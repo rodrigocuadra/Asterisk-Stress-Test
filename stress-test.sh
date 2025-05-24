@@ -1,192 +1,164 @@
 #!/bin/bash
+
+# Script to perform stress testing on Asterisk (pure) using PJSIP
+# Adapted from VitalPBX Stress Test script by Rodrigo Cuadra
+# Last updated: May 2025
+# Support: Grok 3 (based on original rcuadra@vitalpbx.com)
+
 set -e
-# Authors:      Rodrigo Cuadra
-#               with Collaboration of Jose Miguel Rivera
-# Date:         30-May-2023
-# Support:      rcuadra@vitalpbx.com
-#
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[1;34m'
+NC='\033[0m' # No color
+
+# Display welcome message
 echo -e "\n"
-echo -e "\e[39m"
+echo -e "${NC}"
 echo -e "************************************************************"
 echo -e "*          Welcome to the Asterisk Stress Test             *"
 echo -e "*              All options are mandatory                   *"
 echo -e "************************************************************"
+
+# Read configuration from config.txt if it exists
 filename="config.txt"
-	if [ -f $filename ]; then
-		echo -e "config file"
-		n=1
-		while read line; do
-			case $n in
-				1)
-					ip_local=$line
-  				;;
-				2)
-					ip_remote=$line
-  				;;
-				3)
-					ssh_remote_port=$line
-  				;;
-				4)
-					interface_name=$line
-  				;;
-				5)
-					codec=$line
-  				;;
-				6)
-					recording=$line
-  				;;
-				7)
-					maxcpuload=$line
-  				;;
-				8)
-					call_step=$line
-  				;;
-				9)
-					call_step_seconds=$line
-  				;;
-    		10)
-					call_duration=$line
-  				;;
-			esac
-			n=$((n+1))
-		done < $filename
-		echo -e "IP Local....................................... >  $ip_local"	
-		echo -e "IP Remote...................................... >  $ip_remote"
-		echo -e "SSH Remote Port (Default is 22)................ >  $ssh_remote_port"
-		echo -e "Network Interface name (ej: eth0).............. >  $interface_name"
-		echo -e "Codec (1.-PCMU, 2.-G729, 3.-OPUS).............. >  $codec"
-		echo -e "Recording Calls (yes,no)....................... >  $recording"
-		echo -e "Max CPU Load (Recommended 75%)................. >  $maxcpuload"
-		echo -e "Calls Step (Recommended 5-100)................. >  $call_step"
-		echo -e "Seconds between each step (Recommended 5-30)... >  $call_step_seconds"
-  	echo -e "Estimated Call Duration Seconds (ej: 180)...... >  $call_duration"
-	fi
-	
-	while [[ $ip_local == '' ]]
-	do
-    		read -p "IP Local....................................... > " ip_local 
-	done 
+if [ -f "$filename" ]; then
+    echo -e "Reading config file..."
+    n=1
+    while read line; do
+        case $n in
+            1) ip_local=$line ;;
+            2) ip_remote=$line ;;
+            3) ssh_remote_port=$line ;;
+            4) interface_name=$line ;;
+            5) codec=$line ;;
+            6) recording=$line ;;
+            7) maxcpuload=$line ;;
+            8) call_step=$line ;;
+            9) call_step_seconds=$line ;;
+            10) call_duration=$line ;;
+        esac
+        n=$((n+1))
+    done < "$filename"
+    echo -e "IP Local....................................... >  $ip_local"    
+    echo -e "IP Remote...................................... >  $ip_remote"
+    echo -e "SSH Remote Port (Default is 22)................ >  $ssh_remote_port"
+    echo -e "Network Interface name (e.g., eth0)............ >  $interface_name"
+    echo -e "Codec (1.-PCMU, 2.-G729, 3.-OPUS).............. >  $codec"
+    echo -e "Recording Calls (yes,no)....................... >  $recording"
+    echo -e "Max CPU Load (Recommended 75%)................. >  $maxcpuload"
+    echo -e "Calls Step (Recommended 5-100)................. >  $call_step"
+    echo -e "Seconds between each step (Recommended 5-30)... >  $call_step_seconds"
+    echo -e "Estimated Call Duration Seconds (e.g., 180).... >  $call_duration"
+fi
 
-	while [[ $ip_remote == '' ]]
-	do
-    		read -p "IP Remote...................................... > " ip_remote 
-	done
+# Prompt for configuration if not set
+while [[ -z $ip_local ]]; do
+    read -p "IP Local....................................... > " ip_local 
+done 
 
-	while [[ $ssh_remote_port == '' ]]
-	do
-    		read -p "SSH Remote Port (Default is 22)................ > " ssh_remote_port 
-	done
+while [[ -z $ip_remote ]]; do
+    read -p "IP Remote...................................... > " ip_remote 
+done
 
-	while [[ $interface_name == '' ]]
-	do
-    		read -p "Network Interface name (ej: eth0).............. > " interface_name 
-	done
+while [[ -z $ssh_remote_port ]]; do
+    read -p "SSH Remote Port (Default is 22)................ > " ssh_remote_port 
+done
 
-        while [[ $codec == '' ]]
-	do
-    		read -p "Codec (1.-PCMU, 2.-G729, 3.-OPUS).............. > " codec 
-	done 
+while [[ -z $interface_name ]]; do
+    read -p "Network Interface name (e.g., eth0)............ > " interface_name 
+done
 
-	while [[ $recording == '' ]]
-	do
-    		read -p "Recording Calls (yes,no)....................... > " recording 
-	done 
+while [[ -z $codec ]]; do
+    read -p "Codec (1.-PCMU, 2.-G729, 3.-OPUS).............. > " codec 
+done 
 
-	while [[ $maxcpuload == '' ]]
-	do
-    		read -p "Max CPU Load (Recommended 75%)................. > " maxcpuload 
-	done 
+while [[ -z $recording ]]; do
+    read -p "Recording Calls (yes,no)....................... > " recording 
+done 
 
-	while [[ $call_step == '' ]]
-	do
-    		read -p "Calls Step (Recommended 5-100)................. > " call_step 
-	done 
+while [[ -z $maxcpuload ]]; do
+    read -p "Max CPU Load (Recommended 75%)................. > " maxcpuload 
+done 
 
-	while [[ $call_step_seconds == '' ]]
-	do
-    		read -p "Seconds between each step (Recommended 5-30)... > " call_step_seconds
-	done 
- 
-        while [[ $call_duration == '' ]]
-	do
-    		read -p "Estimated Call Duration Seconds (ej: 180)...... > " call_duration
-	done 
- 
+while [[ -z $call_step ]]; do
+    read -p "Calls Step (Recommended 5-100)................. > " call_step 
+done 
+
+while [[ -z $call_step_seconds ]]; do
+    read -p "Seconds between each step (Recommended 5-30)... > " call_step_seconds
+done 
+
+while [[ -z $call_duration ]]; do
+    read -p "Estimated Call Duration Seconds (e.g., 180).... > " call_duration
+done 
+
+# Verify configuration
 echo -e "************************************************************"
 echo -e "*                   Check Information                      *"
-echo -e "*        Make sure that both server have communication     *"
+echo -e "*        Make sure that both servers have communication    *"
 echo -e "************************************************************"
-	while [[ $veryfy_info != yes && $veryfy_info != no ]]
-	do
-    		read -p "Are you sure to continue with this settings? (yes,no) > " veryfy_info 
-	done
+while [[ "$veryfy_info" != "yes" && "$veryfy_info" != "no" ]]; do
+    read -p "Are you sure to continue with this settings? (yes,no) > " veryfy_info 
+done
 
-	if [ "$veryfy_info" = yes ] ;then
-		echo -e "************************************************************"
-		echo -e "*                Starting to run the scripts               *"
-		echo -e "************************************************************"
-	else
-		while [[ $ip_local == '' ]]
-		do
-    			read -p "IP Local....................................... > " ip_local 
-		done 
+if [ "$veryfy_info" != "yes" ]; then
+    # Re-prompt for all settings if user selects 'no'
+    while [[ -z $ip_local ]]; do
+        read -p "IP Local....................................... > " ip_local 
+    done 
 
-		while [[ $ip_remote == '' ]]
-		do
-    			read -p "IP Remote...................................... > " ip_remote 
-		done
+    while [[ -z $ip_remote ]]; do
+        read -p "IP Remote...................................... > " ip_remote 
+    done
 
-		while [[ $ssh_remote_port == '' ]]
-		do
-    			read -p "SSH Remote Port (Default is 22)................. > " ssh_remote_port 
-		done
+    while [[ -z $ssh_remote_port ]]; do
+        read -p "SSH Remote Port (Default is 22)................ > " ssh_remote_port 
+    done
 
-		while [[ $interface_name == '' ]]
-		do
-    			read -p "Network Interface name (ej: eth0).............. > " interface_name 
-		done
+    while [[ -z $interface_name ]]; do
+        read -p "Network Interface name (e.g., eth0)............ > " interface_name 
+    done
 
-		while [[ $codec == '' ]]
-		do
-    			read -p "Codec (1.-PCMU, 2.-G729, 3.-OPUS............... > " codec 
-		done 
+    while [[ -z $codec ]]; do
+        read -p "Codec (1.-PCMU, 2.-G729, 3.-OPUS).............. > " codec 
+    done 
 
-		while [[ $recording == '' ]]
-		do
-    			read -p "Recording Calls (yes,no)....................... > " recording 
-		done 
+    while [[ -z $recording ]]; do
+        read -p "Recording Calls (yes,no)....................... > " recording 
+    done 
 
-		while [[ $maxcpuload == '' ]]
-		do
-    			read -p "Max CPU Load (Recommended 75%).................. > " maxcpuload 
-		done 
+    while [[ -z $maxcpuload ]]; do
+        read -p "Max CPU Load (Recommended 75%)................. > " maxcpuload 
+    done 
 
-		while [[ $call_step == '' ]]
-		do
-    			read -p "Calls Step (Recommended 5-100)................. > " call_step 
-		done 
+    while [[ -z $call_step ]]; do
+        read -p "Calls Step (Recommended 5-100)................. > " call_step 
+    done 
 
-		while [[ $call_step_seconds == '' ]]
-		do
-    			read -p "Seconds between each step (Recommended 5-30)... > " call_step_seconds
-		done 
-  
-		while [[ $call_duration == '' ]]
-		do
-    			read -p "Estimated Call Duration Seconds (ej: 180)...... > " call_duration
-		done 
-	fi
+    while [[ -z $call_step_seconds ]]; do
+        read -p "Seconds between each step (Recommended 5-30)... > " call_step_seconds
+    done 
 
-echo -e "$ip_local" 		> config.txt
-echo -e "$ip_remote" 		>> config.txt
-echo -e "$ssh_remote_port"	>> config.txt
-echo -e "$interface_name" 	>> config.txt
-echo -e "$codec" 		>> config.txt
-echo -e "$recording" 		>> config.txt
-echo -e "$maxcpuload"     	>> config.txt
-echo -e "$call_step" 		>> config.txt
-echo -e "$call_step_seconds" 	>> config.txt
-echo -e "$call_duration" 	>> config.txt
+    while [[ -z $call_duration ]]; do
+        read -p "Estimated Call Duration Seconds (e.g., 180).... > " call_duration
+    done 
+fi
+
+# Save configuration to config.txt
+echo -e "$ip_local"         > config.txt
+echo -e "$ip_remote"        >> config.txt
+echo -e "$ssh_remote_port"  >> config.txt
+echo -e "$interface_name"   >> config.txt
+echo -e "$codec"            >> config.txt
+echo -e "$recording"        >> config.txt
+echo -e "$maxcpuload"       >> config.txt
+echo -e "$call_step"        >> config.txt
+echo -e "$call_step_seconds" >> config.txt
+echo -e "$call_duration"    >> config.txt
+
+# Set up SSH key for passwordless communication
 echo -e "************************************************************"
 echo -e "*          Copy Authorization key to remote server         *"
 echo -e "************************************************************"
@@ -201,197 +173,248 @@ echo -e "Copying public key to $ip_remote..."
 ssh-copy-id -i "${sshKeyFile}.pub" -p "$ssh_remote_port" root@$ip_remote
 
 if [ $? -eq 0 ]; then
-    echo -e "*** SSH key installed successfully. ***"
+    echo -e "${GREEN}*** SSH key installed successfully. ***${NC}"
 else
-    echo -e "❌ Failed to copy SSH key. You might need to check connectivity or credentials."
+    echo -e "${RED}❌ Failed to copy SSH key. Check connectivity or credentials.${NC}"
     exit 1
 fi
 
+# Create Asterisk configuration files
 echo -e "************************************************************"
 echo -e "*            Creating Asterisk config files                *"
 echo -e "************************************************************"
 
-wget -O /var/lib/asterisk/sounds/en/jonathan.wav  https://github.com/VitalPBX/VitalPBX-Stress-Test/raw/refs/heads/master/jonathan.wav
+# Download audio files for testing
+wget -O /var/lib/asterisk/sounds/en/jonathan.wav https://github.com/VitalPBX/VitalPBX-Stress-Test/raw/refs/heads/master/jonathan.wav || echo -e "${RED}Warning: Failed to download jonathan.wav${NC}"
 
-echo -e "[call-test-ext]" 						                 	         > /etc/asterisk/extensions__60-call-test.conf
-echo -e "exten => _200,1,NoOp(Outgoing Call)" 					         >> /etc/asterisk/vitalpbx/extensions__60-call-test.conf
-echo -e " same => Answer()" 						                         >> /etc/asterisk/vitalpbx/extensions__60-call-test.conf
-	if [ "$cdrs" != yes ] ;then
-		echo -e " same => n,NoCDR()" 				                         >> /etc/asterisk/vitalpbx/extensions__60-call-test.conf
-	fi
-	if [ "$recording" = yes ] ;then
-		echo -e " same => n,MixMonitor(/tmp/$"{UNIQUEID}".wav,ab)" 	 >> /etc/asterisk/vitalpbx/extensions__60-call-test.conf
-	fi
-
-echo -e " same => n,Dial(PJSIP/100@call-test-trk)"		           >> /etc/asterisk/vitalpbx/extensions__60-call-test.conf
-echo -e " same => n,Hangup()" 							                     >> /etc/asterisk/vitalpbx/extensions__60-call-test.conf
-
-echo -e "[call-test-trk](p1)" 					                        > /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "type=endpoint" 					                              >> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "dtmf_mode=rfc4733" 					                          >> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "context=call-test-ext" 				                        >> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-if [ "$codec" = 1 ] ;then
-	codec_name=PCMU
-	echo -e "allow=!all,ulaw,alaw" 				>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-fi		
-if [ "$codec" = 2 ] ;then
-	codec_name=G729
-	echo -e "allow=!all,g729" 				>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
+# Server A: extensions.conf
+cat > /etc/asterisk/extensions_stress_test.conf << EOF
+[stress_test]
+exten => 200,1,NoOp(Outgoing Call)
+exten => 200,n,Answer()
+exten => 200,n,NoCDR()
+EOF
+if [ "$recording" = "yes" ]; then
+    echo "exten => 200,n,MixMonitor(/tmp/\${UNIQUEID}.wav,ab)" >> /etc/asterisk/extensions_stress_test.conf
 fi
-if [ "$codec" = 3 ] ;then
-	codec_name=OPUS
-	echo -e "allow=!all,opus" 				>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-fi
-echo -e "language=en" 						>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "aors=call-test-trk" 					>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "trust_id_inbound=no" 					>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "trust_id_outbound=no" 					>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "" 							>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "[call-test-trk](p1-aor)" 				>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "type=aor" 						>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "max_contacts=2" 					>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "contact=sip:call-test-trk@$ip_remote:5060"		>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "qualify_frequency=30" 					>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "qualify_timeout=3" 					>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "" 							>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "[call-test-trk]" 					>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "type=identify" 					>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "endpoint=call-test-trk" 				>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
-echo -e "match=@$ip_remote" 					>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf
+cat >> /etc/asterisk/extensions_stress_test.conf << EOF
+exten => 200,n,Dial(PJSIP/100@trunk_to_server_b,\${CALL_DURATION})
+exten => 200,n,Hangup()
+EOF
 
-ssh -p $ssh_remote_port root@$ip_remote "wget -O /var/lib/asterisk/sounds/en/sarah.wav https://github.com/VitalPBX/VitalPBX-Stress-Test/raw/refs/heads/master/sarah.wav"
+# Server A: pjsip.conf
+cat > /etc/asterisk/pjsip_stress_test.conf << EOF
+[global]
+type=global
+max_initial_qualify_time=5
 
-ssh -p $ssh_remote_port root@$ip_remote "echo -e '[call-test-ext]' 					> /etc/asterisk/vitalpbx/extensions__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "echo -e 'exten => _100,1,Answer()' 				>> /etc/asterisk/vitalpbx/extensions__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "echo -e ' same => n,NoCDR()' 					>> /etc/asterisk/vitalpbx/extensions__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "echo -e ' same => n,Wait(1)' 				        >> /etc/asterisk/vitalpbx/extensions__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "echo -e ' same => n,Playback(sarah&sarah&sarah)'     	        >> /etc/asterisk/vitalpbx/extensions__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "echo -e ' same => n,Hangup()' 					>> /etc/asterisk/vitalpbx/extensions__60-call-test.conf"
-	
-ssh -p $ssh_remote_port root@$ip_remote "rm -rf /etc/asterisk/vitalpbx/sip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "rm -rf /etc/asterisk/vitalpbx/iax__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e '[call-test-trk](p1)'				> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'type=endpoint'					>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'dtmf_mode=rfc4733' 				>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'context=call-test-ext'				>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-if [ "$codec" = 1 ] ;then
-	codec_name=PCMU
-	ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'allow=!all,ulaw,alaw' 			>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-fi		
-if [ "$codec" = 2 ] ;then
-	codec_name=G729
-	ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'allow=!all,g729' 			>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-fi
-if [ "$codec" = 3 ] ;then
-	codec_name=OPUS
-	ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'allow=!all,opus' 			>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-fi
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'language=en'					>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'aors=call-test-trk'				>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'trust_id_inbound=no'				>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'trust_id_outbound=no' 				>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e ''						>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e '[call-test-trk](p1-aor)' 			>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'type=aor'					>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'max_contacts=2'				>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'contact=sip:call-test-trk@$ip_local:5060'	>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'qualify_frequency=30' 				>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'qualify_timeout=3' 				>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e '' 						>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e '[call-test-trk]'				>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'type=identify' 				>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'endpoint=call-test-trk' 			>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "	echo -e 'match=$ip_local' 				>> /etc/asterisk/vitalpbx/pjsip__60-call-test.conf"
+[transport-udp]
+type=transport
+protocol=udp
+bind=0.0.0.0:5060
+external_media_address=$ip_local
+external_signaling_address=$ip_local
+local_net=$ip_local/24
 
+[trunk_to_server_b]
+type=endpoint
+context=stress_test
+dtmf_mode=rfc4733
+EOF
+if [ "$codec" = "1" ]; then
+    codec_name="PCMU"
+    echo "disallow=all" >> /etc/asterisk/pjsip_stress_test.conf
+    echo "allow=ulaw,alaw" >> /etc/asterisk/pjsip_stress_test.conf
+elif [ "$codec" = "2" ]; then
+    codec_name="G729"
+    echo "disallow=all" >> /etc/asterisk/pjsip_stress_test.conf
+    echo "allow=g729" >> /etc/asterisk/pjsip_stress_test.conf
+elif [ "$codec" = "3" ]; then
+    codec_name="OPUS"
+    echo "disallow=all" >> /etc/asterisk/pjsip_stress_test.conf
+    echo "allow=opus" >> /etc/asterisk/pjsip_stress_test.conf
+fi
+cat >> /etc/asterisk/pjsip_stress_test.conf << EOF
+language=en
+aors=trunk_to_server_b
+trust_id_inbound=no
+trust_id_outbound=no
+
+[trunk_to_server_b]
+type=aor
+max_contacts=2
+contact=sip:trunk_to_server_b@$ip_remote:5060
+qualify_frequency=30
+qualify_timeout=3
+
+[trunk_to_server_b]
+type=identify
+endpoint=trunk_to_server_b
+match=$ip_remote
+EOF
+
+# Server B: Download audio file
+ssh -p $ssh_remote_port root@$ip_remote "wget -O /var/lib/asterisk/sounds/en/sarah.wav https://github.com/VitalPBX/VitalPBX-Stress-Test/raw/refs/heads/master/sarah.wav" || echo -e "${RED}Warning: Failed to download sarah.wav on remote server${NC}"
+
+# Server B: extensions.conf
+ssh -p $ssh_remote_port root@$ip_remote "cat > /etc/asterisk/extensions_stress_test.conf << EOF
+[stress_test]
+exten => 100,1,Answer()
+exten => 100,n,NoCDR()
+exten => 100,n,Wait(1)
+exten => 100,n,Playback(sarah&sarah&sarah)
+exten => 100,n,Hangup()
+EOF"
+
+# Server B: pjsip.conf
+ssh -p $ssh_remote_port root@$ip_remote "cat > /etc/asterisk/pjsip_stress_test.conf << EOF
+[global]
+type=global
+max_initial_qualify_time=5
+
+[transport-udp]
+type=transport
+protocol=udp
+bind=0.0.0.0:5060
+external_media_address=$ip_remote
+external_signaling_address=$ip_remote
+local_net=$ip_remote/24
+
+[trunk_from_server_a]
+type=endpoint
+context=stress_test
+dtmf_mode=rfc4733
+EOF"
+if [ "$codec" = "1" ]; then
+    ssh -p $ssh_remote_port root@$ip_remote "echo 'disallow=all' >> /etc/asterisk/pjsip_stress_test.conf"
+    ssh -p $ssh_remote_port root@$ip_remote "echo 'allow=ulaw,alaw' >> /etc/asterisk/pjsip_stress_test.conf"
+elif [ "$codec" = "2" ]; then
+    ssh -p $ssh_remote_port root@$ip_remote "echo 'disallow=all' >> /etc/asterisk/pjsip_stress_test.conf"
+    ssh -p $ssh_remote_port root@$ip_remote "echo 'allow=g729' >> /etc/asterisk/pjsip_stress_test.conf"
+elif [ "$codec" = "3" ]; then
+    ssh -p $ssh_remote_port root@$ip_remote "echo 'disallow=all' >> /etc/asterisk/pjsip_stress_test.conf"
+    ssh -p $ssh_remote_port root@$ip_remote "echo 'allow=opus' >> /etc/asterisk/pjsip_stress_test.conf"
+fi
+ssh -p $ssh_remote_port root@$ip_remote "cat >> /etc/asterisk/pjsip_stress_test.conf << EOF
+language=en
+aors=trunk_from_server_a
+trust_id_inbound=no
+trust_id_outbound=no
+
+[trunk_from_server_a]
+type=aor
+max_contacts=2
+contact=sip:trunk_from_server_a@$ip_local:5060
+qualify_frequency=30
+qualify_timeout=3
+
+[trunk_from_server_a]
+type=identify
+endpoint=trunk_from_server_a
+match=$ip_local
+EOF"
+
+# Set permissions for configuration files
+chown asterisk:asterisk /etc/asterisk/extensions_stress_test.conf /etc/asterisk/pjsip_stress_test.conf
+chmod 640 /etc/asterisk/extensions_stress_test.conf /etc/asterisk/pjsip_stress_test.conf
+ssh -p $ssh_remote_port root@$ip_remote "chown asterisk:asterisk /etc/asterisk/extensions_stress_test.conf /etc/asterisk/pjsip_stress_test.conf"
+ssh -p $ssh_remote_port root@$ip_remote "chmod 640 /etc/asterisk/extensions_stress_test.conf /etc/asterisk/pjsip_stress_test.conf"
+
+# Restart Asterisk on both servers
 systemctl restart asterisk
 ssh -p $ssh_remote_port root@$ip_remote "systemctl restart asterisk"
-echo -e "*** Done ***"
-echo -e " *****************************************************************************************"
-echo -e " *                        Restarting Asterisk in both Server                             *"
-echo -e " *****************************************************************************************"
+echo -e "${GREEN}*** Done ***${NC}"
+echo -e "*****************************************************************************************"
+echo -e "*                        Restarting Asterisk in both servers                             *"
+echo -e "*****************************************************************************************"
 sleep 10
-numcores=`nproc --all`
+
+# Start stress test
+numcores=$(nproc --all)
 exitcalls=false
 i=0
 step=0
 clear
-echo -e " ***************************************************************************************************"
-echo -e "     Actual Test State (Step: "$call_step_seconds"s, Core: "$numcores", Protocol: SIP(PJSIP), Codec: "$codec_name", Recording: "$recording")     "
-echo -e " ***************************************************************************************************"
-echo -e " ---------------------------------------------------------------------------------------------------"
+echo -e "***************************************************************************************************"
+echo -e "     Actual Test State (Step: ${call_step_seconds}s, Core: ${numcores}, Protocol: SIP(PJSIP), Codec: ${codec_name}, Recording: ${recording})     "
+echo -e "***************************************************************************************************"
+echo -e "---------------------------------------------------------------------------------------------------"
 printf "%2s %7s %10s %19s %10s %10s %10s %12s %12s\n" "|" " Step |" "Calls |" "Asterisk Channels |" "CPU Load |" "Load |" "Memory |" "BW TX kb/s |" "BW RX kb/s |"
-R1=`cat /sys/class/net/"$interface_name"/statistics/rx_bytes`
-T1=`cat /sys/class/net/"$interface_name"/statistics/tx_bytes`
+R1=$(cat /sys/class/net/"$interface_name"/statistics/rx_bytes)
+T1=$(cat /sys/class/net/"$interface_name"/statistics/tx_bytes)
 date1=$(date +"%s")
 slepcall=$(printf %.2f "$((1000000000 * call_step_seconds / call_step))e-9")
 sleep 1
-echo -e "calls, active calls, cpu load (%), memory (%), bwtx (kb/s), bwrx(kb/s), interval(seg)" 	> data.csv
-	while [ $exitcalls = 'false' ]        
-        do
-       		R2=`cat /sys/class/net/"$interface_name"/statistics/rx_bytes`
-       		T2=`cat /sys/class/net/"$interface_name"/statistics/tx_bytes`
-		date2=$(date +"%s")
-		diff=$(($date2-$date1))
-		seconds="$(($diff % 60))"
-		T2=`expr $T2 + 128`
-		R2=`expr $R2 + 128`
-        	TBPS=`expr $T2 - $T1`
-        	RBPS=`expr $R2 - $R1`
-        	TKBPS=`expr $TBPS / 128`
-        	RKBPS=`expr $RBPS / 128`
-		bwtx="$((TKBPS/seconds))"
-		bwrx="$((RKBPS/seconds))"
-		activecalls=`asterisk -rx "core show calls" | grep "active" | cut -d' ' -f1`
-		load=`cat /proc/loadavg | awk '{print $0}' | cut -d " " -f 1`
-		cpu=`top -n 1 | awk 'FNR > 7 {s+=$10} END {print s}'`
-		cpuint=${cpu%.*}
-		cpu="$((cpuint/numcores))"
-		memory=`free | awk '/Mem/{printf("%.2f%"), $3/$2*100} /buffers\/cache/{printf(", buffers: %.2f%"), $4/($3+$4)*100}'`
-		if [ "$cpu" -le 34 ] ;then
-			echo -e "\e[92m ---------------------------------------------------------------------------------------------------"
-		fi
-		if [ "$cpu" -ge 35 ] && [ "$cpu" -lt 65 ] ;then
-			echo -e "\e[93m ---------------------------------------------------------------------------------------------------"
-		fi
-		if [ "$cpu" -ge 65 ] ;then
-			echo -e "\e[91m ---------------------------------------------------------------------------------------------------"
-		fi
-		printf "%2s %7s %10s %19s %10s %10s %10s %12s %12s\n" "|" " "$step" |" ""$i" |" ""$activecalls" |" ""$cpu"% |" ""$load" |" ""$memory" |" ""$bwtx" |" ""$bwrx" |"
-		echo -e "$i, $activecalls, $cpu, $load, $memory, $bwtx, $bwrx, $seconds" 	>> data.csv
-		exitstep=false
-		x=1
-		while [ $exitstep = 'false' ]  
-        	do
-			let x=x+1
-			if [ "$call_step" -lt $x ] ;then
-				exitstep=true
-			fi
-			asterisk -rx"channel originate Local/200@call-test-ext application Playback jonathan&jonathan&jonathan"
-			sleep "$slepcall"
-		done
-		let step=step+1
-		let i=i+"$call_step"
-		if [ "$cpu" -gt "$maxcpuload" ] ;then
-			exitcalls=true
-		fi
-		R1=`cat /sys/class/net/"$interface_name"/statistics/rx_bytes`
-		T1=`cat /sys/class/net/"$interface_name"/statistics/tx_bytes`
-		date1=$(date +"%s")
-		sleep 1
-	done
-echo -e "\e[39m ---------------------------------------------------------------------------------------------------"
-echo -e " ***************************************************************************************************"
-echo -e " *                                     Restarting Asterisk                                         *"
-echo -e " ***************************************************************************************************"
-rm -rf /etc/asterisk/vitalpbx/asterisk__60-max-load.conf
+echo -e "calls, active calls, cpu load (%), memory (%), bwtx (kb/s), bwrx(kb/s), interval(seg)" > data.csv
+
+while [ "$exitcalls" = "false" ]; do
+    R2=$(cat /sys/class/net/"$interface_name"/statistics/rx_bytes)
+    T2=$(cat /sys/class/net/"$interface_name"/statistics/tx_bytes)
+    date2=$(date +"%s")
+    diff=$((date2 - date1))
+    seconds=$((diff % 60))
+    T2=$((T2 + 128))
+    R2=$((R2 + 128))
+    TBPS=$((T2 - T1))
+    RBPS=$((R2 - R1))
+    TKBPS=$((TBPS / 128))
+    RKBPS=$((RBPS / 128))
+    bwtx=$((TKBPS / seconds))
+    bwrx=$((RKBPS / seconds))
+    activecalls=$(asterisk -rx "core show calls" | grep "active" | cut -d' ' -f1)
+    load=$(cat /proc/loadavg | awk '{print $1}')
+    cpu=$(top -n 1 -b | awk 'FNR > 7 {s+=$10} END {print s}')
+    cpuint=${cpu%.*}
+    cpu=$((cpuint / numcores))
+    memory=$(free | awk '/Mem/{printf("%.2f%"), $3/$2*100} /buffers\/cache/{printf(", buffers: %.2f%"), $4/($3+$4)*100}')
+    
+    # Color-code output based on CPU load
+    if [ "$cpu" -le 34 ]; then
+        echo -e "\e[92m---------------------------------------------------------------------------------------------------"
+    elif [ "$cpu" -ge 35 ] && [ "$cpu" -lt 65 ]; then
+        echo -e "\e[93m---------------------------------------------------------------------------------------------------"
+    else
+        echo -e "\e[91m---------------------------------------------------------------------------------------------------"
+    fi
+    printf "%2s %7s %10s %19s %10s %10s %10s %12s %12s\n" "|" " $step |" "$i |" "$activecalls |" "$cpu% |" "$load |" "$memory |" "$bwtx |" "$bwrx |"
+    echo -e "$i, $activecalls, $cpu, $load, $memory, $bwtx, $bwrx, $seconds" >> data.csv
+    
+    exitstep=false
+    x=1
+    while [ "$exitstep" = "false" ]; do
+        x=$((x + 1))
+        if [ "$call_step" -lt "$x" ]; then
+            exitstep=true
+        fi
+        asterisk -rx "channel originate Local/200@stress_test application Playback jonathan&jonathan&jonathan"
+        sleep "$slepcall"
+    done
+    step=$((step + 1))
+    i=$((i + call_step))
+    if [ "$cpu" -gt "$maxcpuload" ]; then
+        exitcalls=true
+    fi
+    R1=$(cat /sys/class/net/"$interface_name"/statistics/rx_bytes)
+    T1=$(cat /sys/class/net/"$interface_name"/statistics/tx_bytes)
+    date1=$(date +"%s")
+    sleep 1
+done
+
+echo -e "\e[39m---------------------------------------------------------------------------------------------------"
+echo -e "***************************************************************************************************"
+echo -e "*                                     Restarting Asterisk                                         *"
+echo -e "***************************************************************************************************"
+rm -rf /etc/asterisk/pjsip_stress_test.conf /etc/asterisk/extensions_stress_test.conf
 systemctl restart asterisk
+ssh -p $ssh_remote_port root@$ip_remote "rm -rf /etc/asterisk/pjsip_stress_test.conf /etc/asterisk/extensions_stress_test.conf"
 ssh -p $ssh_remote_port root@$ip_remote "systemctl restart asterisk"
 rm -rf /tmp/*.wav
 
-echo -e " ***************************************************************************************************"
-echo -e " *                                     Summary Report                                              *"
-echo -e " ***************************************************************************************************"
-echo -e "\n\033[1;34mGenerating summary from data.csv...\033[0m"
+# Generate summary report
+echo -e "***************************************************************************************************"
+echo -e "*                                     Summary Report                                              *"
+echo -e "***************************************************************************************************"
+echo -e "\n${BLUE}Generating summary from data.csv...${NC}"
 
 if [ -f data.csv ]; then
     tail -n +2 data.csv | awk -F',' -v dur="$call_duration" '
@@ -430,11 +453,11 @@ if [ -f data.csv ]; then
         printf("• ➕ Estimated Calls/hour (duration ~%ds): %.0f\n\n", dur, est_calls_per_hour);
     }'
 else
-    echo "data.csv not found."
+    echo -e "${RED}data.csv not found.${NC}"
 fi
 
-echo -e " ***************************************************************************************************"
-echo -e " *                                       Test Complete                                             *"
-echo -e " *                                  Result in data.csv file                                        *"
-echo -e " ***************************************************************************************************"
-echo -e "\e[39m"
+echo -e "***************************************************************************************************"
+echo -e "*                                       Test Complete                                             *"
+echo -e "*                                  Result in data.csv file                                        *"
+echo -e "***************************************************************************************************"
+echo -e "${NC}"

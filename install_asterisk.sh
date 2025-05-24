@@ -33,14 +33,29 @@ cd /usr/src || error_exit "Failed to change to /usr/src directory"
 
 # Download the latest version of Asterisk
 echo "Downloading the latest version of Asterisk..."
-ASTERISK_VERSION="asterisk-22-current.tar.gz"
-wget -q http://downloads.asterisk.org/pub/telephony/asterisk/$ASTERISK_VERSION || error_exit "Failed to download Asterisk"
-sudo tar -zxvf $ASTERISK_VERSION || error_exit "Failed to extract Asterisk"
-cd asterisk-22* || error_exit "Failed to change to Asterisk directory"
+ASTERISK_URL="http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-22-current.tar.gz"
+wget -q $ASTERISK_URL || error_exit "Failed to download Asterisk"
+ASTERISK_FILE=$(basename $ASTERISK_URL)
+
+# Check if the Asterisk directory already exists
+ASTERISK_DIR=$(tar -tzf $ASTERISK_FILE | head -1 | cut -f1 -d"/")
+if [ -d "$ASTERISK_DIR" ]; then
+    echo "Asterisk directory $ASTERISK_DIR already exists, skipping extraction..."
+else
+    echo "Extracting Asterisk..."
+    tar -zxvf $ASTERISK_FILE || error_exit "Failed to extract Asterisk"
+fi
+
+# Change to the Asterisk directory
+cd "$ASTERISK_DIR" || error_exit "Failed to change to Asterisk directory"
 
 # Install additional dependencies
 echo "Installing additional dependencies..."
 contrib/scripts/install_prereq install || error_exit "Failed to install additional dependencies"
+
+# Download MP3 decoder source if format_mp3 is to be enabled
+echo "Downloading MP3 decoder source for format_mp3..."
+contrib/scripts/get_mp3_source.sh || error_exit "Failed to download MP3 decoder source"
 
 # Configure the build
 echo "Configuring the build..."
@@ -108,9 +123,6 @@ echo "Verifying Asterisk installation..."
 asterisk -rx "core show version" && echo -e "${GREEN}Asterisk installed successfully!${NC}" || error_exit "Failed to verify installation"
 
 # Final instructions
-echo -e "\n${GREEN}Installation completed.${NC}"
-echo "Next steps:"
-echo "1. Configure files in /etc/asterisk/ (e.g., pjsip.conf or sip.conf)."
-echo "2. Test with a softphone (e.g., Zoiper or Linphone)."
-echo "3. Check the official documentation at https://wiki.asterisk.org."
-echo "4. To access the Asterisk CLI, use: sudo asterisk -rvvv"
+echo -e "************************************************************"
+echo -e "*                 Installation Completed!                  *"
+echo -e "************************************************************"

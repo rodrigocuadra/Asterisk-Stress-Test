@@ -393,7 +393,7 @@ exitcalls=false
 i=0
 step=0
 clear
-asterisk_version = asterisk -V
+asterisk_version=$(asterisk -V)
 echo -e "***************************************************************************************************"
 echo -e "                           Asterisk Version: ${asterisk_version}                                   "
 echo -e "     Actual Test State (Step: ${call_step_seconds}s, Core: ${numcores}, Protocol: SIP(PJSIP), Codec: ${codec_name}, Recording: ${recording})     "

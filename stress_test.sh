@@ -423,9 +423,9 @@ while [ "$exitcalls" = "false" ]; do
     bwrx=$((RKBPS / seconds))
     activecalls=$(asterisk -rx "core show calls" | grep "active" | cut -d' ' -f1)
     load=$(cat /proc/loadavg | awk '{print $1}')
-    cpu=$(top -n 1 -b | awk 'FNR > 7 {s+=$10} END {print s}')
-    cpuint=${cpu%.*}
-    cpu=$((cpuint / numcores))
+	cpu=`top -n 1 | awk 'FNR > 7 {s+=$10} END {print s}'`
+	cpuint=${cpu%.*}
+	cpu="$((cpuint/numcores))"
     #memory=$(free | awk '/Mem/{printf("%.2f%"), $3/$2*100} /buffers\/cache/{printf(", buffers: %.2f%"), $4/($3+$4)*100}')
     memory=$(free | awk '/Mem:/ {used=$3; total=$2} END {if (total>0) printf("%.2f%%", used/total*100); else print "N/A"}')
     

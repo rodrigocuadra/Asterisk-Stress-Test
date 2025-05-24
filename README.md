@@ -19,7 +19,7 @@ Welcome to the **Asterisk Stress Test Toolkit**, a practical utility designed to
 
 ## ⚙️ Prerequisites
 
-- Two Linux servers (Ubuntu 22.04 or Debian 12 recommended)
+- Two Linux servers (Debian 12 recommended)
 - Root SSH access
 - Internet access from both servers
 - Open ports for SIP communication (UDP 5060) and RTP (UDP 10000-20000)

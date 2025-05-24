@@ -216,7 +216,7 @@ echo -e "*            Creating Asterisk config files                *"
 echo -e "************************************************************"
 
 # Download audio files for testing
-wget -O /var/lib/asterisk/sounds/en/jonathan.wav https://github.com/VitalPBX/VitalPBX-Stress-Test/raw/refs/heads/master/jonathan.wav || echo -e "${RED}Warning: Failed to download jonathan.wav${NC}"
+wget -O /var/lib/asterisk/sounds/en/jonathan.wav https://github.com/rodrigocuadra/Asterisk-Stress-Test/raw/refs/heads/main/jonathan.wav || echo -e "${RED}Warning: Failed to download jonathan.wav${NC}"
 
 # Server A: extensions.conf
 cat > /etc/asterisk/extensions_stress_test.conf << EOF
@@ -285,7 +285,7 @@ match=$ip_remote
 EOF
 
 # Server B: Download audio file
-ssh -p $ssh_remote_port root@$ip_remote "wget -O /var/lib/asterisk/sounds/en/sarah.wav https://github.com/VitalPBX/VitalPBX-Stress-Test/raw/refs/heads/master/sarah.wav" || echo -e "${RED}Warning: Failed to download sarah.wav on remote server${NC}"
+ssh -p $ssh_remote_port root@$ip_remote "wget -O /var/lib/asterisk/sounds/en/sarah.wav https://github.com/rodrigocuadra/Asterisk-Stress-Test/raw/refs/heads/main/sarah.wav" || echo -e "${RED}Warning: Failed to download sarah.wav on remote server${NC}"
 
 # Server B: extensions.conf
 ssh -p $ssh_remote_port root@$ip_remote "cat > /etc/asterisk/extensions_stress_test.conf << EOF

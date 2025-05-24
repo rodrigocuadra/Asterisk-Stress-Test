@@ -1,11 +1,44 @@
 #!/bin/bash
 
-# Script to perform stress testing on Asterisk (pure) using PJSIP
-# Adapted from VitalPBX Stress Test script by Rodrigo Cuadra
-# Last updated: May 2025
-# Support: Grok 3 (based on original rcuadra@vitalpbx.com)
+# ------------------------------------------------------------------------------
+# Stress Test Script for Asterisk (Pure) with PJSIP
+# ------------------------------------------------------------------------------
+#
+# Purpose:      Performs stress testing on Asterisk by generating SIP calls
+#               between two servers, monitoring CPU, memory, and bandwidth usage,
+#               and generating a performance report.
+#
+# Authors:      Rodrigo Cuadra (original author)
+#
+# Version:      1.0 for Asterisk 22.4.1
+# Date:         May 24, 2025
+#
+# Compatibility: Asterisk 22.x with PJSIP module
+# Requirements: 
+#               - Two Asterisk servers with SSH access
+#               - PJSIP configured with UDP transport
+#               - Audio files (jonathan.wav, sarah.wav) for playback
+#               - Supported codecs: PCMU, G.729, OPUS
+#
+# Usage:        sudo ./stress_test_asterisk.sh
+#               Follow prompts to configure test parameters or use config.txt
+#
+# Output:       - Real-time performance metrics (CPU, calls, bandwidth)
+#               - Summary report in data.csv
+#
+# Notes:        - Ensure ports 5060/UDP and 10000-20000/UDP are open
+#               - G.729 and OPUS require respective codec modules
+#               - Run as root or with sudo
+#
+# Support:      For issues, refer to Asterisk documentation (https://wiki.asterisk.org)
+#               or contact your system administrator
+#
+# ------------------------------------------------------------------------------
 
 set -e
+
+# Clear the terminal for a clean start
+clear
 
 # Colors for output
 RED='\033[0;31m'

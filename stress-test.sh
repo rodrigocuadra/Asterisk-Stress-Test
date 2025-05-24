@@ -41,18 +41,16 @@ set -e
 clear
 
 # Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[1;34m'
+CYAN='\033[1;36m'
 NC='\033[0m' # No color
 
 # Display welcome message
-echo -e "\n"
-echo -e "${NC}"
+echo -e "\n${CYAN}"
 echo -e "************************************************************"
 echo -e "*          Welcome to the Asterisk Stress Test             *"
 echo -e "*              All options are mandatory                   *"
 echo -e "************************************************************"
+echo -e "${NC}"
 
 # Read configuration from config.txt if it exists
 filename="config.txt"

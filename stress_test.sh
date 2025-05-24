@@ -284,6 +284,14 @@ endpoint=trunk_to_server_b
 match=$ip_remote
 EOF
 
+# Server A: Include stress test configs in main config files
+# Remove existing includes to avoid duplicates
+sed -i '/#include extensions_stress_test.conf/d' /etc/asterisk/extensions.conf
+sed -i '/#include pjsip_stress_test.conf/d' /etc/asterisk/pjsip.conf
+# Add new includes
+echo "#include extensions_stress_test.conf" >> /etc/asterisk/extensions.conf
+echo "#include pjsip_stress_test.conf" >> /etc/asterisk/pjsip.conf
+
 # Server B: Download audio file
 ssh -p $ssh_remote_port root@$ip_remote "wget -O /var/lib/asterisk/sounds/en/sarah.wav https://github.com/rodrigocuadra/Asterisk-Stress-Test/raw/refs/heads/main/sarah.wav" || echo -e "${RED}Warning: Failed to download sarah.wav on remote server${NC}"
 
@@ -344,6 +352,14 @@ type=identify
 endpoint=trunk_from_server_a
 match=$ip_local
 EOF"
+
+# Server B: Include stress test configs in main config files
+# Remove existing includes to avoid duplicates
+ssh -p $ssh_remote_port root@$ip_remote "sed -i '/#include extensions_stress_test.conf/d' /etc/asterisk/extensions.conf"
+ssh -p $ssh_remote_port root@$ip_remote "sed -i '/#include pjsip_stress_test.conf/d' /etc/asterisk/pjsip.conf"
+# Add new includes
+ssh -p $ssh_remote_port root@$ip_remote "echo '#include extensions_stress_test.conf' >> /etc/asterisk/extensions.conf"
+ssh -p $ssh_remote_port root@$ip_remote "echo '#include pjsip_stress_test.conf' >> /etc/asterisk/pjsip.conf"
 
 # Set permissions for configuration files
 chown asterisk:asterisk /etc/asterisk/extensions_stress_test.conf /etc/asterisk/pjsip_stress_test.conf

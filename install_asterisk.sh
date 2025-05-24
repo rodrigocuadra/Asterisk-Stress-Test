@@ -82,6 +82,21 @@ make samples || error_exit "Error installing configuration files"
 echo "Installing startup scripts..."
 make config || error_exit "Error installing startup scripts"
 
+# Install G.729A codec
+echo "Installing G.729A codec..."
+cd /usr/src
+G729_URL="http://downloads.digium.com/pub/telephony/codec_g729/asterisk-22.0/x86-64/codec_g729a-22.0-current-x86_64.tar.gz"
+wget -q $G729_URL || error_exit "Failed to download G.729A codec"
+G729_FILE=$(basename $G729_URL)
+tar -zxvf $G729_FILE || error_exit "Failed to extract G.729A codec"
+cd codec_g729a-22* || error_exit "Failed to change to G.729A codec directory"
+make || error_exit "Failed to compile G.729A codec"
+make install || error_exit "Failed to install G.729A codec"
+
+# Configure Asterisk to load G.729 codec
+echo "Configuring Asterisk to load G.729 codec..."
+echo "load => codec_g729.so" >> /etc/asterisk/modules.conf
+
 # Update system libraries
 echo "Updating system libraries..."
 ldconfig || error_exit "Error updating libraries"

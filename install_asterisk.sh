@@ -35,7 +35,7 @@ cd /usr/src || error_exit "Failed to change to /usr/src directory"
 echo "Downloading the latest version of Asterisk..."
 ASTERISK_VERSION="asterisk-22-current.tar.gz"
 wget -q http://downloads.asterisk.org/pub/telephony/asterisk/$ASTERISK_VERSION || error_exit "Failed to download Asterisk"
-tar -zxvf $ASTERISK_VERSION || error_exit "Failed to extract Asterisk"
+sudo tar -zxvf $ASTERISK_VERSION || error_exit "Failed to extract Asterisk"
 cd asterisk-22* || error_exit "Failed to change to Asterisk directory"
 
 # Install additional dependencies

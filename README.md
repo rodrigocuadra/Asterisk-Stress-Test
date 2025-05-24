@@ -19,7 +19,7 @@ install_asterisk.sh
 Script to install Asterisk from source
 
 
-stress_test_asterisk.sh
+stress_test.sh
 Script to generate high call load
 
 
@@ -45,7 +45,7 @@ sudo ./install_asterisk.sh
 
 📞 Step 2: Run the Stress Test
 Once both servers are up and running with Asterisk installed, log in to one of the servers (this will be your test controller), and run:
-wget https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/stress_test_asterisk.sh
+wget https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/stress_test.sh
 chmod +x stress_test_asterisk.sh
 sudo ./stress_test_asterisk.sh
 

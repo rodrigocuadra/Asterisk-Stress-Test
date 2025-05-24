@@ -397,7 +397,8 @@ while [ "$exitcalls" = "false" ]; do
     cpu=$(top -n 1 -b | awk 'FNR > 7 {s+=$10} END {print s}')
     cpuint=${cpu%.*}
     cpu=$((cpuint / numcores))
-    memory=$(free | awk '/Mem/{printf("%.2f%"), $3/$2*100} /buffers\/cache/{printf(", buffers: %.2f%"), $4/($3+$4)*100}')
+    #memory=$(free | awk '/Mem/{printf("%.2f%"), $3/$2*100} /buffers\/cache/{printf(", buffers: %.2f%"), $4/($3+$4)*100}')
+    memory=$(free | awk '/Mem:/ {used=$3; total=$2} END {if (total>0) printf("%.2f%%", used/total*100); else print "N/A"}')
     
     # Color-code output based on CPU load
     if [ "$cpu" -le 34 ]; then

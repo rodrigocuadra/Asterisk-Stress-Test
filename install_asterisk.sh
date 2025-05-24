@@ -26,7 +26,7 @@ apt update && apt upgrade -y || error_exit "Failed to update the system"
 
 # Install basic dependencies
 echo "Installing basic dependencies..."
-apt install -y build-essential wget git subversion libssl-dev libncurses5-dev libnewt-dev libxml2-dev linux-headers-$(uname -r) libsqlite3-dev uuid-dev libjansson-dev libedit-dev || error_exit "Failed to install basic dependencies"
+apt install -y sudo build-essential wget git subversion libssl-dev libncurses5-dev libnewt-dev libxml2-dev linux-headers-$(uname -r) libsqlite3-dev uuid-dev libjansson-dev libedit-dev || error_exit "Failed to install basic dependencies"
 
 # Change to the source directory
 cd /usr/src || error_exit "Failed to change to /usr/src directory"

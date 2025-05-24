@@ -46,7 +46,7 @@ sudo ./install_asterisk.sh
 Once both servers are up and running with Asterisk installed, log in to **one of the servers** (this will be your test controller), and run:
 
 ```bash
-wget https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/stress_test.sh
+wget https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/stress-test.sh
 chmod +x stress_test.sh
 sudo ./stress_test.sh
 ```

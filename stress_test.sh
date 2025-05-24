@@ -223,7 +223,7 @@ cat > /etc/asterisk/extensions_stress_test.conf << EOF
 [stress_test]
 exten => 200,1,NoOp(Outgoing Call)
  same => n,Answer()
- same => n,NoCDR()
+ same => n,Set(CDR_PROP(disable)=1)
 EOF
 if [ "$recording" = "yes" ]; then
     echo " same => n,MixMonitor(/tmp/\${UNIQUEID}.wav,ab)" >> /etc/asterisk/extensions_stress_test.conf
@@ -295,7 +295,7 @@ ssh -p $ssh_remote_port root@$ip_remote "wget -O /var/lib/asterisk/sounds/en/sar
 ssh -p $ssh_remote_port root@$ip_remote "cat > /etc/asterisk/extensions_stress_test.conf << EOF
 [stress_test]
 exten => 100,1,Answer()
- same => n,NoCDR()
+ same => n,Set(CDR_PROP(disable)=1)
  same => 100,n,Wait(1)
  same => 100,n,Playback(sarah&sarah&sarah)
  same => 100,n,Hangup()

@@ -288,6 +288,16 @@ sed -i '/#include pjsip_stress_test.conf/d' /etc/asterisk/pjsip.conf
 echo "#include extensions_stress_test.conf" >> /etc/asterisk/extensions.conf
 echo "#include pjsip_stress_test.conf" >> /etc/asterisk/pjsip.conf
 
+# Change from 1024 to 50,000 open files. Increases the simultaneous call capacity in Asterisk.
+# Remove existing includes to avoid duplicates
+sed -i '/maxfiles = 50000/d' /etc/asterisk/asterisk.conf
+sed -i '/transmit_silence = yes/d' /etc/asterisk/asterisk.conf
+sed -i '/hide_messaging_ami_events = yes/d' /etc/asterisk/asterisk.conf
+# Add new settings
+sed "maxfiles = 50000" >> /etc/asterisk/asterisk.conf
+sed "transmit_silence = yes" >> /etc/asterisk/asterisk.conf
+sed "hide_messaging_ami_events = yes" >> /etc/asterisk/asterisk.conf
+
 # Server B: Download audio file
 ssh -p $ssh_remote_port root@$ip_remote "wget -O /var/lib/asterisk/sounds/en/sarah.wav https://github.com/rodrigocuadra/Asterisk-Stress-Test/raw/refs/heads/main/sarah.wav" || echo -e "${RED}Warning: Failed to download sarah.wav on remote server${NC}"
 
@@ -359,6 +369,16 @@ chown asterisk:asterisk /etc/asterisk/extensions_stress_test.conf /etc/asterisk/
 chmod 640 /etc/asterisk/extensions_stress_test.conf /etc/asterisk/pjsip_stress_test.conf
 ssh -p $ssh_remote_port root@$ip_remote "chown asterisk:asterisk /etc/asterisk/extensions_stress_test.conf /etc/asterisk/pjsip_stress_test.conf"
 ssh -p $ssh_remote_port root@$ip_remote "chmod 640 /etc/asterisk/extensions_stress_test.conf /etc/asterisk/pjsip_stress_test.conf"
+
+# Change from 1024 to 50,000 open files. Increases the simultaneous call capacity in Asterisk.
+# Remove existing includes to avoid duplicates
+ssh -p $ssh_remote_port root@$ip_remote "sed -i '/maxfiles = 50000/d' /etc/asterisk/asterisk.conf"
+ssh -p $ssh_remote_port root@$ip_remote "sed -i '/transmit_silence = yes/d' /etc/asterisk/asterisk.conf"
+ssh -p $ssh_remote_port root@$ip_remote "sed -i '/hide_messaging_ami_events = yes/d' /etc/asterisk/asterisk.conf"
+# Add new settings
+ssh -p $ssh_remote_port root@$ip_remote "echo 'maxfiles = 50000' >> /etc/asterisk/asterisk.conf"
+ssh -p $ssh_remote_port root@$ip_remote "echo 'transmit_silence = yes' >> /etc/asterisk/asterisk.conf"
+ssh -p $ssh_remote_port root@$ip_remote "echo 'hide_messaging_ami_events = yes' >> /etc/asterisk/asterisk.conf"
 
 # Restart Asterisk on both servers
 systemctl restart asterisk

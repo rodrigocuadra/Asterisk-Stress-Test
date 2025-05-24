@@ -34,6 +34,7 @@ Run the following command **on both servers** to install Asterisk from source:
 ```bash
 wget https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/install_asterisk.sh
 chmod +x install_asterisk.sh
+apt install sudo
 sudo ./install_asterisk.sh
 ```
 

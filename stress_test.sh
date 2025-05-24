@@ -294,9 +294,9 @@ sed -i '/maxfiles = 50000/d' /etc/asterisk/asterisk.conf
 sed -i '/transmit_silence = yes/d' /etc/asterisk/asterisk.conf
 sed -i '/hide_messaging_ami_events = yes/d' /etc/asterisk/asterisk.conf
 # Add new settings
-sed "maxfiles = 50000" >> /etc/asterisk/asterisk.conf
-sed "transmit_silence = yes" >> /etc/asterisk/asterisk.conf
-sed "hide_messaging_ami_events = yes" >> /etc/asterisk/asterisk.conf
+echo "maxfiles = 50000" >> /etc/asterisk/asterisk.conf
+echo "transmit_silence = yes" >> /etc/asterisk/asterisk.conf
+echo "hide_messaging_ami_events = yes" >> /etc/asterisk/asterisk.conf
 
 # Server B: Download audio file
 ssh -p $ssh_remote_port root@$ip_remote "wget -O /var/lib/asterisk/sounds/en/sarah.wav https://github.com/rodrigocuadra/Asterisk-Stress-Test/raw/refs/heads/main/sarah.wav" || echo -e "${RED}Warning: Failed to download sarah.wav on remote server${NC}"

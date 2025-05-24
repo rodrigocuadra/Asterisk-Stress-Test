@@ -76,7 +76,7 @@ if [ -f "$filename" ]; then
     echo -e "IP Remote...................................... >  $ip_remote"
     echo -e "SSH Remote Port (Default is 22)................ >  $ssh_remote_port"
     echo -e "Network Interface name (e.g., eth0)............ >  $interface_name"
-    echo -e "Codec (1.-PCMU, 2.-G729, 3.-OPUS).............. >  $codec"
+    echo -e "Codec (1.-PCMU, 2.-OPUS)....................... >  $codec"
     echo -e "Recording Calls (yes,no)....................... >  $recording"
     echo -e "Max CPU Load (Recommended 75%)................. >  $maxcpuload"
     echo -e "Calls Step (Recommended 5-100)................. >  $call_step"
@@ -102,7 +102,7 @@ while [[ -z $interface_name ]]; do
 done
 
 while [[ -z $codec ]]; do
-    read -p "Codec (1.-PCMU, 2.-G729, 3.-OPUS).............. > " codec 
+    read -p "Codec (1.-PCMU, 2.-OPUS)....................... > " codec 
 done 
 
 while [[ -z $recording ]]; do
@@ -153,7 +153,7 @@ if [ "$veryfy_info" != "yes" ]; then
     done
 
     while [[ -z $codec ]]; do
-        read -p "Codec (1.-PCMU, 2.-G729, 3.-OPUS).............. > " codec 
+        read -p "Codec (1.-PCMU, 2.-OPUS)....................... > " codec 
     done 
 
     while [[ -z $recording ]]; do
@@ -257,10 +257,6 @@ if [ "$codec" = "1" ]; then
     echo "disallow=all" >> /etc/asterisk/pjsip_stress_test.conf
     echo "allow=ulaw,alaw" >> /etc/asterisk/pjsip_stress_test.conf
 elif [ "$codec" = "2" ]; then
-    codec_name="G729"
-    echo "disallow=all" >> /etc/asterisk/pjsip_stress_test.conf
-    echo "allow=g729" >> /etc/asterisk/pjsip_stress_test.conf
-elif [ "$codec" = "3" ]; then
     codec_name="OPUS"
     echo "disallow=all" >> /etc/asterisk/pjsip_stress_test.conf
     echo "allow=opus" >> /etc/asterisk/pjsip_stress_test.conf
@@ -328,9 +324,6 @@ if [ "$codec" = "1" ]; then
     ssh -p $ssh_remote_port root@$ip_remote "echo 'disallow=all' >> /etc/asterisk/pjsip_stress_test.conf"
     ssh -p $ssh_remote_port root@$ip_remote "echo 'allow=ulaw,alaw' >> /etc/asterisk/pjsip_stress_test.conf"
 elif [ "$codec" = "2" ]; then
-    ssh -p $ssh_remote_port root@$ip_remote "echo 'disallow=all' >> /etc/asterisk/pjsip_stress_test.conf"
-    ssh -p $ssh_remote_port root@$ip_remote "echo 'allow=g729' >> /etc/asterisk/pjsip_stress_test.conf"
-elif [ "$codec" = "3" ]; then
     ssh -p $ssh_remote_port root@$ip_remote "echo 'disallow=all' >> /etc/asterisk/pjsip_stress_test.conf"
     ssh -p $ssh_remote_port root@$ip_remote "echo 'allow=opus' >> /etc/asterisk/pjsip_stress_test.conf"
 fi

@@ -222,15 +222,15 @@ wget -O /var/lib/asterisk/sounds/en/jonathan.wav https://github.com/rodrigocuadr
 cat > /etc/asterisk/extensions_stress_test.conf << EOF
 [stress_test]
 exten => 200,1,NoOp(Outgoing Call)
-exten => 200,n,Answer()
-exten => 200,n,NoCDR()
+ same => n,Answer()
+ same => n,NoCDR()
 EOF
 if [ "$recording" = "yes" ]; then
-    echo "exten => 200,n,MixMonitor(/tmp/\${UNIQUEID}.wav,ab)" >> /etc/asterisk/extensions_stress_test.conf
+    echo " same => n,MixMonitor(/tmp/\${UNIQUEID}.wav,ab)" >> /etc/asterisk/extensions_stress_test.conf
 fi
 cat >> /etc/asterisk/extensions_stress_test.conf << EOF
-exten => 200,n,Dial(PJSIP/100@trunk_to_server_b,\${CALL_DURATION})
-exten => 200,n,Hangup()
+ same => n,Dial(PJSIP/100@trunk_to_server_b,\${CALL_DURATION})
+ same => n,Hangup()
 EOF
 
 # Server A: pjsip.conf
@@ -295,10 +295,10 @@ ssh -p $ssh_remote_port root@$ip_remote "wget -O /var/lib/asterisk/sounds/en/sar
 ssh -p $ssh_remote_port root@$ip_remote "cat > /etc/asterisk/extensions_stress_test.conf << EOF
 [stress_test]
 exten => 100,1,Answer()
-exten => 100,n,NoCDR()
-exten => 100,n,Wait(1)
-exten => 100,n,Playback(sarah&sarah&sarah)
-exten => 100,n,Hangup()
+ same => n,NoCDR()
+ same => 100,n,Wait(1)
+ same => 100,n,Playback(sarah&sarah&sarah)
+ same => 100,n,Hangup()
 EOF"
 
 # Server B: pjsip.conf

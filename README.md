@@ -1,50 +1,58 @@
 # 🚀 Asterisk Stress Test Toolkit
 
-Welcome to the **Asterisk Stress Test Toolkit**, a practical utility designed to benchmark and evaluate Asterisk performance under simulated high call loads. This project provides everything needed to:
+Welcome to the **Asterisk Stress Test Toolkit**, a complete and reproducible testing framework to evaluate **Asterisk's** performance under high-load SIP call scenarios.
 
-- 🎯 Install Asterisk from source
-- 📊 Generate stress traffic to test server stability
-- 📈 Monitor system resources (CPU, memory, bandwidth) during tests
+This toolkit is ideal for:
+
+* 🎯 Installing Asterisk from source
+* 🔁 Generating simulated SIP traffic
+* 📈 Monitoring system performance (CPU, bandwidth, RAM, concurrency)
+* 📊 Analyzing call capacity with automatic CSV reporting
 
 ---
 
 ## 📦 Repository Contents
 
-| File                       | Description                                      |
-|----------------------------|--------------------------------------------------|
-| `install_asterisk.sh`      | Script to install Asterisk from source           |
-| `stress_test.sh`           | Script to generate high call load                |
+| File                  | Description                                     |
+| --------------------- | ----------------------------------------------- |
+| `install_asterisk.sh` | Installs Asterisk 22.4.1 from source with PJSIP |
+| `stress_test.sh`      | Launches simulated SIP calls for benchmarking   |
 
 ---
 
-## ⚙️ Prerequisites
+## ⚙️ Requirements
 
-- Two Linux servers (Debian 12 recommended)
-- Root SSH access
-- Internet access from both servers
-- Open ports for SIP communication (UDP 5060) and RTP (UDP 10000-20000)
-- Minimum 2 GB RAM and 2 vCPUs per server for stress testing
+* Two Debian 12 servers (VMs or bare-metal)
+* Root access to both servers
+* Outbound internet access (to fetch audio/codecs)
+* Open ports: **5060/UDP** (SIP), **10000–20000/UDP** (RTP)
+* Recommended: ≥2 vCPU, ≥2 GB RAM
 
 ---
 
-## 🧱 Step 1: Install Asterisk on Both Servers
+## 🛠️ Step 1: Install Asterisk
 
-Run the following command **on both servers** to install Asterisk from source:
+Run the following **on both servers**:
 
 ```bash
+apt install sudo -y
 wget https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/install_asterisk.sh
 chmod +x install_asterisk.sh
-apt install sudo
 sudo ./install_asterisk.sh
 ```
 
-> ☑️ This script installs Asterisk 22.4.1, configures PJSIP for SIP communication, and sets up the necessary environment for stress testing. It creates a dedicated `asterisk` user and configures basic firewall rules.
+☑️ This will:
+
+* Compile Asterisk 22.4.1 with PJSIP support
+* Configure SIP ports and RTP range
+* Set up a working SIP profile
+* Create the `asterisk` user and apply firewall rules
 
 ---
 
 ## 📞 Step 2: Run the Stress Test
 
-Once both servers are up and running with Asterisk installed, log in to **one of the servers** (this will be your test controller), and run:
+From **one of the two servers** (your controller), run:
 
 ```bash
 wget https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/stress_test.sh
@@ -52,54 +60,87 @@ chmod +x stress_test.sh
 sudo ./stress_test.sh
 ```
 
-During execution, the script will:
+You’ll be prompted to:
 
-- Prompt for required network and performance parameters (e.g., local/remote IPs, codec, call duration)
-- Automatically configure a PJSIP trunk to the remote server
-- Upload the destination dialplan to the remote server (for audio playback)
-- Start launching calls incrementally to stress the system
-- Monitor CPU, memory, network usage, and active channels
-- Log results into `data.csv`
+* Enter local/remote IP addresses
+* Choose codec and call duration
+* Specify call ramp-up settings
 
----
+🧪 The script will automatically:
 
-## 📊 Results
-
-After running the test, you'll get:
-
-- **Live statistics** displayed step-by-step on screen
-- A `data.csv` file containing all metrics for review
-- A final summary of:
-  - Max CPU usage
-  - Max concurrent calls
-  - Average bandwidth per call
-  - Estimated calls per hour based on call duration
+* Configure trunks and dialplans
+* Upload destination dialplan to the remote server
+* Simulate two-way SIP calls
+* Monitor CPU, RAM, bandwidth, and concurrency
+* Save results into `data.csv`
 
 ---
 
-## 🧠 Notes
+## 📊 Example Results
 
-- Ensure the remote server allows unauthenticated SIP traffic (no registration required) for testing.
-- This test uses audio files (`jonathan.wav` and `sarah.wav`) for playback, downloaded automatically.
-- Supported codecs: PCMU (G.711), G.729, OPUS (G.729 and OPUS require respective modules).
-- Modify the test script as needed to adjust call durations, codecs, or PJSIP settings.
-- The script removes temporary configurations (`pjsip_stress_test.conf`, `extensions_stress_test.conf`) after testing.
+After a full test cycle, you’ll get a final statistical summary like this:
+
+* Max concurrent calls: **900**
+* Max CPU usage: **86.00%**
+* Load average: **11.06**
+* Avg bandwidth per call: **75.87 kb/s**
+* Est. throughput: **18,000 calls/hour**
+
+### 📷 Benchmark Snapshot:
+
+![Asterisk Stress Test Result](https://github.com/rodrigocuadra/Asterisk-Stress-Test/blob/main/Asterisk_2Core.png)
+
+---
+
+## 🔍 Interpretation
+
+* These values were obtained using **Hyper-V** virtual machines on 2-core systems.
+* **CPU usage above 45%** is not recommended for long periods in production.
+* The test simulates a real-world call with **bi-directional media playback** (using `jonathan.wav` and `sarah.wav`).
+* **Bandwidth consumption remains constant** across the test due to static media size.
+
+---
+
+## ✍️ Customization Notes
+
+* All configs are temporary: `pjsip_stress_test.conf` and `extensions_stress_test.conf` are removed after the test
+* You can modify codecs, step sizes, and durations directly in `stress_test.sh`
+* The test assumes **unauthenticated SIP traffic** (no registration) for simplicity
+
+---
+
+## 📤 CSV Output Sample
+
+The script generates a `data.csv` file with fields:
+
+```
+Step,Concurrent_Calls,CPU_Usage,Load_Avg,TX_kbps,RX_kbps
+```
+
+Perfect for plotting time-series graphs or analyzing call behavior step-by-step.
 
 ---
 
 ## 👤 Author
 
-**Rodrigo Cuadra**  
-Adapted for Asterisk by Grok 3 (xAI)  
-📧 For support, refer to Asterisk documentation or your system administrator
+**Rodrigo Cuadra**
+🔗 GitHub: [@rodrigocuadra](https://github.com/rodrigocuadra)
+Adapted for benchmarking and analysis by Grok 3 (xAI)
 
 ---
 
 ## 🛡️ Disclaimer
 
-This stress test is designed for **controlled lab environments**.  
-**Do not run it in production** unless you know what you're doing.
-
+This toolkit is meant for **controlled testing environments**.
+Running this in production without safeguards could disrupt your VoIP services.
 Use responsibly.
 
 ---
+
+## 📎 Related Projects
+
+* [FreeSWITCH Stress Test Toolkit](https://github.com/rodrigocuadra/Freeswitch-Stress-Test)
+
+---
+
+Happy benchmarking! 🎧📶

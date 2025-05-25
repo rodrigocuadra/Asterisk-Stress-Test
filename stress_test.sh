@@ -511,10 +511,18 @@ if [ -f data.csv ]; then
         printf("• Max Concurrent Calls: %d\n", max_calls);
         printf("• Average Calls/Step..: %.2f\n", avg_calls);
         printf("• Average BW/Call.....: %.2f kb/s\n", avg_bw);
-        printf("• ➕ Estimated Calls/hour (duration ~%ds): %.0f\n\n", dur, est_calls_per_hour);
+        printf("• ➕ Estimated Calls/hour (duration ~%ds): %.0f\n", dur, est_calls_per_hour);
     }'
+
+    # ✅ Append system info
+    echo -e "\n🧠 CPU Info:"
+    lscpu | grep -E 'Model name|^CPU\(s\)|CPU MHz' | grep -v NUMA
+
+    echo -e "\n💾 RAM Info:"
+    free -h | awk '/^Mem:/ {print "Total Memory: " $$2}'
+
 else
-    echo -e "${RED}data.csv not found.${NC}"
+    echo "❌ data.csv not found."
 fi
 
 echo -e "***************************************************************************************************"

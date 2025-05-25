@@ -519,7 +519,7 @@ if [ -f data.csv ]; then
     lscpu | grep -E 'Model name|^CPU\(s\)|CPU MHz' | grep -v NUMA
 
     echo -e "\n💾 RAM Info:"
-    free -h | awk '/^Mem:/ {print "Total Memory: " $$2}'
+    free -h | awk '/^Mem:/ {print "Total Memory: " $2}'
 
 else
     echo "❌ data.csv not found."

@@ -489,6 +489,8 @@ if [ -f data.csv ]; then
         calls = $2 + 0;
         tx = $5 + 0;
         rx = $6 + 0;
+
+        # Bandwidth per call (includes both legs: TX + RX)
         bw_per_call = (calls > 0) ? (tx + rx) / calls : 0;
 
         if(cpu > max_cpu) max_cpu = cpu;
@@ -506,12 +508,12 @@ if [ -f data.csv ]; then
         est_calls_per_hour = (dur > 0) ? max_calls * (3600 / dur) : 0;
 
         printf("\n📊 Summary:\n");
-        printf("• Max CPU Usage.......: %.2f%%\n", max_cpu);
-        printf("• Average CPU Usage...: %.2f%%\n", avg_cpu);
-        printf("• Max Concurrent Calls: %d\n", max_calls);
-        printf("• Average Calls/Step..: %.2f\n", avg_calls);
-        printf("• Average BW/Call.....: %.2f kb/s\n", avg_bw);
-        printf("• ➕ Estimated Calls/hour (duration ~%ds): %.0f\n", dur, est_calls_per_hour);
+        printf("• Max CPU Usage.............: %.2f%%\n", max_cpu);
+        printf("• Average CPU Usage.........: %.2f%%\n", avg_cpu);
+        printf("• Max Concurrent Calls......: %d\n", max_calls);
+        printf("• Average Calls per Step....: %.2f\n", avg_calls);
+        printf("• Average Bandwidth/Call....: %.2f kb/s (TX + RX)\n", avg_bw);
+        printf("• ➕ Estimated Calls/Hour (~%ds): %.0f\n", dur, est_calls_per_hour);
     }'
 
     # ✅ Append system info

@@ -86,62 +86,15 @@ if [ -f "$filename" ]; then
     echo -e "Web server URL base (e.g., http://192.168.5.5:8000)... >   $web_notify_url_base"
 fi
 
-# Prompt for configuration if not set
-while [[ -z $ip_local ]]; do
-    read -p "IP Local.............................................. > " ip_local 
-done 
+AUTO_MODE=false
+if [[ "$1" == "--auto" || "$1" == "--no-confirm" ]]; then
+        AUTO_MODE=true
+        echo "✅ Auto mode enabled: running with config.txt only, no prompts."
+fi
 
-while [[ -z $ip_remote ]]; do
-    read -p "IP Remote............................................. > " ip_remote 
-done
+if [ "$AUTO_MODE" = false ]; then
 
-while [[ -z $ssh_remote_port ]]; do
-    read -p "SSH Remote Port (Default is 22)....................... > " ssh_remote_port 
-done
-
-while [[ -z $interface_name ]]; do
-    read -p "Network Interface name (e.g., eth0)................... > " interface_name 
-done
-
-while [[ -z $codec ]]; do
-    read -p "Codec (1.-PCMU, 2.-OPUS).............................. > " codec 
-done 
-
-while [[ -z $recording ]]; do
-    read -p "Recording Calls (yes,no).............................. > " recording 
-done 
-
-while [[ -z $maxcpuload ]]; do
-    read -p "Max CPU Load (Recommended 75%)........................ > " maxcpuload 
-done 
-
-while [[ -z $call_step ]]; do
-    read -p "Calls Step (Recommended 5-100)........................ > " call_step 
-done 
-
-while [[ -z $call_step_seconds ]]; do
-    read -p "Seconds between each step (Recommended 5-30).......... > " call_step_seconds
-done 
-
-while [[ -z $call_duration ]]; do
-    read -p "Estimated Call Duration Seconds (e.g., 180)........... > " call_duration
-done 
-
-while [[ -z $web_notify_url_base ]]; do
-    read -p "Web server URL base (e.g., http://192.168.5.5:8000)... > " web_notify_url_base
-done
-
-# Verify configuration
-echo -e "************************************************************"
-echo -e "*                   Check Information                      *"
-echo -e "*        Make sure that both servers have communication    *"
-echo -e "************************************************************"
-while [[ "$veryfy_info" != "yes" && "$veryfy_info" != "no" ]]; do
-    read -p "Are you sure to continue with this settings? (yes,no) > " veryfy_info 
-done
-
-if [ "$veryfy_info" != "yes" ]; then
-    # Re-prompt for all settings if user selects 'no'
+    # Prompt for configuration if not set
     while [[ -z $ip_local ]]; do
         read -p "IP Local.............................................. > " ip_local 
     done 
@@ -185,6 +138,65 @@ if [ "$veryfy_info" != "yes" ]; then
     while [[ -z $web_notify_url_base ]]; do
         read -p "Web server URL base (e.g., http://192.168.5.5:8000)... > " web_notify_url_base
     done
+
+    # Verify configuration
+    echo -e "************************************************************"
+    echo -e "*                   Check Information                      *"
+    echo -e "*        Make sure that both servers have communication    *"
+    echo -e "************************************************************"
+    while [[ "$veryfy_info" != "yes" && "$veryfy_info" != "no" ]]; do
+        read -p "Are you sure to continue with this settings? (yes,no) > " veryfy_info 
+    done
+
+    if [ "$veryfy_info" != "yes" ]; then
+        # Re-prompt for all settings if user selects 'no'
+        while [[ -z $ip_local ]]; do
+            read -p "IP Local.............................................. > " ip_local 
+        done 
+
+        while [[ -z $ip_remote ]]; do
+            read -p "IP Remote............................................. > " ip_remote 
+        done
+
+        while [[ -z $ssh_remote_port ]]; do
+            read -p "SSH Remote Port (Default is 22)....................... > " ssh_remote_port 
+        done
+
+        while [[ -z $interface_name ]]; do
+            read -p "Network Interface name (e.g., eth0)................... > " interface_name 
+        done
+
+        while [[ -z $codec ]]; do
+            read -p "Codec (1.-PCMU, 2.-OPUS).............................. > " codec 
+        done 
+
+        while [[ -z $recording ]]; do
+            read -p "Recording Calls (yes,no).............................. > " recording 
+        done 
+
+        while [[ -z $maxcpuload ]]; do
+            read -p "Max CPU Load (Recommended 75%)........................ > " maxcpuload 
+        done 
+
+        while [[ -z $call_step ]]; do
+            read -p "Calls Step (Recommended 5-100)........................ > " call_step 
+        done 
+
+        while [[ -z $call_step_seconds ]]; do
+            read -p "Seconds between each step (Recommended 5-30).......... > " call_step_seconds
+        done 
+
+        while [[ -z $call_duration ]]; do
+            read -p "Estimated Call Duration Seconds (e.g., 180)........... > " call_duration
+        done 
+
+        while [[ -z $web_notify_url_base ]]; do
+            read -p "Web server URL base (e.g., http://192.168.5.5:8000)... > " web_notify_url_base
+        done
+    fi
+
+else
+    echo "🚀 Skipping confirmation. Proceeding with loaded config."
 fi
 
 # Save configuration to config.txt

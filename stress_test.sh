@@ -10,8 +10,8 @@
 #
 # Authors:      Rodrigo Cuadra (original author)
 #
-# Version:      1.0 for Asterisk 22.4.1
-# Date:         May 24, 2025
+# Version:      1.1 for Asterisk 22.4.1
+# Date:         June 28, 2025
 #
 # Compatibility: Asterisk 22.x with PJSIP module
 # Requirements: 

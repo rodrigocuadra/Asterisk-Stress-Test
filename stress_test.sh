@@ -201,6 +201,9 @@ echo -e "$call_duration"    >> config.txt
 echo -e "$web_notify_url_base"    >> config.txt
 
 test_type="asterisk"
+web_notify="yes"
+progress_url="${web_notify_url_base}/api/progress"
+explosion_url="${web_notify_url_base}/api/explosion"
 
 # Set up SSH key for passwordless communication
 echo -e "************************************************************"
@@ -453,9 +456,22 @@ while [ "$exitcalls" = "false" ]; do
     printf "%2s %7s %10s %19s %10s %10s %10s %12s %12s\n" "|" " $step |" "$i |" "$activecalls |" "$cpu% |" "$load |" "$memory |" "$bwtx |" "$bwrx |"
     echo -e "$i, $activecalls, $cpu, $load, $memory, $bwtx, $bwrx, $seconds" >> data.csv
 
-    if [ "$json_output_enabled" = "yes" ]; then
-        timestamp=$(date --iso-8601=seconds)
-        echo "{\"step\": $step, \"calls\": $i, \"active_calls\": $activecalls, \"cpu\": $cpu, \"load\": \"$load\", \"memory\": \"$memory\", \"bw_tx\": $bwtx, \"bw_rx\": $bwrx, \"timestamp\": \"$timestamp\"}" >> /tmp/progress.jsonl
+    if [ "$web_notify" != "yes" ]; then
+        curl -s -X POST "$progress_url" \
+            -H "Content-Type: application/json" \
+            -d "{
+                \"test_type\": \"$test_type\",
+                \"ip\": \"$ip_local\",
+                \"step\": $step,
+                \"calls\": $i,
+                \"active_calls\": $activecalls,
+                \"cpu\": $cpu,
+                \"load\": \"$load\",
+                \"memory\": \"$memory\",
+                \"bw_tx\": $bwtx,
+                \"bw_rx\": $bwrx,
+                \"timestamp\": \"$(date --iso-8601=seconds)\"
+            }" > /dev/null &
     fi
     
     exitstep=false
@@ -472,15 +488,19 @@ while [ "$exitcalls" = "false" ]; do
     i=$((i + call_step))
     if [ "$cpu" -gt "$maxcpuload" ]; then
         exitcalls=true
-        if [ "$explosion_notified" != "yes" ]; then
-            echo "🔥 Threshold reached ($cpu%). Notifying control server..."
-            if [ "$web_notify_url" != "" ]; then
-                curl -s -X POST "$web_notify_url" \
+            if [ "$web_notify" != "yes" ]; then
+                echo "🔥 Threshold reached ($cpu%). Notifying control server..."
+                curl -s -X POST "$explosion_url" \
                     -H "Content-Type: application/json" \
-                    -d "{\"ip\": \"$ip_local\", \"cpu\": $cpu, \"calls\": $activecalls, \"step\": $step, \"timestamp\": \"$(date --iso-8601=seconds)\"}" &
-                explosion_notified="yes"
+                    -d "{
+                    \"test_type\": \"$test_type\",
+                    \"ip\": \"$ip_local\",
+                    \"cpu\": $cpu,
+                    \"calls\": $activecalls,
+                    \"step\": $step,
+                    \"timestamp\": \"$(date --iso-8601=seconds)\"
+                    }" > /dev/null &
             fi
-        fi
     fi
     R1=$(cat /sys/class/net/"$interface_name"/statistics/rx_bytes)
     T1=$(cat /sys/class/net/"$interface_name"/statistics/tx_bytes)

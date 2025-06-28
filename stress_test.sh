@@ -106,7 +106,7 @@ if [ -f "$filename" ]; then
     echo -e "Calls Step (Recommended 5-100)........................ >  $call_step"
     echo -e "Seconds between each step (Recommended 5-30).......... >  $call_step_seconds"
     echo -e "Estimated Call Duration Seconds (e.g., 180)........... >  $call_duration"
-    if [ "$web_notify" != "yes" ]; then
+    if [ "$NOTIFY_MODE" = true ]; then
         echo -e "Web server URL base (e.g., http://192.168.5.5:8000)... >   $web_notify_url_base"
     fi
 fi
@@ -487,7 +487,7 @@ while [ "$exitcalls" = "false" ]; do
     printf "%2s %7s %10s %19s %10s %10s %10s %12s %12s\n" "|" " $step |" "$i |" "$activecalls |" "$cpu% |" "$load |" "$memory |" "$bwtx |" "$bwrx |"
     echo -e "$i, $activecalls, $cpu, $load, $memory, $bwtx, $bwrx, $seconds" >> data.csv
 
-    if [ "$WEB_NOTIFY" = true ]; then
+    if [ "$web_notify_url_base" != "" ] && [ "$NOTIFY_MODE" = true ]; then
         curl -s -X POST "$progress_url" \
             -H "Content-Type: application/json" \
             -d "{
@@ -519,7 +519,7 @@ while [ "$exitcalls" = "false" ]; do
     i=$((i + call_step))
     if [ "$cpu" -gt "$maxcpuload" ]; then
         exitcalls=true
-            if [ "$WEB_NOTIFY" = true ]; then
+            if [ "$web_notify_url_base" != "" ] && [ "$NOTIFY_MODE" = true ]; then
                 echo "🔥 Threshold reached ($cpu%). Notifying control server..."
                 curl -s -X POST "$explosion_url" \
                     -H "Content-Type: application/json" \

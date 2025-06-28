@@ -21,7 +21,7 @@
 #               - Supported codecs: PCMU, G.729, OPUS
 #
 # Usage:        sudo ./stress_test_asterisk.sh
-#               Follow prompts to configure test parameters or use configst.txt
+#               Follow prompts to configure test parameters or use config.txt
 #
 # Output:       - Real-time performance metrics (CPU, calls, bandwidth)
 #               - Summary report in data.csv
@@ -57,8 +57,8 @@ test_type="asterisk"
 progress_url="${web_notify_url_base}/api/progress"
 explosion_url="${web_notify_url_base}/api/explosion"
 
-# Read configuration from configst.txt if it exists
-filename="configst.txt"
+# Read configuration from config.txt if it exists
+filename="config.txt"
 if [ -f "$filename" ]; then
     echo -e "Reading config file..."
     n=1
@@ -96,7 +96,7 @@ fi
 AUTO_MODE=false
 if [[ "$1" == "--auto" || "$1" == "--no-confirm" ]]; then
         AUTO_MODE=true
-        echo "✅ Auto mode enabled: running with configst.txt only, no prompts."
+        echo "✅ Auto mode enabled: running with config.txt only, no prompts."
 fi
 
 if [ "$AUTO_MODE" = false ]; then
@@ -207,21 +207,21 @@ else
     echo "🚀 Skipping confirmation. Proceeding with loaded config."
 fi
 
-# Save configuration to configst.txt
-echo -e "$ip_local"          > configst.txt
-echo -e "$ip_remote"         >> configst.txt
-echo -e "$ssh_remote_port"   >> configst.txt
-echo -e "$interface_name"    >> configst.txt
-echo -e "$codec"             >> configst.txt
-echo -e "$recording"         >> configst.txt
-echo -e "$maxcpuload"        >> configst.txt
-echo -e "$call_step"         >> configst.txt
-echo -e "$call_step_seconds" >> configst.txt
-echo -e "$call_duration"     >> configst.txt
+# Save configuration to config.txt
+echo -e "$ip_local"          > config.txt
+echo -e "$ip_remote"         >> config.txt
+echo -e "$ssh_remote_port"   >> config.txt
+echo -e "$interface_name"    >> config.txt
+echo -e "$codec"             >> config.txt
+echo -e "$recording"         >> config.txt
+echo -e "$maxcpuload"        >> config.txt
+echo -e "$call_step"         >> config.txt
+echo -e "$call_step_seconds" >> config.txt
+echo -e "$call_duration"     >> config.txt
 if [ "$web_notify" != "yes" ]; then
-    echo -e "$web_notify_url_base"    >> configst.txt
+    echo -e "$web_notify_url_base"    >> config.txt
 else
-    echo -e "None"                    >> configst.txt
+    echo -e "None"                    >> config.txt
 fi
 
 # Set up SSH key for passwordless communication

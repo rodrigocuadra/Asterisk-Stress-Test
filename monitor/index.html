@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stress Test Monitor</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+        }
+        .panel {
+            flex: 1;
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 90vh;
+            overflow-y: auto;
+        }
+        .asterisk { border-left: 5px solid #007BFF; }
+        .freeswitch { border-left: 5px solid #28A745; }
+        .entry { margin-bottom: 8px; }
+        .explosion { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="panel asterisk">
+    <h2>Asterisk</h2>
+    <div id="asterisk-log"></div>
+</div>
+
+<div class="panel freeswitch">
+    <h2>FreeSWITCH</h2>
+    <div id="freeswitch-log"></div>
+</div>
+
+<script>
+    const ws = new WebSocket("ws://" + location.hostname + ":8000/ws");
+
+    ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        const panelId = msg.data.test_type === "asterisk" ? "asterisk-log" : "freeswitch-log";
+        const logDiv = document.getElementById(panelId);
+        const div = document.createElement("div");
+        div.classList.add("entry");
+
+        if (msg.type === "progress") {
+            div.innerText = `[STEP ${msg.data.step}] Calls: ${msg.data.calls}, CPU: ${msg.data.cpu}%, BW TX: ${msg.data.bw_tx} kb/s`;
+        } else if (msg.type === "explosion") {
+            div.classList.add("explosion");
+            div.innerText = `🔥 EXPLOSION! CPU ${msg.data.cpu}% at step ${msg.data.step}`;
+        }
+
+        logDiv.appendChild(div);
+        logDiv.scrollTop = logDiv.scrollHeight;
+    };
+
+    ws.onerror = () => {
+        alert("❌ WebSocket connection failed.");
+    };
+</script>
+
+</body>
+</html>

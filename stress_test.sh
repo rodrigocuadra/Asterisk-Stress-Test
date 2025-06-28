@@ -52,8 +52,26 @@ echo -e "*              All options are mandatory                   *"
 echo -e "************************************************************"
 echo -e "${NC}"
 
+AUTO_MODE=false
+WEB_NOTIFY=false
+for arg in "$@"
+do
+    case $arg in
+        --auto|--no-confirm)
+            AUTO_MODE=true
+            echo "✅ Auto mode enabled: running with config.txt only, no prompts."
+            ;;
+        --notify)
+            WEB_NOTIFY=true
+            echo "📡 Web notify enabled: full reporting to server 5."
+            ;;
+        *)
+            echo "⚠️ Unknown argument: $arg"
+            ;;
+    esac
+done
+
 test_type="asterisk"
-web_notify="no"
 progress_url="${web_notify_url_base}/api/progress"
 explosion_url="${web_notify_url_base}/api/explosion"
 
@@ -91,12 +109,6 @@ if [ -f "$filename" ]; then
     if [ "$web_notify" != "yes" ]; then
         echo -e "Web server URL base (e.g., http://192.168.5.5:8000)... >   $web_notify_url_base"
     fi
-fi
-
-AUTO_MODE=false
-if [[ "$1" == "--auto" || "$1" == "--no-confirm" ]]; then
-        AUTO_MODE=true
-        echo "✅ Auto mode enabled: running with config.txt only, no prompts."
 fi
 
 if [ "$AUTO_MODE" = false ]; then
@@ -475,7 +487,7 @@ while [ "$exitcalls" = "false" ]; do
     printf "%2s %7s %10s %19s %10s %10s %10s %12s %12s\n" "|" " $step |" "$i |" "$activecalls |" "$cpu% |" "$load |" "$memory |" "$bwtx |" "$bwrx |"
     echo -e "$i, $activecalls, $cpu, $load, $memory, $bwtx, $bwrx, $seconds" >> data.csv
 
-    if [ "$web_notify" != "yes" ]; then
+    if [ "$WEB_NOTIFY" = true ]; then
         curl -s -X POST "$progress_url" \
             -H "Content-Type: application/json" \
             -d "{
@@ -507,7 +519,7 @@ while [ "$exitcalls" = "false" ]; do
     i=$((i + call_step))
     if [ "$cpu" -gt "$maxcpuload" ]; then
         exitcalls=true
-            if [ "$web_notify" != "yes" ]; then
+            if [ "$WEB_NOTIFY" = true ]; then
                 echo "🔥 Threshold reached ($cpu%). Notifying control server..."
                 curl -s -X POST "$explosion_url" \
                     -H "Content-Type: application/json" \

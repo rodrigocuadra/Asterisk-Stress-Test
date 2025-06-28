@@ -23,6 +23,7 @@
         .freeswitch { border-left: 5px solid #28A745; }
         .entry { margin-bottom: 8px; }
         .explosion { color: red; font-weight: bold; }
+        .winner { color: green; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -38,24 +39,34 @@
 </div>
 
 <script>
+    // Establish WebSocket connection to backend server
     const ws = new WebSocket("ws://" + location.hostname + ":8000/ws");
 
     ws.onmessage = (event) => {
         const msg = JSON.parse(event.data);
         const panelId = msg.data.test_type === "asterisk" ? "asterisk-log" : "freeswitch-log";
         const logDiv = document.getElementById(panelId);
+
         const div = document.createElement("div");
         div.classList.add("entry");
 
+        // Step-by-step progress info
         if (msg.type === "progress") {
             div.innerText = `[STEP ${msg.data.step}] Calls: ${msg.data.calls}, CPU: ${msg.data.cpu}%, BW TX: ${msg.data.bw_tx} kb/s`;
+        
+        // Explosion event (when CPU threshold is exceeded)
         } else if (msg.type === "explosion") {
             div.classList.add("explosion");
             div.innerText = `🔥 EXPLOSION! CPU ${msg.data.cpu}% at step ${msg.data.step}`;
+        
+        // Winner event (when the other system already exploded)
+        } else if (msg.type === "winner") {
+            div.classList.add("winner");
+            div.innerText = `🏆 WINNER! CPU ${msg.data.cpu}% at step ${msg.data.step}`;
         }
 
         logDiv.appendChild(div);
-        logDiv.scrollTop = logDiv.scrollHeight;
+        logDiv.scrollTop = logDiv.scrollHeight; // Auto-scroll to bottom
     };
 
     ws.onerror = () => {

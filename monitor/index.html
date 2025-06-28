@@ -52,8 +52,8 @@
 
         // Step-by-step progress info
         if (msg.type === "progress") {
-            div.innerText = `[STEP ${msg.data.step}] Calls: ${msg.data.calls}, CPU: ${msg.data.cpu}%, BW TX: ${msg.data.bw_tx} kb/s`;
-        
+            div.innerText = `[STEP ${msg.data.step}] Calls: ${msg.data.calls}, CPU: ${msg.data.cpu}%, Memory: ${msg.data.memory}, BW TX: ${msg.data.bw_tx} kb/s, BW RX: ${msg.data.bw_rx} kb/s`;
+
         // Explosion event (when CPU threshold is exceeded)
         } else if (msg.type === "explosion") {
             div.classList.add("explosion");

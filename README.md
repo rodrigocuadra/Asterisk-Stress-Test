@@ -63,6 +63,8 @@ chmod +x install_stresstest_api.sh
 
 **Stress Test**
 ```
+mkdir /opt/stress_test
+cd /opt/stress_test
 wget https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/stress_test.sh
 chmod +x stress_test.sh
 sudo ./stress_test.sh

@@ -54,7 +54,15 @@ sudo ./install_asterisk.sh
 
 From **one of the two servers** (your controller), run:
 
-```bash
+**API (Optional)**
+```
+wget https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/install_stresstest_api.sh
+chmod +x install_stresstest_api.sh
+./install_stresstest_api.sh
+```
+
+**Stress Test**
+```
 wget https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/stress_test.sh
 chmod +x stress_test.sh
 sudo ./stress_test.sh

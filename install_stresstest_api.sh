@@ -74,7 +74,7 @@ def receive_config(data: ConfigData):
 
 @app.post("/start-test")
 def start_test():
-    subprocess.Popen(["/bin/bash", "/opt/stress_test/stress_test.sh", "--auto"])
+    subprocess.Popen(["/bin/bash", "/opt/stress_test/stress_test.sh", "--auto --notify"])
     return {"status": "🚀 test started"}
 EOF
 

@@ -52,8 +52,8 @@ echo -e "*              All options are mandatory                   *"
 echo -e "************************************************************"
 echo -e "${NC}"
 
-web_notify="no"
 test_type="asterisk"
+web_notify="no"
 progress_url="${web_notify_url_base}/api/progress"
 explosion_url="${web_notify_url_base}/api/explosion"
 

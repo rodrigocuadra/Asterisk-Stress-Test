@@ -52,6 +52,11 @@ echo -e "*              All options are mandatory                   *"
 echo -e "************************************************************"
 echo -e "${NC}"
 
+web_notify="yes"
+test_type="asterisk"
+progress_url="${web_notify_url_base}/api/progress"
+explosion_url="${web_notify_url_base}/api/explosion"
+
 # Read configuration from config.txt if it exists
 filename="config.txt"
 if [ -f "$filename" ]; then
@@ -83,7 +88,9 @@ if [ -f "$filename" ]; then
     echo -e "Calls Step (Recommended 5-100)........................ >  $call_step"
     echo -e "Seconds between each step (Recommended 5-30).......... >  $call_step_seconds"
     echo -e "Estimated Call Duration Seconds (e.g., 180)........... >  $call_duration"
-    echo -e "Web server URL base (e.g., http://192.168.5.5:8000)... >   $web_notify_url_base"
+    if [ "$web_notify" != "yes" ]; then
+        echo -e "Web server URL base (e.g., http://192.168.5.5:8000)... >   $web_notify_url_base"
+    fi
 fi
 
 AUTO_MODE=false
@@ -134,11 +141,11 @@ if [ "$AUTO_MODE" = false ]; then
     while [[ -z $call_duration ]]; do
         read -p "Estimated Call Duration Seconds (e.g., 180)........... > " call_duration
     done 
-
-    while [[ -z $web_notify_url_base ]]; do
-        read -p "Web server URL base (e.g., http://192.168.5.5:8000)... > " web_notify_url_base
-    done
-
+    if [ "$web_notify" != "yes" ]; then
+        while [[ -z $web_notify_url_base ]]; do
+            read -p "Web server URL base (e.g., http://192.168.5.5:8000)... > " web_notify_url_base
+        done
+    fi
     # Verify configuration
     echo -e "************************************************************"
     echo -e "*                   Check Information                      *"
@@ -189,10 +196,11 @@ if [ "$AUTO_MODE" = false ]; then
         while [[ -z $call_duration ]]; do
             read -p "Estimated Call Duration Seconds (e.g., 180)........... > " call_duration
         done 
-
-        while [[ -z $web_notify_url_base ]]; do
-            read -p "Web server URL base (e.g., http://192.168.5.5:8000)... > " web_notify_url_base
-        done
+        if [ "$web_notify" != "yes" ]; then
+            while [[ -z $web_notify_url_base ]]; do
+                read -p "Web server URL base (e.g., http://192.168.5.5:8000)... > " web_notify_url_base
+            done
+        fi
     fi
 
 else
@@ -210,12 +218,9 @@ echo -e "$maxcpuload"       >> config.txt
 echo -e "$call_step"        >> config.txt
 echo -e "$call_step_seconds" >> config.txt
 echo -e "$call_duration"    >> config.txt
-echo -e "$web_notify_url_base"    >> config.txt
-
-test_type="asterisk"
-web_notify="yes"
-progress_url="${web_notify_url_base}/api/progress"
-explosion_url="${web_notify_url_base}/api/explosion"
+if [ "$web_notify" != "yes" ]; then
+    echo -e "$web_notify_url_base"    >> config.txt
+fi
 
 # Set up SSH key for passwordless communication
 echo -e "************************************************************"

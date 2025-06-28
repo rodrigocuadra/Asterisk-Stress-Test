@@ -69,7 +69,7 @@ if [ -f "$filename" ]; then
             8) call_step=$line ;;
             9) call_step_seconds=$line ;;
             10) call_duration=$line ;;
-            11) json_output_enabled=$line ;;
+            11) web_notify_url_base=$line ;;
         esac
         n=$((n+1))
     done < "$filename"
@@ -83,7 +83,7 @@ if [ -f "$filename" ]; then
     echo -e "Calls Step (Recommended 5-100)........................ >  $call_step"
     echo -e "Seconds between each step (Recommended 5-30).......... >  $call_step_seconds"
     echo -e "Estimated Call Duration Seconds (e.g., 180)........... >  $call_duration"
-    echo -e "Enable JSON output for web visualization? (yes,no).... >  $json_output_enabled"
+    echo -e "Web server URL base (e.g., http://192.168.5.5:8000)... >   $web_notify_url_base"
 fi
 
 # Prompt for configuration if not set
@@ -127,8 +127,8 @@ while [[ -z $call_duration ]]; do
     read -p "Estimated Call Duration Seconds (e.g., 180)........... > " call_duration
 done 
 
-while [[ -z $json_output_enabled ]]; do
-    read -p "Enable JSON output for web visualization? (yes,no).... > " json_output_enabled
+while [[ -z $web_notify_url_base ]]; do
+    read -p "Web server URL base (e.g., http://192.168.5.5:8000)... > " web_notify_url_base
 done
 
 # Verify configuration
@@ -182,8 +182,8 @@ if [ "$veryfy_info" != "yes" ]; then
         read -p "Estimated Call Duration Seconds (e.g., 180)........... > " call_duration
     done 
 
-    while [[ -z $json_output_enabled ]]; do
-        read -p "Enable JSON output for web visualization? (yes,no).... > " json_output_enabled
+    while [[ -z $web_notify_url_base ]]; do
+        read -p "Web server URL base (e.g., http://192.168.5.5:8000)... > " web_notify_url_base
     done
 fi
 
@@ -198,7 +198,9 @@ echo -e "$maxcpuload"       >> config.txt
 echo -e "$call_step"        >> config.txt
 echo -e "$call_step_seconds" >> config.txt
 echo -e "$call_duration"    >> config.txt
-echo -e "$json_output_enabled"    >> config.txt
+echo -e "$web_notify_url_base"    >> config.txt
+
+test_type="asterisk"
 
 # Set up SSH key for passwordless communication
 echo -e "************************************************************"
@@ -470,6 +472,15 @@ while [ "$exitcalls" = "false" ]; do
     i=$((i + call_step))
     if [ "$cpu" -gt "$maxcpuload" ]; then
         exitcalls=true
+        if [ "$explosion_notified" != "yes" ]; then
+            echo "🔥 Threshold reached ($cpu%). Notifying control server..."
+            if [ "$web_notify_url" != "" ]; then
+                curl -s -X POST "$web_notify_url" \
+                    -H "Content-Type: application/json" \
+                    -d "{\"ip\": \"$ip_local\", \"cpu\": $cpu, \"calls\": $activecalls, \"step\": $step, \"timestamp\": \"$(date --iso-8601=seconds)\"}" &
+                explosion_notified="yes"
+            fi
+        fi
     fi
     R1=$(cat /sys/class/net/"$interface_name"/statistics/rx_bytes)
     T1=$(cat /sys/class/net/"$interface_name"/statistics/tx_bytes)

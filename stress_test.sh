@@ -208,18 +208,20 @@ else
 fi
 
 # Save configuration to config.txt
-echo -e "$ip_local"         > config.txt
-echo -e "$ip_remote"        >> config.txt
-echo -e "$ssh_remote_port"  >> config.txt
-echo -e "$interface_name"   >> config.txt
-echo -e "$codec"            >> config.txt
-echo -e "$recording"        >> config.txt
-echo -e "$maxcpuload"       >> config.txt
-echo -e "$call_step"        >> config.txt
+echo -e "$ip_local"          > config.txt
+echo -e "$ip_remote"         >> config.txt
+echo -e "$ssh_remote_port"   >> config.txt
+echo -e "$interface_name"    >> config.txt
+echo -e "$codec"             >> config.txt
+echo -e "$recording"         >> config.txt
+echo -e "$maxcpuload"        >> config.txt
+echo -e "$call_step"         >> config.txt
 echo -e "$call_step_seconds" >> config.txt
-echo -e "$call_duration"    >> config.txt
+echo -e "$call_duration"     >> config.txt
 if [ "$web_notify" != "yes" ]; then
     echo -e "$web_notify_url_base"    >> config.txt
+else
+    echo -e "None"                    >> config.txt
 fi
 
 # Set up SSH key for passwordless communication

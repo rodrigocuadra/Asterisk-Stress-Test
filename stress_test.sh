@@ -54,7 +54,6 @@ echo -e "${NC}"
 
 AUTO_MODE=false
 WEB_NOTIFY=false
-SKIP_CONFIG=false
 for arg in "$@"
 do
     case $arg in
@@ -65,10 +64,6 @@ do
         --notify)
             WEB_NOTIFY=true
             echo "📡 Web notify enabled: full reporting to server 5."
-            ;;
-        --skip-config)
-            SKIP_CONFIG=true
-            echo "📡 Skip configuration: Go straight to the test."
             ;;
         *)
             echo "⚠️ Unknown argument: $arg"
@@ -241,203 +236,205 @@ test_type="asterisk"
 progress_url="${web_notify_url_base}/api/progress"
 explosion_url="${web_notify_url_base}/api/explosion"
 
-# Set up SSH key for passwordless communication
-echo -e "************************************************************"
-echo -e "*          Copy Authorization key to remote server         *"
-echo -e "************************************************************"
-sshKeyFile="/root/.ssh/id_rsa"
+if [ "$AUTO_MODE" = false ]; then
+    # Set up SSH key for passwordless communication
+    echo -e "************************************************************"
+    echo -e "*          Copy Authorization key to remote server         *"
+    echo -e "************************************************************"
+    sshKeyFile="/root/.ssh/id_rsa"
 
-if [ ! -f "$sshKeyFile" ]; then
-    echo -e "Generating SSH key..."
-    ssh-keygen -f "$sshKeyFile" -t rsa -N '' >/dev/null
+    if [ ! -f "$sshKeyFile" ]; then
+        echo -e "Generating SSH key..."
+        ssh-keygen -f "$sshKeyFile" -t rsa -N '' >/dev/null
+    fi
+
+    echo -e "Copying public key to $ip_remote..."
+    ssh-copy-id -i "${sshKeyFile}.pub" -p "$ssh_remote_port" root@$ip_remote
+
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}*** SSH key installed successfully. ***${NC}"
+    else
+        echo -e "${RED}❌ Failed to copy SSH key. Check connectivity or credentials.${NC}"
+        exit 1
+    fi
+
+    # Create Asterisk configuration files
+    echo -e "************************************************************"
+    echo -e "*            Creating Asterisk config files                *"
+    echo -e "************************************************************"
+
+    # Download audio files for testing
+    wget -O /var/lib/asterisk/sounds/en/jonathan.wav https://github.com/rodrigocuadra/Asterisk-Stress-Test/raw/refs/heads/main/jonathan.wav || echo -e "${RED}Warning: Failed to download jonathan.wav${NC}"
+
+    # Server A: extensions.conf
+    cat > /etc/asterisk/extensions_stress_test.conf << EOF
+    [stress_test]
+    exten => 200,1,NoOp(Outgoing Call)
+     same => n,Answer()
+    EOF
+    if [ "$recording" = "yes" ]; then
+        echo " same => n,MixMonitor(/tmp/\${UNIQUEID}.wav,ab)" >> /etc/asterisk/extensions_stress_test.conf
+    fi
+    cat >> /etc/asterisk/extensions_stress_test.conf << EOF
+     same => n,Dial(PJSIP/100@trunk_to_server_b,\${CALL_DURATION})
+     same => n,Hangup()
+    EOF
+
+    # Server A: pjsip.conf
+    cat > /etc/asterisk/pjsip_stress_test.conf << EOF
+    [global]
+    type=global
+    max_initial_qualify_time=5
+
+    [transport-udp]
+    type=transport
+    protocol=udp
+    bind=0.0.0.0:5060
+    external_media_address=$ip_local
+    external_signaling_address=$ip_local
+    local_net=$ip_local/24
+
+    [trunk_to_server_b]
+    type=endpoint
+    context=stress_test
+    dtmf_mode=rfc4733
+    EOF
+    if [ "$codec" = "1" ]; then
+        codec_name="PCMU"
+        echo "disallow=all" >> /etc/asterisk/pjsip_stress_test.conf
+        echo "allow=ulaw,alaw" >> /etc/asterisk/pjsip_stress_test.conf
+    elif [ "$codec" = "2" ]; then
+        codec_name="OPUS"
+        echo "disallow=all" >> /etc/asterisk/pjsip_stress_test.conf
+        echo "allow=opus" >> /etc/asterisk/pjsip_stress_test.conf
+    fi
+    cat >> /etc/asterisk/pjsip_stress_test.conf << EOF
+    language=en
+    aors=trunk_to_server_b
+    trust_id_inbound=no
+    trust_id_outbound=no
+
+    [trunk_to_server_b]
+    type=aor
+    max_contacts=2
+    contact=sip:trunk_to_server_b@$ip_remote:5060
+    qualify_frequency=30
+    qualify_timeout=3
+
+    [trunk_to_server_b]
+    type=identify
+    endpoint=trunk_to_server_b
+    match=$ip_remote
+    EOF
+
+    # Server A: Include stress test configs in main config files
+    # Remove existing includes to avoid duplicates
+    sed -i '/#include extensions_stress_test.conf/d' /etc/asterisk/extensions.conf
+    sed -i '/#include pjsip_stress_test.conf/d' /etc/asterisk/pjsip.conf
+    # Add new includes
+    echo "#include extensions_stress_test.conf" >> /etc/asterisk/extensions.conf
+    echo "#include pjsip_stress_test.conf" >> /etc/asterisk/pjsip.conf
+
+    # Change from 1024 to 50,000 open files. Increases the simultaneous call capacity in Asterisk.
+    # Remove existing includes to avoid duplicates
+    sed -i '/maxfiles = 50000/d' /etc/asterisk/asterisk.conf
+    sed -i '/transmit_silence = yes/d' /etc/asterisk/asterisk.conf
+    sed -i '/hide_messaging_ami_events = yes/d' /etc/asterisk/asterisk.conf
+    # Add new settings
+    echo "maxfiles = 50000" >> /etc/asterisk/asterisk.conf
+    echo "transmit_silence = yes" >> /etc/asterisk/asterisk.conf
+    echo "hide_messaging_ami_events = yes" >> /etc/asterisk/asterisk.conf
+
+    # Server B: Download audio file
+    ssh -p $ssh_remote_port root@$ip_remote "wget -O /var/lib/asterisk/sounds/en/sarah.wav https://github.com/rodrigocuadra/Asterisk-Stress-Test/raw/refs/heads/main/sarah.wav" || echo -e "${RED}Warning: Failed to download sarah.wav on remote server${NC}"
+
+    # Server B: extensions.conf
+    ssh -p $ssh_remote_port root@$ip_remote "cat > /etc/asterisk/extensions_stress_test.conf << EOF
+    [stress_test]
+    exten => 100,1,Answer()
+     same => n,Wait(1)
+     same => n,Playback(sarah&sarah&sarah)
+     same => n,Hangup()
+    EOF"
+
+    # Server B: pjsip.conf
+    ssh -p $ssh_remote_port root@$ip_remote "cat > /etc/asterisk/pjsip_stress_test.conf << EOF
+    [global]
+    type=global
+    max_initial_qualify_time=5
+
+    [transport-udp]
+    type=transport
+    protocol=udp
+    bind=0.0.0.0:5060
+    external_media_address=$ip_remote
+    external_signaling_address=$ip_remote
+    local_net=$ip_remote/24
+
+    [trunk_from_server_a]
+    type=endpoint
+    context=stress_test
+    dtmf_mode=rfc4733
+    EOF"
+    if [ "$codec" = "1" ]; then
+        ssh -p $ssh_remote_port root@$ip_remote "echo 'disallow=all' >> /etc/asterisk/pjsip_stress_test.conf"
+        ssh -p $ssh_remote_port root@$ip_remote "echo 'allow=ulaw,alaw' >> /etc/asterisk/pjsip_stress_test.conf"
+    elif [ "$codec" = "2" ]; then
+        ssh -p $ssh_remote_port root@$ip_remote "echo 'disallow=all' >> /etc/asterisk/pjsip_stress_test.conf"
+        ssh -p $ssh_remote_port root@$ip_remote "echo 'allow=opus' >> /etc/asterisk/pjsip_stress_test.conf"
+    fi
+    ssh -p $ssh_remote_port root@$ip_remote "cat >> /etc/asterisk/pjsip_stress_test.conf << EOF
+    language=en
+    aors=trunk_from_server_a
+    trust_id_inbound=no
+    trust_id_outbound=no
+
+    [trunk_from_server_a]
+    type=aor
+    max_contacts=2
+    contact=sip:trunk_from_server_a@$ip_local:5060
+    qualify_frequency=30
+    qualify_timeout=3
+
+    [trunk_from_server_a]
+    type=identify
+    endpoint=trunk_from_server_a
+    match=$ip_local
+    EOF"
+
+    # Server B: Include stress test configs in main config files
+    # Remove existing includes to avoid duplicates
+    ssh -p $ssh_remote_port root@$ip_remote "sed -i '/#include extensions_stress_test.conf/d' /etc/asterisk/extensions.conf"
+    ssh -p $ssh_remote_port root@$ip_remote "sed -i '/#include pjsip_stress_test.conf/d' /etc/asterisk/pjsip.conf"
+    # Add new includes
+    ssh -p $ssh_remote_port root@$ip_remote "echo '#include extensions_stress_test.conf' >> /etc/asterisk/extensions.conf"
+    ssh -p $ssh_remote_port root@$ip_remote "echo '#include pjsip_stress_test.conf' >> /etc/asterisk/pjsip.conf"
+
+    # Set permissions for configuration files
+    chown asterisk:asterisk /etc/asterisk/extensions_stress_test.conf /etc/asterisk/pjsip_stress_test.conf
+    chmod 640 /etc/asterisk/extensions_stress_test.conf /etc/asterisk/pjsip_stress_test.conf
+    ssh -p $ssh_remote_port root@$ip_remote "chown asterisk:asterisk /etc/asterisk/extensions_stress_test.conf /etc/asterisk/pjsip_stress_test.conf"
+    ssh -p $ssh_remote_port root@$ip_remote "chmod 640 /etc/asterisk/extensions_stress_test.conf /etc/asterisk/pjsip_stress_test.conf"
+
+    # Change from 1024 to 50,000 open files. Increases the simultaneous call capacity in Asterisk.
+    # Remove existing includes to avoid duplicates
+    ssh -p $ssh_remote_port root@$ip_remote "sed -i '/maxfiles = 50000/d' /etc/asterisk/asterisk.conf"
+    ssh -p $ssh_remote_port root@$ip_remote "sed -i '/transmit_silence = yes/d' /etc/asterisk/asterisk.conf"
+    ssh -p $ssh_remote_port root@$ip_remote "sed -i '/hide_messaging_ami_events = yes/d' /etc/asterisk/asterisk.conf"
+    # Add new settings
+    ssh -p $ssh_remote_port root@$ip_remote "echo 'maxfiles = 50000' >> /etc/asterisk/asterisk.conf"
+    ssh -p $ssh_remote_port root@$ip_remote "echo 'transmit_silence = yes' >> /etc/asterisk/asterisk.conf"
+    ssh -p $ssh_remote_port root@$ip_remote "echo 'hide_messaging_ami_events = yes' >> /etc/asterisk/asterisk.conf"
+
+    # Restart Asterisk on both servers
+    systemctl restart asterisk
+    ssh -p $ssh_remote_port root@$ip_remote "systemctl restart asterisk"
+    echo -e "${GREEN}*** Done ***${NC}"
+    echo -e "*****************************************************************************************"
+    echo -e "*                        Restarting Asterisk in both servers                             *"
+    echo -e "*****************************************************************************************"
+    sleep 10
 fi
-
-echo -e "Copying public key to $ip_remote..."
-ssh-copy-id -i "${sshKeyFile}.pub" -p "$ssh_remote_port" root@$ip_remote
-
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}*** SSH key installed successfully. ***${NC}"
-else
-    echo -e "${RED}❌ Failed to copy SSH key. Check connectivity or credentials.${NC}"
-    exit 1
-fi
-
-# Create Asterisk configuration files
-echo -e "************************************************************"
-echo -e "*            Creating Asterisk config files                *"
-echo -e "************************************************************"
-
-# Download audio files for testing
-wget -O /var/lib/asterisk/sounds/en/jonathan.wav https://github.com/rodrigocuadra/Asterisk-Stress-Test/raw/refs/heads/main/jonathan.wav || echo -e "${RED}Warning: Failed to download jonathan.wav${NC}"
-
-# Server A: extensions.conf
-cat > /etc/asterisk/extensions_stress_test.conf << EOF
-[stress_test]
-exten => 200,1,NoOp(Outgoing Call)
- same => n,Answer()
-EOF
-if [ "$recording" = "yes" ]; then
-    echo " same => n,MixMonitor(/tmp/\${UNIQUEID}.wav,ab)" >> /etc/asterisk/extensions_stress_test.conf
-fi
-cat >> /etc/asterisk/extensions_stress_test.conf << EOF
- same => n,Dial(PJSIP/100@trunk_to_server_b,\${CALL_DURATION})
- same => n,Hangup()
-EOF
-
-# Server A: pjsip.conf
-cat > /etc/asterisk/pjsip_stress_test.conf << EOF
-[global]
-type=global
-max_initial_qualify_time=5
-
-[transport-udp]
-type=transport
-protocol=udp
-bind=0.0.0.0:5060
-external_media_address=$ip_local
-external_signaling_address=$ip_local
-local_net=$ip_local/24
-
-[trunk_to_server_b]
-type=endpoint
-context=stress_test
-dtmf_mode=rfc4733
-EOF
-if [ "$codec" = "1" ]; then
-    codec_name="PCMU"
-    echo "disallow=all" >> /etc/asterisk/pjsip_stress_test.conf
-    echo "allow=ulaw,alaw" >> /etc/asterisk/pjsip_stress_test.conf
-elif [ "$codec" = "2" ]; then
-    codec_name="OPUS"
-    echo "disallow=all" >> /etc/asterisk/pjsip_stress_test.conf
-    echo "allow=opus" >> /etc/asterisk/pjsip_stress_test.conf
-fi
-cat >> /etc/asterisk/pjsip_stress_test.conf << EOF
-language=en
-aors=trunk_to_server_b
-trust_id_inbound=no
-trust_id_outbound=no
-
-[trunk_to_server_b]
-type=aor
-max_contacts=2
-contact=sip:trunk_to_server_b@$ip_remote:5060
-qualify_frequency=30
-qualify_timeout=3
-
-[trunk_to_server_b]
-type=identify
-endpoint=trunk_to_server_b
-match=$ip_remote
-EOF
-
-# Server A: Include stress test configs in main config files
-# Remove existing includes to avoid duplicates
-sed -i '/#include extensions_stress_test.conf/d' /etc/asterisk/extensions.conf
-sed -i '/#include pjsip_stress_test.conf/d' /etc/asterisk/pjsip.conf
-# Add new includes
-echo "#include extensions_stress_test.conf" >> /etc/asterisk/extensions.conf
-echo "#include pjsip_stress_test.conf" >> /etc/asterisk/pjsip.conf
-
-# Change from 1024 to 50,000 open files. Increases the simultaneous call capacity in Asterisk.
-# Remove existing includes to avoid duplicates
-sed -i '/maxfiles = 50000/d' /etc/asterisk/asterisk.conf
-sed -i '/transmit_silence = yes/d' /etc/asterisk/asterisk.conf
-sed -i '/hide_messaging_ami_events = yes/d' /etc/asterisk/asterisk.conf
-# Add new settings
-echo "maxfiles = 50000" >> /etc/asterisk/asterisk.conf
-echo "transmit_silence = yes" >> /etc/asterisk/asterisk.conf
-echo "hide_messaging_ami_events = yes" >> /etc/asterisk/asterisk.conf
-
-# Server B: Download audio file
-ssh -p $ssh_remote_port root@$ip_remote "wget -O /var/lib/asterisk/sounds/en/sarah.wav https://github.com/rodrigocuadra/Asterisk-Stress-Test/raw/refs/heads/main/sarah.wav" || echo -e "${RED}Warning: Failed to download sarah.wav on remote server${NC}"
-
-# Server B: extensions.conf
-ssh -p $ssh_remote_port root@$ip_remote "cat > /etc/asterisk/extensions_stress_test.conf << EOF
-[stress_test]
-exten => 100,1,Answer()
- same => n,Wait(1)
- same => n,Playback(sarah&sarah&sarah)
- same => n,Hangup()
-EOF"
-
-# Server B: pjsip.conf
-ssh -p $ssh_remote_port root@$ip_remote "cat > /etc/asterisk/pjsip_stress_test.conf << EOF
-[global]
-type=global
-max_initial_qualify_time=5
-
-[transport-udp]
-type=transport
-protocol=udp
-bind=0.0.0.0:5060
-external_media_address=$ip_remote
-external_signaling_address=$ip_remote
-local_net=$ip_remote/24
-
-[trunk_from_server_a]
-type=endpoint
-context=stress_test
-dtmf_mode=rfc4733
-EOF"
-if [ "$codec" = "1" ]; then
-    ssh -p $ssh_remote_port root@$ip_remote "echo 'disallow=all' >> /etc/asterisk/pjsip_stress_test.conf"
-    ssh -p $ssh_remote_port root@$ip_remote "echo 'allow=ulaw,alaw' >> /etc/asterisk/pjsip_stress_test.conf"
-elif [ "$codec" = "2" ]; then
-    ssh -p $ssh_remote_port root@$ip_remote "echo 'disallow=all' >> /etc/asterisk/pjsip_stress_test.conf"
-    ssh -p $ssh_remote_port root@$ip_remote "echo 'allow=opus' >> /etc/asterisk/pjsip_stress_test.conf"
-fi
-ssh -p $ssh_remote_port root@$ip_remote "cat >> /etc/asterisk/pjsip_stress_test.conf << EOF
-language=en
-aors=trunk_from_server_a
-trust_id_inbound=no
-trust_id_outbound=no
-
-[trunk_from_server_a]
-type=aor
-max_contacts=2
-contact=sip:trunk_from_server_a@$ip_local:5060
-qualify_frequency=30
-qualify_timeout=3
-
-[trunk_from_server_a]
-type=identify
-endpoint=trunk_from_server_a
-match=$ip_local
-EOF"
-
-# Server B: Include stress test configs in main config files
-# Remove existing includes to avoid duplicates
-ssh -p $ssh_remote_port root@$ip_remote "sed -i '/#include extensions_stress_test.conf/d' /etc/asterisk/extensions.conf"
-ssh -p $ssh_remote_port root@$ip_remote "sed -i '/#include pjsip_stress_test.conf/d' /etc/asterisk/pjsip.conf"
-# Add new includes
-ssh -p $ssh_remote_port root@$ip_remote "echo '#include extensions_stress_test.conf' >> /etc/asterisk/extensions.conf"
-ssh -p $ssh_remote_port root@$ip_remote "echo '#include pjsip_stress_test.conf' >> /etc/asterisk/pjsip.conf"
-
-# Set permissions for configuration files
-chown asterisk:asterisk /etc/asterisk/extensions_stress_test.conf /etc/asterisk/pjsip_stress_test.conf
-chmod 640 /etc/asterisk/extensions_stress_test.conf /etc/asterisk/pjsip_stress_test.conf
-ssh -p $ssh_remote_port root@$ip_remote "chown asterisk:asterisk /etc/asterisk/extensions_stress_test.conf /etc/asterisk/pjsip_stress_test.conf"
-ssh -p $ssh_remote_port root@$ip_remote "chmod 640 /etc/asterisk/extensions_stress_test.conf /etc/asterisk/pjsip_stress_test.conf"
-
-# Change from 1024 to 50,000 open files. Increases the simultaneous call capacity in Asterisk.
-# Remove existing includes to avoid duplicates
-ssh -p $ssh_remote_port root@$ip_remote "sed -i '/maxfiles = 50000/d' /etc/asterisk/asterisk.conf"
-ssh -p $ssh_remote_port root@$ip_remote "sed -i '/transmit_silence = yes/d' /etc/asterisk/asterisk.conf"
-ssh -p $ssh_remote_port root@$ip_remote "sed -i '/hide_messaging_ami_events = yes/d' /etc/asterisk/asterisk.conf"
-# Add new settings
-ssh -p $ssh_remote_port root@$ip_remote "echo 'maxfiles = 50000' >> /etc/asterisk/asterisk.conf"
-ssh -p $ssh_remote_port root@$ip_remote "echo 'transmit_silence = yes' >> /etc/asterisk/asterisk.conf"
-ssh -p $ssh_remote_port root@$ip_remote "echo 'hide_messaging_ami_events = yes' >> /etc/asterisk/asterisk.conf"
-
-# Restart Asterisk on both servers
-systemctl restart asterisk
-ssh -p $ssh_remote_port root@$ip_remote "systemctl restart asterisk"
-echo -e "${GREEN}*** Done ***${NC}"
-echo -e "*****************************************************************************************"
-echo -e "*                        Restarting Asterisk in both servers                             *"
-echo -e "*****************************************************************************************"
-sleep 10
 
 # Start stress test
 numcores=$(nproc --all)

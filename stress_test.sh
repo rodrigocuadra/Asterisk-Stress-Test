@@ -54,6 +54,7 @@ echo -e "${NC}"
 
 AUTO_MODE=false
 WEB_NOTIFY=false
+SKIP_CONFIG=false
 for arg in "$@"
 do
     case $arg in
@@ -64,6 +65,10 @@ do
         --notify)
             WEB_NOTIFY=true
             echo "📡 Web notify enabled: full reporting to server 5."
+            ;;
+        --skip-config)
+            SKIP_CONFIG=true
+            echo "📡 Skip configuration: Go straight to the test."
             ;;
         *)
             echo "⚠️ Unknown argument: $arg"

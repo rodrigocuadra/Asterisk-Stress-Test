@@ -241,6 +241,12 @@ test_type="asterisk"
 progress_url="${web_notify_url_base}/api/progress"
 explosion_url="${web_notify_url_base}/api/explosion"
 
+if [ "$codec" = "1" ]; then
+    codec_name="PCMU"
+elif [ "$codec" = "2" ]; then
+    codec_name="OPUS"
+fi
+
 if [ "$AUTO_MODE" = false ]; then
 # Set up SSH key for passwordless communication
 echo -e "************************************************************"

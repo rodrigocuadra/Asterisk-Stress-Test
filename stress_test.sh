@@ -490,7 +490,6 @@ while [ "$exitcalls" = "false" ]; do
     cpu=`top -n 1 | awk 'FNR > 7 {s+=$10} END {print s}'`
     cpuint=${cpu%.*}
     cpu="$((cpuint/numcores))"
-    #memory=$(free | awk '/Mem/{printf("%.2f%"), $3/$2*100} /buffers\/cache/{printf(", buffers: %.2f%"), $4/($3+$4)*100}')
     memory=$(free | awk '/Mem:/ {used=$3; total=$2} END {if (total>0) printf("%.2f%%", used/total*100); else print "N/A"}')
     
     # Color-code output based on CPU load
@@ -538,16 +537,17 @@ while [ "$exitcalls" = "false" ]; do
         exitcalls=true
             if [ "$web_notify_url_base" != "" ] && [ "$WEB_NOTIFY" = true ]; then
                 echo "🔥 Threshold reached ($cpu%). Notifying control server..."
-                curl -s -X POST "$explosion_url" \
+                curl -X POST "$explosion_url" \
                     -H "Content-Type: application/json" \
                     -d "{
                     \"test_type\": \"$test_type\",
                     \"ip\": \"$ip_local\",
                     \"cpu\": $cpu,
-                    \"calls\": $activecalls,
+                    \"active_calls\": $activecalls,
                     \"step\": $step,
                     \"timestamp\": \"$(date --iso-8601=seconds)\"
                     }" > /dev/null &
+                    echo "📤 Explosion request sent for $test_type (CPU: $cpu%, Active Calls: $activecalls)"
             fi
     fi
     R1=$(cat /sys/class/net/"$interface_name"/statistics/rx_bytes)

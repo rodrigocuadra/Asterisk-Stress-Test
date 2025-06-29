@@ -9,6 +9,9 @@ wget -O /opt/stresstest_monitor/main.py  https://raw.githubusercontent.com/rodri
 wget -O /opt/stresstest_monitor/state.py  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/state.py
 wget -O /opt/stresstest_monitor/ws_manager.py  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/ws_manager.py
 
+wget -O /opt/stresstest_monitor/explosion.mp3  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/explosion.mp3
+wget -O /opt/stresstest_monitor/winner.mp3  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/winner.mp3
+
 mkdir /var/www/stresstest_monitor
 wget -O /var/www/stresstest_monitor/index.html  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/index.html
 

@@ -272,6 +272,7 @@ echo -e "************************************************************"
 wget -O /var/lib/asterisk/sounds/en/jonathan.wav https://github.com/rodrigocuadra/Asterisk-Stress-Test/raw/refs/heads/main/jonathan.wav || echo -e "${RED}Warning: Failed to download jonathan.wav${NC}"
 
 # Server A: extensions.conf
+rm -rf /etc/asterisk/pjsip_stress_test.conf /etc/asterisk/extensions_stress_test.conf
 cat > /etc/asterisk/extensions_stress_test.conf << EOF
 [stress_test]
 exten => 200,1,NoOp(Outgoing Call)
@@ -354,6 +355,7 @@ echo "hide_messaging_ami_events = yes" >> /etc/asterisk/asterisk.conf
 ssh -p $ssh_remote_port root@$ip_remote "wget -O /var/lib/asterisk/sounds/en/sarah.wav https://github.com/rodrigocuadra/Asterisk-Stress-Test/raw/refs/heads/main/sarah.wav" || echo -e "${RED}Warning: Failed to download sarah.wav on remote server${NC}"
 
 # Server B: extensions.conf
+ssh -p $ssh_remote_port root@$ip_remote "rm -rf /etc/asterisk/pjsip_stress_test.conf /etc/asterisk/extensions_stress_test.conf"
 ssh -p $ssh_remote_port root@$ip_remote "cat > /etc/asterisk/extensions_stress_test.conf << EOF
 [stress_test]
 exten => 100,1,Answer()
@@ -552,9 +554,7 @@ echo -e "\e[39m-----------------------------------------------------------------
 echo -e "***************************************************************************************************"
 echo -e "*                                     Restarting Asterisk                                         *"
 echo -e "***************************************************************************************************"
-rm -rf /etc/asterisk/pjsip_stress_test.conf /etc/asterisk/extensions_stress_test.conf
 systemctl restart asterisk
-ssh -p $ssh_remote_port root@$ip_remote "rm -rf /etc/asterisk/pjsip_stress_test.conf /etc/asterisk/extensions_stress_test.conf"
 ssh -p $ssh_remote_port root@$ip_remote "systemctl restart asterisk"
 rm -rf /tmp/*.wav
 

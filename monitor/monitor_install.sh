@@ -14,6 +14,7 @@ wget -O /var/www/stresstest_monitor/winner.mp3  https://raw.githubusercontent.co
 
 mkdir /var/www/stresstest_monitor
 wget -O /var/www/stresstest_monitor/index.html  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/index.html
+wget -O /var/www/stresstest_monitor/favicon.ico  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/favicon.ico
 
 wget -O /etc/nginx/sites-available/stresstest_monitor  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/stresstest_monitor
 ln -s /etc/nginx/sites-available/stresstest_monitor /etc/nginx/sites-enabled/

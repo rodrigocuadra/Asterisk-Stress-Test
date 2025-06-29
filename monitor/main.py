@@ -30,7 +30,7 @@ class ExplosionData(BaseModel):
     test_type: str
     ip: str
     cpu: float
-    calls: int
+    active_calls: int
     step: int
     timestamp: str
 
@@ -66,32 +66,16 @@ async def progress(data: ProgressData):
 
 @app.post("/api/explosion")
 async def explosion(data: ExplosionData):
-    """
-    Handles an explosion event (when CPU usage exceeds the threshold).
+    test_type = data.test_type
+    
+    # Ignore if it has already exploded
+    if test_state[test_type]["exploded"]:
+        return {"status": "duplicate"}
 
-    The first component (Asterisk or FreeSWITCH) that reaches the threshold
-    will trigger an 'explosion' broadcast. The other one, if it also sends
-    an explosion, will be considered the winner and broadcasted as such.
-    """
-
-    # Check if any system has already exploded
-    for test_type, state in test_state.items():
-        if state["exploded"]:
-            if test_type != data.test_type:
-                # The other system exploded first, so this one is the winner
-                await manager.broadcast({
-                    "type": "winner",
-                    "data": data.dict()
-                })
-                return {"status": "winner"}
-            else:
-                # Duplicate explosion from the same system, ignore
-                return {"status": "duplicate"}
-
-    # No system exploded yet, this is the first one → EXPLOSION
-    test_state[data.test_type]["exploded"] = True
-    test_state[data.test_type]["explosion_data"] = data.dict()
-
+    # Mark as exploited
+    test_state[test_type]["exploded"] = True
+    test_state[test_type]["explosion_data"] = data.dict()
+    
     await manager.broadcast({
         "type": "explosion",
         "data": data.dict()
@@ -136,6 +120,12 @@ def start_tests():
             "web_notify_url_base": lines[10]
         }
 
+        # Initialize state
+        test_state[tipo]["maxcpuload"] = config_data["maxcpuload"]
+        test_state[tipo]["exploded"] = False
+        test_state[tipo]["steps"] = []
+        test_state[tipo]["explosion_data"] = {}
+        
         try:
             r1 = requests.post(f"{base}/config", json=config_data)
             r1.raise_for_status()

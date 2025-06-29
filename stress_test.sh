@@ -432,6 +432,7 @@ ssh -p $ssh_remote_port root@$ip_remote "sed -i '/hide_messaging_ami_events = ye
 ssh -p $ssh_remote_port root@$ip_remote "echo 'maxfiles = 50000' >> /etc/asterisk/asterisk.conf"
 ssh -p $ssh_remote_port root@$ip_remote "echo 'transmit_silence = yes' >> /etc/asterisk/asterisk.conf"
 ssh -p $ssh_remote_port root@$ip_remote "echo 'hide_messaging_ami_events = yes' >> /etc/asterisk/asterisk.conf"
+fi
 
 # Restart Asterisk on both servers
 systemctl restart asterisk
@@ -440,8 +441,7 @@ echo -e "${GREEN}*** Done ***${NC}"
 echo -e "*****************************************************************************************"
 echo -e "*                        Restarting Asterisk in both servers                            *"
 echo -e "*****************************************************************************************"
-sleep 10
-fi
+#sleep 10
 
 echo -e "*****************************************************************************************"
 echo -e "*                                  Start stress test                                    *"

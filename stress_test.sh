@@ -241,6 +241,7 @@ test_type="asterisk"
 progress_url="${web_notify_url_base}/api/progress"
 explosion_url="${web_notify_url_base}/api/explosion"
 
+if [ "$AUTO_MODE" = false ]; then
 # Set up SSH key for passwordless communication
 echo -e "************************************************************"
 echo -e "*          Copy Authorization key to remote server         *"
@@ -435,11 +436,14 @@ systemctl restart asterisk
 ssh -p $ssh_remote_port root@$ip_remote "systemctl restart asterisk"
 echo -e "${GREEN}*** Done ***${NC}"
 echo -e "*****************************************************************************************"
-echo -e "*                        Restarting Asterisk in both servers                             *"
+echo -e "*                        Restarting Asterisk in both servers                            *"
 echo -e "*****************************************************************************************"
 sleep 10
+fi
 
-# Start stress test
+echo -e "*****************************************************************************************"
+echo -e "*                                  Start stress test                                    *"
+echo -e "*****************************************************************************************"
 numcores=$(nproc --all)
 exitcalls=false
 i=0

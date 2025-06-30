@@ -10,7 +10,7 @@ import os
 app = FastAPI()
 
 # ------------------------
-# Data models
+# Data Models
 # ------------------------
 
 class ProgressData(BaseModel):
@@ -35,25 +35,33 @@ class ExplosionData(BaseModel):
     timestamp: str
 
 # ------------------------
-# WebSocket endpoint
+# WebSocket Endpoint
 # ------------------------
 
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
+    """
+    WebSocket endpoint for real-time updates.
+    """
     await manager.connect(ws)
     try:
         while True:
-            await ws.receive_text()  # This is not used, only output
-    except:
+            await ws.receive_text()  # Not used, only for output
+    except Exception as e:
+        print(f"WebSocket error: {e}")
         await manager.disconnect(ws)
 
 # ------------------------
-# API: Real-time progress
+# API: Real-time Progress
 # ------------------------
 
 @app.post("/api/progress")
 async def progress(data: ProgressData):
+    """
+    Handle progress updates from Asterisk/FreeSWITCH and broadcast to WebSocket clients.
+    """
     test_state[data.test_type]["steps"].append(data.dict())
+    print(f"Received /api/progress: {data.dict()}")
     await manager.broadcast({
         "type": "progress",
         "data": data.dict()
@@ -61,38 +69,74 @@ async def progress(data: ProgressData):
     return {"ok": True}
 
 # ------------------------
-# API: Explosion event
+# API: Explosion Event
 # ------------------------
 
 @app.post("/api/explosion")
 async def explosion(data: ExplosionData):
+    """
+    Handle explosion event when CPU exceeds threshold.
+    Broadcasts explosion to WebSocket clients unless already exploded (unless forced).
+    """
+    print(f"Received /api/explosion: {data.dict()}")
     test_type = data.test_type
     
-    # Ignore if it has already exploded
-    if test_state[test_type]["exploded"]:
-        return {"status": "duplicate"}
-
-    # Mark as exploited
-    test_state[test_type]["exploded"] = True
-    test_state[test_type]["explosion_data"] = data.dict()
+    # Allow explosion for manual testing (e.g., curl), ignore duplicate check
+    if os.getenv("FORCE_EXPLOSION", "false").lower() == "true" or not test_state[test_type]["exploded"]:
+        test_state[test_type]["exploded"] = True
+        test_state[test_type]["explosion_data"] = data.dict()
+        print(f"Sending WebSocket message: type=explosion, data={data.dict()}")
+        await manager.broadcast({
+            "type": "explosion",
+            "data": data.dict()
+        })
+        return {"status": "explosion"}
     
-    await manager.broadcast({
-        "type": "explosion",
-        "data": data.dict()
-    })
-
-    return {"status": "explosion"}
+    print(f"Duplicate explosion for {test_type}, ignoring")
+    return {"status": "duplicate"}
 
 # ------------------------
-# API: Start both tests
+# API: Reset State
+# ------------------------
+
+@app.post("/api/reset")
+def reset_state():
+    """
+    Reset test state for both systems to allow new tests.
+    """
+    for test_type in ["asterisk", "freeswitch"]:
+        test_state[test_type] = {
+            "maxcpuload": test_state[test_type].get("maxcpuload", 75.0),
+            "exploded": False,
+            "steps": [],
+            "explosion_data": {}
+        }
+    print(f"State reset: {test_state}")
+    return {"status": "reset"}
+
+# ------------------------
+# API: Start Both Tests
 # ------------------------
 
 @app.post("/api/start")
 def start_tests():
+    """
+    Start stress tests for Asterisk and FreeSWITCH by sending config to their servers.
+    Resets test state before starting.
+    """
     targets = {
         "asterisk": "http://192.168.10.31:8081",
         "freeswitch": "http://192.168.10.33:8081"
     }
+
+    # Reset state before starting tests
+    for test_type in ["asterisk", "freeswitch"]:
+        test_state[test_type] = {
+            "maxcpuload": test_state[test_type].get("maxcpuload", 75.0),
+            "exploded": False,
+            "steps": [],
+            "explosion_data": {}
+        }
 
     for tipo, base in targets.items():
         config_path = f"/opt/stresstest_monitor/configs/{tipo}_config.txt"
@@ -113,19 +157,15 @@ def start_tests():
             "interface_name": lines[3],
             "codec": lines[4],
             "recording": lines[5],
-            "maxcpuload": lines[6],
+            "maxcpuload": float(lines[6]),
             "call_step": lines[7],
             "call_step_seconds": lines[8],
             "call_duration": lines[9],
             "web_notify_url_base": lines[10]
         }
 
-        # Initialize state
         test_state[tipo]["maxcpuload"] = config_data["maxcpuload"]
-        test_state[tipo]["exploded"] = False
-        test_state[tipo]["steps"] = []
-        test_state[tipo]["explosion_data"] = {}
-        
+
         try:
             r1 = requests.post(f"{base}/config", json=config_data)
             r1.raise_for_status()
@@ -134,4 +174,5 @@ def start_tests():
         except Exception as e:
             return JSONResponse(status_code=500, content={"error": f"Failed to start test for {tipo}: {str(e)}"})
 
+    print(f"Tests started, state: {test_state}")
     return {"started": True}

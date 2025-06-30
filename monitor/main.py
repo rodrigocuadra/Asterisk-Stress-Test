@@ -81,7 +81,7 @@ async def explosion(data: ExplosionData):
     print(f"Received /api/explosion: {data.dict()}")
     test_type = data.test_type
     
-    # Allow explosion for manual testing (e.g., curl), ignore duplicate check
+    # Allow explosion for manual testing (e.g., curl) or if not exploded
     if os.getenv("FORCE_EXPLOSION", "false").lower() == "true" or not test_state[test_type]["exploded"]:
         test_state[test_type]["exploded"] = True
         test_state[test_type]["explosion_data"] = data.dict()

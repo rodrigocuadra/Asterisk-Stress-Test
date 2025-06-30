@@ -50,7 +50,7 @@
         .chart-container {
             position: relative;
             width: 100%;
-            height: 250px; /* Increased height for visibility */
+            height: 250px;
         }
         canvas {
             width: 100% !important;
@@ -98,6 +98,19 @@
             margin-top: 20px;
             animation: pulse 1s infinite alternate;
         }
+        .comparison-table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .comparison-table th {
+            background-color: #f2f2f2;
+        }
         .explode-effect {
             position: absolute;
             top: 0;
@@ -109,6 +122,18 @@
             opacity: 0.8;
             animation: explode 0.5s infinite alternate;
             z-index: 2;
+        }
+        .crash-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            color: white;
+            font-size: 2em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 3;
         }
         @keyframes explode {
             0% { transform: scale(1); opacity: 0.8; }
@@ -129,6 +154,7 @@
         <div class="chart-container">
             <canvas id="asterisk-chart"></canvas>
             <div class="explode-effect" id="asterisk-overlay"></div>
+            <div class="crash-indicator" id="asterisk-crash">💥 CRASHED!</div>
         </div>
         <div class="metrics">
             <div class="card" id="asterisk-cpu">CPU: --%</div>
@@ -143,6 +169,7 @@
         <div class="chart-container">
             <canvas id="freeswitch-chart"></canvas>
             <div class="explode-effect" id="freeswitch-overlay"></div>
+            <div class="crash-indicator" id="freeswitch-crash">💥 CRASHED!</div>
         </div>
         <div class="metrics">
             <div class="card" id="freeswitch-cpu">CPU: --%</div>
@@ -159,10 +186,26 @@
 </div>
 <div class="footer">
     <div class="winner-box" id="winner-box" style="display: none;"></div>
+    <table class="comparison-table" id="comparison-table" style="display: none;">
+        <thead>
+            <tr>
+                <th>System</th>
+                <th>Max Calls</th>
+                <th>CPU (%)</th>
+                <th>Active Calls at Explosion</th>
+            </tr>
+        </thead>
+        <tbody id="comparison-body"></tbody>
+    </table>
 </div>
 <script>
 let ws = null;
+let userInteracted = false;
 const charts = {};
+const testState = {
+    asterisk: { exploded: false, maxCalls: 0, explosionData: {} },
+    freeswitch: { exploded: false, maxCalls: 0, explosionData: {} }
+};
 
 /**
  * Creates a line chart for CPU usage.
@@ -221,7 +264,7 @@ function initializeCharts() {
  * Initializes WebSocket connection for real-time updates.
  */
 function initializeWebSocket() {
-    ws = new WebSocket("ws://" + location.hostname + ":8000/ws");
+    ws = new WebSocket("ws://192.168.10.30:8000/ws");
     
     ws.onopen = () => {
         console.log("WebSocket connected");
@@ -236,20 +279,22 @@ function initializeWebSocket() {
 
             console.log("Message received:", { type, data, prefix });
 
-            if (type === "progress" && prefix) {
+            if (type === "progress" && prefix && charts[prefix]) {
                 updateMetrics(prefix, data);
                 updateChart(prefix, data);
                 updateMessage(prefix, data.cpu);
                 const calls = parseInt(data.active_calls) || 0;
                 testState[prefix].maxCalls = Math.max(testState[prefix].maxCalls, calls);
-            } else if (type === "explosion" && prefix) {
+            } else if (type === "explosion" && prefix && charts[prefix]) {
                 console.log(`Processing explosion for ${prefix}`);
+                testState[prefix].explosionData = data; // Store explosion data
                 triggerExplosion(prefix);
                 testState[prefix].exploded = true;
                 testState[prefix].maxCalls = Math.max(testState[prefix].maxCalls, parseInt(data.active_calls) || 0);
                 checkWinner();
+                fetchComparison(); // Fetch comparison after explosion
             } else {
-                console.warn("Unknown message type or missing prefix:", type, data);
+                console.warn("Unknown message type or missing prefix/chart:", type, data, prefix);
             }
         } catch (e) {
             console.error("Error parsing WebSocket message:", e);
@@ -259,7 +304,7 @@ function initializeWebSocket() {
 
     ws.onerror = (error) => {
         console.error("WebSocket error:", error);
-        alert("WebSocket connection error. Check console for details.");
+        alert("WebSocket connection error. Check server status at ws://192.168.10.30:8000/ws and ensure port 8000 is open.");
     };
 
     ws.onclose = () => {
@@ -315,46 +360,45 @@ function updateMessage(prefix, cpu) {
 }
 
 /**
- * Triggers the explosion animation and sound for a system.
+ * Triggers the explosion animation, crash indicator, and sound for a system.
  * @param {string} prefix - The system prefix ('asterisk' or 'freeswitch').
  */
 function triggerExplosion(prefix) {
     console.log(`Triggering explosion for ${prefix}`);
     const overlay = document.getElementById(`${prefix}-overlay`);
+    const crashIndicator = document.getElementById(`${prefix}-crash`);
     const sound = document.getElementById("explosion-sound");
 
-    if (overlay) {
+    if (overlay && crashIndicator) {
         overlay.style.display = "block";
-        console.log(`Showing overlay for ${prefix}`);
+        crashIndicator.style.display = "block";
+        console.log(`Showing explosion overlay and crash indicator for ${prefix}`);
         setTimeout(() => {
             overlay.style.display = "none";
-            console.log(`Hiding overlay for ${prefix}`);
+            crashIndicator.style.display = "none";
+            console.log(`Hiding explosion overlay and crash indicator for ${prefix}`);
         }, 10000);
     } else {
-        console.error(`Overlay not found for ${prefix}`);
-        alert(`Error: Explosion overlay not found for ${prefix}`);
+        if (!overlay) console.error(`Explosion overlay not found for ${prefix}`);
+        if (!crashIndicator) console.error(`Crash indicator not found for ${prefix}`);
+        alert(`Error: Explosion overlay or crash indicator not found for ${prefix}`);
     }
 
-    if (sound) {
+    if (sound && userInteracted) {
         sound.play().then(() => {
             console.log("Explosion sound played successfully");
         }).catch((e) => {
             console.error("Failed to play explosion sound:", e);
-            alert("Failed to play explosion sound: " + e.message + ". Click 'Start Stress Tests' or 'Test Audio' first.");
+            alert("Failed to play explosion sound: " + e.message);
         });
+    } else if (!userInteracted) {
+        console.warn("Audio play skipped: No user interaction detected");
+        alert("Audio play skipped. Click 'Start Stress Tests' or 'Test Audio' first to enable sound.");
     } else {
         console.error("Audio element 'explosion-sound' not found");
         alert("Error: Explosion audio file not found");
     }
 }
-
-/**
- * State to track explosion and max calls for each system.
- */
-const testState = {
-    asterisk: { exploded: false, maxCalls: 0 },
-    freeswitch: { exploded: false, maxCalls: 0 }
-};
 
 /**
  * Checks if both systems have exploded and declares a winner based on max calls.
@@ -384,13 +428,16 @@ function checkWinner() {
             console.log("Showing winner box");
         }
 
-        if (sound) {
+        if (sound && userInteracted) {
             sound.play().then(() => {
                 console.log("Winner sound played successfully");
             }).catch((e) => {
                 console.error("Failed to play winner sound:", e);
-                alert("Failed to play winner sound: " + e.message + ". Click 'Start Stress Tests' or 'Test Audio' first.");
+                alert("Failed to play winner sound: " + e.message);
             });
+        } else if (!userInteracted) {
+            console.warn("Winner audio play skipped: No user interaction detected");
+            alert("Winner audio play skipped. Click 'Start Stress Tests' or 'Test Audio' first to enable sound.");
         } else {
             console.error("Audio element 'winner-sound' not found");
             alert("Error: Winner audio file not found");
@@ -411,10 +458,49 @@ function checkWinner() {
 }
 
 /**
+ * Fetches and displays the comparison between Asterisk and FreeSWITCH.
+ */
+async function fetchComparison() {
+    try {
+        const response = await fetch("/api/comparison");
+        if (!response.ok) throw new Error("Failed to fetch comparison");
+        const comparison = await response.json();
+        console.log("Comparison data fetched:", comparison);
+        displayComparison(comparison);
+    } catch (e) {
+        console.error("Error fetching comparison:", e);
+        alert("Error fetching comparison. Check console for details.");
+    }
+}
+
+/**
+ * Displays the comparison table.
+ * @param {Object} comparison - Comparison data from the API.
+ */
+function displayComparison(comparison) {
+    const tbody = document.getElementById("comparison-body");
+    tbody.innerHTML = "";
+    const systems = ["asterisk", "freeswitch"];
+    systems.forEach(system => {
+        const data = comparison[system];
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${system.toUpperCase()}</td>
+            <td>${comparison.max_calls[system] || '--'}</td>
+            <td>${data.cpu || '--'}</td>
+            <td>${data.active_calls || '--'}</td>
+        `;
+        tbody.appendChild(row);
+    });
+    document.getElementById("comparison-table").style.display = "table";
+}
+
+/**
  * Starts stress tests and unlocks audio.
  */
 function startTests() {
     console.log("Starting stress tests");
+    userInteracted = true; // Set interaction flag on user action
     document.getElementById("footer-start").style.display = "none";
     
     // Reset state
@@ -442,7 +528,7 @@ function startTests() {
                 console.log("Tests started successfully");
                 // Unlock audio
                 const sound = document.getElementById("explosion-sound");
-                if (sound) {
+                if (sound && !sound.paused) {
                     sound.play().then(() => {
                         console.log("Audio unlocked successfully");
                         sound.pause();
@@ -465,6 +551,7 @@ function startTests() {
  */
 function testAudio() {
     console.log("Testing audio");
+    userInteracted = true; // Set interaction flag on user action
     const sound = document.getElementById("explosion-sound");
     if (sound) {
         sound.play().then(() => {

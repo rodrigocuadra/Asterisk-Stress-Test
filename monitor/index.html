@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
     <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js"></script>
     <style>
         body {
             font-family: sans-serif;
@@ -304,18 +305,26 @@
             }
         };
 
-
         const term1 = new Terminal({ cursorBlink: true, fontSize: 14 });
+        const fitAddon1 = new FitAddon.FitAddon();
+        term1.loadAddon(fitAddon1);
         term1.open(document.getElementById("terminal1"));
+        fitAddon1.fit();
+
         const socket1 = new WebSocket(`ws://${location.host}/ws/terminal1`);
         socket1.onmessage = e => term1.write(e.data);
         term1.onData(data => socket1.send(data));
 
         const term2 = new Terminal({ cursorBlink: true, fontSize: 14 });
+        const fitAddon2 = new FitAddon.FitAddon();
+        term2.loadAddon(fitAddon2);
         term2.open(document.getElementById("terminal2"));
+        fitAddon2.fit();
+
         const socket2 = new WebSocket(`ws://${location.host}/ws/terminal2`);
         socket2.onmessage = e => term2.write(e.data);
         term2.onData(data => socket2.send(data));
+
     </script>
 </body>
 

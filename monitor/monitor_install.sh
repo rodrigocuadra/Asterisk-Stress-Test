@@ -1,7 +1,7 @@
 #!/bin/bash
 
 apt update && apt install -y python3 python3-pip
-pip3 install --break-system-packages fastapi uvicorn pydantic aiofiles python-multipart websockets requests
+pip3 install --break-system-packages fastapi uvicorn paramiko pydantic aiofiles python-multipart websockets requests
 pip3 install openai --break-system-packages
 
 mkdir /opt/stresstest_monitor

@@ -87,7 +87,7 @@ async def progress(data: ProgressData):
     with open(progress_file, "w") as f:
         json.dump(test_results, f)
     await manager.broadcast({"type": "progress", "data": data.dict()})
-    return {"ok": True}
+    #return {"ok": True}
 
 # ------------------------
 # API: Evento de explosión
@@ -98,52 +98,7 @@ async def explosion(data: ExplosionData):
     test_state[data.test_type]["exploded"] = True
     test_state[data.test_type]["explosion_data"] = data.dict()
     await manager.broadcast({"type": "explosion", "data": data.dict()})
-    return {"status": "explosion"}
-
-# ------------------------
-# API: Reset del estado
-# ------------------------
-
-@app.post("/api/reset")
-def reset_state():
-    for test_type in ["asterisk", "freeswitch"]:
-        test_state[test_type] = {
-            "maxcpuload": test_state[test_type].get("maxcpuload", 75.0),
-            "exploded": False,
-            "steps": [],
-            "explosion_data": {}
-        }
-    return {"status": "reset"}
-
-# ------------------------
-# API: Iniciar stress tests remotos
-# ------------------------
-
-@app.post("/api/start")
-def start_tests():
-    hosts = {
-        "asterisk": "192.168.10.31",
-        "freeswitch": "192.168.10.33"
-    }
-
-    for test_type in hosts:
-        test_state[test_type] = {
-            "maxcpuload": test_state[test_type].get("maxcpuload", 75.0),
-            "exploded": False,
-            "steps": [],
-            "explosion_data": {}
-        }
-
-    for tipo, ip in hosts.items():
-        try:
-            subprocess.run(
-                ["ssh", f"root@{ip}", "bash -lc '/opt/stress_test/stress_test.sh --notify --auto'"],
-                check=True
-            )
-        except subprocess.CalledProcessError as e:
-            return JSONResponse(status_code=500, content={"error": f"Failed to start {tipo} test: {str(e)}"})
-
-    return {"started": True}
+    #return {"status": "explosion"}
 
 # ------------------------
 # WebSockets: SSH interactivo

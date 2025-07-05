@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Stress Test Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
     <style>
         body {
             font-family: sans-serif;
@@ -12,25 +15,30 @@
             margin: 0;
             padding: 20px;
         }
+
         .container {
             display: flex;
             justify-content: space-between;
             gap: 20px;
         }
+
         .panel {
             flex: 1;
             background: #fff;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
             align-items: center;
             position: relative;
+            overflow: hidden;
         }
+
         h2 {
             margin-top: 0;
         }
+
         .metrics {
             display: flex;
             flex-wrap: wrap;
@@ -38,6 +46,7 @@
             justify-content: center;
             width: 100%;
         }
+
         .card {
             flex: 1 1 45%;
             background: #d4edda;
@@ -47,528 +56,268 @@
             font-size: 1.2em;
             transition: background 0.3s;
         }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            height: 250px;
-        }
+
         canvas {
-            width: 100% !important;
-            height: 250px !important;
-            position: relative;
-            z-index: 1;
-        }
-        .message-box {
-            margin-top: 20px;
-            padding: 20px;
-            background: #e9ecef;
-            border-radius: 10px;
-            font-size: 1.6em;
-            font-weight: bold;
-            color: #333;
-            text-align: center;
-            width: 100%;
-        }
-        .footer {
-            margin-top: 40px;
-            text-align: center;
-        }
-        .start-btn, .test-audio-btn {
-            font-size: 1.4em;
-            padding: 12px 30px;
-            background: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin: 10px;
-        }
-        .start-btn:hover, .test-audio-btn:hover {
-            background: #0056b3;
-        }
-        .winner-box {
-            padding: 20px;
-            background: #d1ecf1;
-            border: 2px solid #bee5eb;
-            color: #0c5460;
-            border-radius: 10px;
-            font-size: 1.6em;
-            font-weight: bold;
-            text-align: center;
-            margin-top: 20px;
-            animation: pulse 1s infinite alternate;
-        }
-        .comparison-table {
-            margin-top: 20px;
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .comparison-table th, .comparison-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        .comparison-table th {
-            background-color: #f2f2f2;
-        }
-        .explode-effect {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: none;
-            background: radial-gradient(circle, red, orange, yellow);
-            opacity: 0.8;
-            animation: explode 0.5s infinite alternate;
-            z-index: 2;
-        }
-        .crash-indicator {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: none;
-            color: white;
-            font-size: 2em;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            z-index: 3;
-        }
-        @keyframes explode {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(1.2); opacity: 0.4; }
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.05); }
-        }
+            max-width: 100%;
+            height: 180px;
+
+            .message-box {
+                margin-top: 20px;
+                padding: 20px;
+                background: #e9ecef;
+                border-radius: 10px;
+                font-size: 1.6em;
+                font-weight: bold;
+                color: #333;
+                text-align: center;
+                width: 100%;
+            }
+
+            .footer {
+                margin-top: 40px;
+                text-align: center;
+            }
+
+            .start-btn {
+                font-size: 1.4em;
+                padding: 12px 30px;
+                background: #007BFF;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+            }
+
+            .start-btn:hover {
+                background: #0056b3;
+            }
+
+            .winner-box {
+                padding: 20px;
+                background: #d1ecf1;
+                border: 2px solid #bee5eb;
+                color: #0c5460;
+                border-radius: 10px;
+                font-size: 1.6em;
+                font-weight: bold;
+                text-align: center;
+                margin-top: 20px;
+                animation: pulse 1s infinite alternate;
+            }
+
+            .explode-effect {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                display: none;
+                background: radial-gradient(circle, red, orange, yellow);
+                opacity: 0.9;
+                z-index: 10;
+                justify-content: center;
+                align-items: center;
+                color: white;
+                font-size: 2em;
+                font-weight: bold;
+                animation: explode 0.5s infinite alternate;
+            }
+
+            .explode-effect i {
+                font-size: 3em;
+                margin-right: 10px;
+            }
+
+            @keyframes explode {
+                0% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+
+                100% {
+                    transform: scale(1.3);
+                    opacity: 0.4;
+                }
+            }
+
+            @keyframes pulse {
+                0% {
+                    transform: scale(1);
+                }
+
+                100% {
+                    transform: scale(1.05);
+                }
+            }
+
+            .xterm {
+                padding: 4px;
+            }
+
+            .terminal-row {
+                display: flex;
+                flex-direction: row;
+                gap: 10px;
+                margin-top: 40px;
+            }
+
+            .terminal-container {
+                flex: 1;
+                height: 300px;
+                background: #000;
+                color: #fff;
+            }
     </style>
 </head>
+
 <body>
-<audio id="explosion-sound" src="explosion.mp3" preload="auto"></audio>
-<audio id="winner-sound" src="winner.mp3" preload="auto"></audio>
-<div class="container">
-    <div class="panel" id="asterisk-panel">
-        <h2>Asterisk</h2>
-        <div class="chart-container">
+    <audio id="explosion-sound" src="explosion.mp3"></audio>
+    <audio id="winner-sound" src="winner.mp3"></audio>
+    <div class="container">
+        <div class="panel" id="asterisk-panel">
+            <h2>Asterisk</h2>
+            <div class="explode-effect" id="asterisk-overlay"><i>💥</i> BOOM!</div>
+            <div class="metrics">
+                <div class="card" id="asterisk-cpu">CPU: --%</div>
+                <div class="card" id="asterisk-mem">Memory: --%</div>
+                <div class="card" id="asterisk-calls">Active Calls: --</div>
+                <div class="card" id="asterisk-bw">BW TX: -- kb/s</div>
+            </div>
             <canvas id="asterisk-chart"></canvas>
-            <div class="explode-effect" id="asterisk-overlay"></div>
-            <div class="crash-indicator" id="asterisk-crash">💥 CRASHED!</div>
+            <div class="message-box" id="asterisk-message">Waiting for data...</div>
         </div>
-        <div class="metrics">
-            <div class="card" id="asterisk-cpu">CPU: --%</div>
-            <div class="card" id="asterisk-mem">Memory: --%</div>
-            <div class="card" id="asterisk-calls">Active Calls: --</div>
-            <div class="card" id="asterisk-bw">BW TX: -- kb/s</div>
-        </div>
-        <div class="message-box" id="asterisk-message">Waiting for data...</div>
-    </div>
-    <div class="panel" id="freeswitch-panel">
-        <h2>FreeSWITCH</h2>
-        <div class="chart-container">
+        <div class="panel" id="freeswitch-panel">
+            <h2>FreeSWITCH</h2>
+            <div class="explode-effect" id="freeswitch-overlay"><i>💥</i> BOOM!</div>
+            <div class="metrics">
+                <div class="card" id="freeswitch-cpu">CPU: --%</div>
+                <div class="card" id="freeswitch-mem">Memory: --%</div>
+                <div class="card" id="freeswitch-calls">Active Calls: --</div>
+                <div class="card" id="freeswitch-bw">BW TX: -- kb/s</div>
+            </div>
             <canvas id="freeswitch-chart"></canvas>
-            <div class="explode-effect" id="freeswitch-overlay"></div>
-            <div class="crash-indicator" id="freeswitch-crash">💥 CRASHED!</div>
+            <div class="message-box" id="freeswitch-message">Waiting for data...</div>
         </div>
-        <div class="metrics">
-            <div class="card" id="freeswitch-cpu">CPU: --%</div>
-            <div class="card" id="freeswitch-mem">Memory: --%</div>
-            <div class="card" id="freeswitch-calls">Active Calls: --</div>
-            <div class="card" id="freeswitch-bw">BW TX: -- kb/s</div>
-        </div>
-        <div class="message-box" id="freeswitch-message">Waiting for data...</div>
     </div>
-</div>
-<div class="footer" id="footer-start">
-    <button class="start-btn" onclick="startTests()">🚀 Start Stress Tests</button>
-    <button class="test-audio-btn" onclick="testAudio()">Test Audio</button>
-</div>
-<div class="footer">
-    <div class="winner-box" id="winner-box" style="display: none;"></div>
-    <table class="comparison-table" id="comparison-table" style="display: none;">
-        <thead>
-            <tr>
-                <th>System</th>
-                <th>Max Calls</th>
-                <th>CPU (%)</th>
-                <th>Active Calls at Explosion</th>
-            </tr>
-        </thead>
-        <tbody id="comparison-body"></tbody>
-    </table>
-</div>
-<script>
-let ws = null;
-let userInteracted = false;
-const charts = {};
-const testState = {
-    asterisk: { exploded: false, maxCalls: 0, explosionData: {} },
-    freeswitch: { exploded: false, maxCalls: 0, explosionData: {} }
-};
+    <div class="footer" id="footer-start">
+        <button class="start-btn" onclick="startTests()">🚀 Start Stress Tests</button>
+    </div>
+    <div class="footer">
+        <div class="winner-box" id="winner-box" style="display: none;"></div>
+    </div>
+    <div class="terminal-row">
+        <div class="terminal-container" id="terminal1"></div>
+        <div class="terminal-container" id="terminal2"></div>
+    </div>
 
-/**
- * Creates a line chart for CPU usage.
- * @param {string} id - The canvas ID for the chart.
- * @returns {Chart} - The Chart.js instance.
- */
-function createChart(id) {
-    const ctx = document.getElementById(id);
-    if (!ctx) {
-        console.error(`Canvas element not found: ${id}`);
-        alert(`Error: Canvas element not found for ${id}`);
-        return null;
-    }
-    try {
-        return new Chart(ctx.getContext("2d"), {
-            type: "line",
-            data: {
-                labels: [],
-                datasets: [{
-                    label: "CPU Usage %",
-                    data: [],
-                    borderColor: "#007BFF",
-                    fill: false,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true, max: 100 }
-                }
+    <script>
+
+        function startTests() {
+            document.getElementById("explosion-sound").play().catch(() => { });
+            document.getElementById("winner-sound").play().catch(() => { });
+            fetch("/api/start", { method: "POST" });
+
+            const cmd = "cd /opt/stress_test && ./stress_test.sh --notify --auto\n";
+            if (socket1 && socket1.readyState === WebSocket.OPEN) socket1.send(cmd);
+            if (socket2 && socket2.readyState === WebSocket.OPEN) socket2.send(cmd);
+        }
+
+        const ws = new WebSocket("ws://" + location.hostname + ":8000/ws");
+
+        function updateCardColor(card, value) {
+            if (value >= 50) {
+                card.style.background = '#f8d7da';
+            } else if (value >= 30) {
+                card.style.background = '#fff3cd';
+            } else {
+                card.style.background = '#d4edda';
             }
-        });
-    } catch (e) {
-        console.error(`Failed to create chart for ${id}:`, e);
-        alert(`Error creating chart for ${id}: ${e.message}`);
-        return null;
-    }
-}
+        }
 
-/**
- * Initializes charts for both systems.
- */
-function initializeCharts() {
-    console.log("Initializing charts...");
-    charts["asterisk"] = createChart("asterisk-chart");
-    charts["freeswitch"] = createChart("freeswitch-chart");
-    if (!charts["asterisk"] || !charts["freeswitch"]) {
-        console.error("Chart initialization failed");
-    } else {
-        console.log("Charts initialized successfully");
-    }
-}
+        function updateChart(chart, value) {
+            chart.data.labels.push('');
+            chart.data.datasets[0].data.push(value);
+            if (chart.data.labels.length > 20) {
+                chart.data.labels.shift();
+                chart.data.datasets[0].data.shift();
+            }
+            chart.update();
+        }
 
-/**
- * Initializes WebSocket connection for real-time updates.
- */
-function initializeWebSocket() {
-    ws = new WebSocket("ws://192.168.10.30:8000/ws");
-    
-    ws.onopen = () => {
-        console.log("WebSocket connected");
-    };
+        function declareWinner(type) {
+            const name = type === 'asterisk' ? 'Asterisk' : 'FreeSWITCH';
+            document.getElementById("winner-box").innerText = "🏆 " + name + " is the Winner!";
+            document.getElementById("winner-box").style.display = "block";
+            confetti();
+            document.getElementById("winner-sound").play();
+        }
 
-    ws.onmessage = (event) => {
-        try {
+        function triggerExplosion(type) {
+            const overlay = document.getElementById(type + "-overlay");
+            overlay.style.display = "flex";
+            document.getElementById("explosion-sound").play();
+            setTimeout(() => {
+                overlay.style.display = "none";
+            }, 10000);
+        }
+        const charts = {
+            asterisk: new Chart(document.getElementById("asterisk-chart"), {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: 'CPU %', data: [], borderColor: '#007BFF' }] },
+                options: { animation: false, responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+            }),
+            freeswitch: new Chart(document.getElementById("freeswitch-chart"), {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: 'CPU %', data: [], borderColor: '#28A745' }] },
+                options: { animation: false, responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+            })
+        };
+
+        ws.onmessage = (event) => {
             const msg = JSON.parse(event.data);
-            const type = msg.type;
-            const data = msg.data || {};
-            const prefix = data.test_type;
+            const t = msg.data.test_type;
 
-            console.log("Message received:", { type, data, prefix });
+            if (msg.type === 'progress') {
+                document.getElementById(t + "-cpu").innerText = "CPU: " + msg.data.cpu + "%";
+                document.getElementById(t + "-mem").innerText = "Memory: " + msg.data.memory;
+                document.getElementById(t + "-calls").innerText = "Active Calls: " + msg.data.active_calls;
+                document.getElementById(t + "-bw").innerText = "BW TX: " + msg.data.bw_tx + " kb/s";
 
-            if (type === "progress" && prefix && charts[prefix]) {
-                updateMetrics(prefix, data);
-                updateChart(prefix, data);
-                updateMessage(prefix, data.cpu);
-                const calls = parseInt(data.active_calls) || 0;
-                testState[prefix].maxCalls = Math.max(testState[prefix].maxCalls, calls);
-            } else if (type === "explosion" && prefix && charts[prefix]) {
-                console.log(`Processing explosion for ${prefix}`);
-                testState[prefix].explosionData = data; // Store explosion data
-                triggerExplosion(prefix);
-                testState[prefix].exploded = true;
-                testState[prefix].maxCalls = Math.max(testState[prefix].maxCalls, parseInt(data.active_calls) || 0);
-                checkWinner();
-                fetchComparison(); // Fetch comparison after explosion
-            } else {
-                console.warn("Unknown message type or missing prefix/chart:", type, data, prefix);
-            }
-        } catch (e) {
-            console.error("Error parsing WebSocket message:", e);
-            alert("Error parsing WebSocket message. Check console for details.");
-        }
-    };
+                updateCardColor(document.getElementById(t + "-cpu"), msg.data.cpu);
+                updateChart(charts[t], msg.data.cpu);
 
-    ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
-        alert("WebSocket connection error. Check server status at ws://192.168.10.30:8000/ws and ensure port 8000 is open.");
-    };
-
-    ws.onclose = () => {
-        console.log("WebSocket closed. Attempting to reconnect...");
-        setTimeout(initializeWebSocket, 5000);
-    };
-}
-
-/**
- * Updates the metrics display for a system.
- * @param {string} prefix - The system prefix ('asterisk' or 'freeswitch').
- * @param {Object} data - The metrics data.
- */
-function updateMetrics(prefix, data) {
-    document.getElementById(`${prefix}-cpu`).textContent = `CPU: ${data.cpu || '--'}%`;
-    document.getElementById(`${prefix}-mem`).textContent = `Memory: ${data.memory || '--'}`;
-    document.getElementById(`${prefix}-calls`).textContent = `Active Calls: ${data.active_calls || '--'}`;
-    document.getElementById(`${prefix}-bw`).textContent = `BW TX: ${data.bw_tx || '--'} kb/s`;
-
-    const cpuCard = document.getElementById(`${prefix}-cpu`);
-    const cpu = parseFloat(data.cpu) || 0;
-    cpuCard.style.background = cpu < 30 ? '#d4edda' : cpu < 50 ? '#fff3cd' : '#f8d7da';
-}
-
-/**
- * Updates the CPU usage chart for a system.
- * @param {string} prefix - The system prefix ('asterisk' or 'freeswitch').
- * @param {Object} data - The chart data.
- */
-function updateChart(prefix, data) {
-    const chart = charts[prefix];
-    if (!chart) {
-        console.error(`Chart not initialized for ${prefix}`);
-        return;
-    }
-    chart.data.labels.push(`Step ${data.step || chart.data.labels.length + 1}`);
-    chart.data.datasets[0].data.push(parseFloat(data.cpu) || 0);
-    chart.update();
-}
-
-/**
- * Updates the status message based on CPU usage.
- * @param {string} prefix - The system prefix ('asterisk' or 'freeswitch').
- * @param {number} cpu - The CPU usage percentage.
- */
-function updateMessage(prefix, cpu) {
-    let msg;
-    cpu = parseFloat(cpu) || 0;
-    if (cpu < 35) msg = "💪 More calls please, I can handle more!";
-    else if (cpu < 70) msg = "😓 Easy there, I'm starting to feel the heat...";
-    else msg = "🔥 I can't take it anymore! Stop the calls!";
-    document.getElementById(`${prefix}-message`).textContent = msg;
-}
-
-/**
- * Triggers the explosion animation, crash indicator, and sound for a system.
- * @param {string} prefix - The system prefix ('asterisk' or 'freeswitch').
- */
-function triggerExplosion(prefix) {
-    console.log(`Triggering explosion for ${prefix}`);
-    const overlay = document.getElementById(`${prefix}-overlay`);
-    const crashIndicator = document.getElementById(`${prefix}-crash`);
-    const sound = document.getElementById("explosion-sound");
-
-    if (overlay && crashIndicator) {
-        overlay.style.display = "block";
-        crashIndicator.style.display = "block";
-        console.log(`Showing explosion overlay and crash indicator for ${prefix}`);
-        setTimeout(() => {
-            overlay.style.display = "none";
-            crashIndicator.style.display = "none";
-            console.log(`Hiding explosion overlay and crash indicator for ${prefix}`);
-        }, 10000);
-    } else {
-        if (!overlay) console.error(`Explosion overlay not found for ${prefix}`);
-        if (!crashIndicator) console.error(`Crash indicator not found for ${prefix}`);
-        alert(`Error: Explosion overlay or crash indicator not found for ${prefix}`);
-    }
-
-    if (sound && userInteracted) {
-        sound.play().then(() => {
-            console.log("Explosion sound played successfully");
-        }).catch((e) => {
-            console.error("Failed to play explosion sound:", e);
-            alert("Failed to play explosion sound: " + e.message);
-        });
-    } else if (!userInteracted) {
-        console.warn("Audio play skipped: No user interaction detected");
-        alert("Audio play skipped. Click 'Start Stress Tests' or 'Test Audio' first to enable sound.");
-    } else {
-        console.error("Audio element 'explosion-sound' not found");
-        alert("Error: Explosion audio file not found");
-    }
-}
-
-/**
- * Checks if both systems have exploded and declares a winner based on max calls.
- */
-function checkWinner() {
-    if (testState.asterisk.exploded && testState.freeswitch.exploded) {
-        console.log("Both systems exploded, determining winner:", testState);
-        let winner;
-        if (testState.asterisk.maxCalls > testState.freeswitch.maxCalls) {
-            winner = "asterisk";
-        } else if (testState.freeswitch.maxCalls > testState.asterisk.maxCalls) {
-            winner = "freeswitch";
-        } else {
-            winner = "tie";
-        }
-
-        const box = document.getElementById("winner-box");
-        const sound = document.getElementById("winner-sound");
-
-        if (box) {
-            if (winner === "tie") {
-                box.textContent = "🤝 TIE! Both systems handled the same number of calls.";
-            } else {
-                box.textContent = `🏆 ${winner.toUpperCase()} WINS WITH ${testState[winner].maxCalls} CALLS!`;
-            }
-            box.style.display = "block";
-            console.log("Showing winner box");
-        }
-
-        if (sound && userInteracted) {
-            sound.play().then(() => {
-                console.log("Winner sound played successfully");
-            }).catch((e) => {
-                console.error("Failed to play winner sound:", e);
-                alert("Failed to play winner sound: " + e.message);
-            });
-        } else if (!userInteracted) {
-            console.warn("Winner audio play skipped: No user interaction detected");
-            alert("Winner audio play skipped. Click 'Start Stress Tests' or 'Test Audio' first to enable sound.");
-        } else {
-            console.error("Audio element 'winner-sound' not found");
-            alert("Error: Winner audio file not found");
-        }
-
-        if (typeof confetti === "function") {
-            confetti({
-                particleCount: 150,
-                spread: 90,
-                origin: { y: 0.6 }
-            });
-            console.log("Confetti triggered");
-        } else {
-            console.warn("Confetti library not loaded");
-            alert("Error: Confetti library not loaded");
-        }
-    }
-}
-
-/**
- * Fetches and displays the comparison between Asterisk and FreeSWITCH.
- */
-async function fetchComparison() {
-    try {
-        const response = await fetch("/api/comparison");
-        if (!response.ok) throw new Error("Failed to fetch comparison");
-        const comparison = await response.json();
-        console.log("Comparison data fetched:", comparison);
-        displayComparison(comparison);
-    } catch (e) {
-        console.error("Error fetching comparison:", e);
-        alert("Error fetching comparison. Check console for details.");
-    }
-}
-
-/**
- * Displays the comparison table.
- * @param {Object} comparison - Comparison data from the API.
- */
-function displayComparison(comparison) {
-    const tbody = document.getElementById("comparison-body");
-    tbody.innerHTML = "";
-    const systems = ["asterisk", "freeswitch"];
-    systems.forEach(system => {
-        const data = comparison[system];
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${system.toUpperCase()}</td>
-            <td>${comparison.max_calls[system] || '--'}</td>
-            <td>${data.cpu || '--'}</td>
-            <td>${data.active_calls || '--'}</td>
-        `;
-        tbody.appendChild(row);
-    });
-    document.getElementById("comparison-table").style.display = "table";
-}
-
-/**
- * Starts stress tests and unlocks audio.
- */
-function startTests() {
-    console.log("Starting stress tests");
-    userInteracted = true; // Set interaction flag on user action
-    document.getElementById("footer-start").style.display = "none";
-    
-    // Reset state
-    fetch("/api/reset", { method: "POST" })
-        .then((response) => {
-            if (!response.ok) {
-                console.error("Failed to reset state:", response.status);
-                alert("Error resetting state. Check console for details.");
-            } else {
-                console.log("State reset successfully");
-            }
-        })
-        .catch((e) => {
-            console.error("Error resetting state:", e);
-            alert("Error resetting state. Check console for details.");
-        });
-
-    // Start tests
-    fetch("/api/start", { method: "POST" })
-        .then((response) => {
-            if (!response.ok) {
-                console.error("Failed to start tests:", response.status);
-                alert("Error starting tests. Check console for details.");
-            } else {
-                console.log("Tests started successfully");
-                // Unlock audio
-                const sound = document.getElementById("explosion-sound");
-                if (sound && !sound.paused) {
-                    sound.play().then(() => {
-                        console.log("Audio unlocked successfully");
-                        sound.pause();
-                        sound.currentTime = 0;
-                    }).catch((e) => {
-                        console.warn("Failed to unlock audio:", e);
-                        alert("Failed to unlock audio: " + e.message);
-                    });
+                let mbox = document.getElementById(t + "-message");
+                if (msg.data.cpu < 35) {
+                    mbox.innerText = "💪 More calls! I can handle more load!";
+                } else if (msg.data.cpu < 60) {
+                    mbox.innerText = "😅 Take it easy, I'm getting tired...";
+                } else {
+                    mbox.innerText = "🥵 Please stop! I'm overloaded!";
                 }
             }
-        })
-        .catch((e) => {
-            console.error("Error starting tests:", e);
-            alert("Error starting tests. Check console for details.");
-        });
-}
 
-/**
- * Tests audio playback to ensure browser permissions.
- */
-function testAudio() {
-    console.log("Testing audio");
-    userInteracted = true; // Set interaction flag on user action
-    const sound = document.getElementById("explosion-sound");
-    if (sound) {
-        sound.play().then(() => {
-            console.log("Test audio played successfully");
-        }).catch((e) => {
-            console.error("Failed to play test audio:", e);
-            alert("Failed to play test audio: " + e.message);
-        });
-    } else {
-        console.error("Audio element 'explosion-sound' not found");
-        alert("Error: Audio element not found");
-    }
-}
+            if (msg.type === 'explosion') {
+                triggerExplosion(t);
+            }
 
-// Initialize charts and WebSocket
-initializeCharts();
-initializeWebSocket();
-</script>
+            if (msg.type === 'winner') {
+                declareWinner(t);
+            }
+        };
+
+
+        const term1 = new Terminal({ cursorBlink: true, fontSize: 14 });
+        term1.open(document.getElementById("terminal1"));
+        const socket1 = new WebSocket(`ws://${location.host}/ws/terminal1`);
+        socket1.onmessage = e => term1.write(e.data);
+        term1.onData(data => socket1.send(data));
+
+        const term2 = new Terminal({ cursorBlink: true, fontSize: 14 });
+        term2.open(document.getElementById("terminal2"));
+        const socket2 = new WebSocket(`ws://${location.host}/ws/terminal2`);
+        socket2.onmessage = e => term2.write(e.data);
+        term2.onData(data => socket2.send(data));
+    </script>
 </body>
+
 </html>

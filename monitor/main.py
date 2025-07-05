@@ -20,7 +20,7 @@ test_results = {"asterisk": [], "freeswitch": []}
 app = FastAPI()
 
 CALLS_THRESHOLD = int(os.getenv("CALLS_THRESHOLD", "500"))
-openai.api_key = os.getenv("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")
+openai.api_key = os.getenv("sk-proj-*****")
 
 # ------------------------
 # Modelos de datos

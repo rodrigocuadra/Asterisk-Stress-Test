@@ -215,7 +215,6 @@
         function startTests() {
             document.getElementById("explosion-sound").play().catch(() => { });
             document.getElementById("winner-sound").play().catch(() => { });
-            fetch("/api/start", { method: "POST" });
 
             const cmd = "cd /opt/stress_test && ./stress_test.sh --notify --auto\n";
             if (socket1 && socket1.readyState === WebSocket.OPEN) socket1.send(cmd);

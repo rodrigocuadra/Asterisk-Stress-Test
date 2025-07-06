@@ -9,7 +9,7 @@ import requests
 import os
 import json
 from pathlib import Path
-import openai
+from openai import OpenAI
 import subprocess
 import asyncio
 import paramiko
@@ -22,11 +22,14 @@ load_dotenv()
 progress_file = Path(os.getenv("PROGRESS_FILE", "/opt/stresstest_monitor/results.json"))
 index_html_path = Path(os.getenv("INDEX_HTML_PATH", "/var/www/stresstest_monitor/index.html"))
 CALLS_THRESHOLD = int(os.getenv("CALLS_THRESHOLD", "500"))
-openai.api_key = os.getenv("OPENAI_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4")
 SSH_USER = os.getenv("SSH_USER", "root")
 TERMINAL1_IP = os.getenv("TERMINAL1_IP", "192.168.10.31")
 TERMINAL2_IP = os.getenv("TERMINAL2_IP", "192.168.10.33")
+
+# Initialize OpenAI client
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Runtime result buffer
 test_results = {"asterisk": [], "freeswitch": []}
@@ -113,7 +116,6 @@ async def explosion(data: ExplosionData):
 
     exploded_services.add(data.test_type)
 
-    # Si ambos sistemas explotaron y aún no se ha enviado el análisis, enviar después de 10s
     if not analysis_sent and "asterisk" in exploded_services and "freeswitch" in exploded_services:
         analysis_sent = True
         await asyncio.sleep(10)
@@ -135,14 +137,13 @@ async def send_analysis_to_clients():
             f"{json.dumps(result_data)}"
         )
 
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model=OPENAI_MODEL,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7
         )
 
         analysis = response.choices[0].message.content
-
         await manager.broadcast({"type": "analysis", "data": analysis})
 
     except Exception as e:

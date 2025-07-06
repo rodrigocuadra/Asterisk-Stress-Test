@@ -140,7 +140,7 @@ canvas {
 
 .terminal-container {
     flex: 1;
-    height: 300px;
+    height: 250px;
     background: #000;
     color: #fff;
 }
@@ -152,8 +152,7 @@ canvas {
     z-index: 1000;
 }
 
-#asterisk-chart,
-#freeswitch-chart {
-    height: 120px; /* o 100px si lo quieres más compacto */
+#asterisk-chart, #freeswitch-chart {
+    height: 320px !important;
 }
 

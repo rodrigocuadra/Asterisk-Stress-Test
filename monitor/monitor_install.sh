@@ -4,11 +4,11 @@
 # Update & Install Dependencies
 # -----------------------------
 # Update the package list and install Python 3 and pip
-apt update && apt install -y python3 python3-pip python-dotenv
+apt update && apt install -y python3 python3-pip
 
 # Install required Python packages for the FastAPI application
 # --break-system-packages ensures compatibility on newer systems like Ubuntu 23+
-pip3 install --break-system-packages fastapi uvicorn paramiko pydantic aiofiles python-multipart websockets requests
+pip3 install --break-system-packages fastapi uvicorn paramiko pydantic aiofiles python-multipart websockets requests python-dotenv
 pip3 install openai --break-system-packages
 
 # -----------------------------
@@ -74,3 +74,14 @@ wget -O /etc/systemd/system/stresstest-api.service  https://raw.githubuserconten
 systemctl daemon-reload
 systemctl enable stresstest-api
 systemctl start stresstest-api
+
+# Create environment file
+cat <<EOF > /opt/stresstest_monitor/.env
+CALLS_THRESHOLD=500
+OPENAI_API_KEY=sk-proj-************************
+INDEX_HTML_PATH=/var/www/stresstest_monitor/index.html
+PROGRESS_FILE=/opt/stresstest_monitor/results.json
+SSH_USER=root
+TERMINAL1_IP=192.168.10.31
+TERMINAL2_IP=192.168.10.33
+EOF

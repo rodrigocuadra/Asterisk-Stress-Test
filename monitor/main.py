@@ -31,6 +31,7 @@ TERMINAL2_IP = os.getenv("TERMINAL2_IP", "192.168.10.33")
 # Runtime result buffer
 test_results = {"asterisk": [], "freeswitch": []}
 exploded_services = set()
+analysis_sent = False
 
 app = FastAPI()
 
@@ -105,14 +106,16 @@ async def progress(data: ProgressData):
 
 @app.post("/api/explosion")
 async def explosion(data: ExplosionData):
+    global analysis_sent
     test_state[data.test_type]["exploded"] = True
     test_state[data.test_type]["explosion_data"] = data.dict()
     await manager.broadcast({"type": "explosion", "data": data.dict()})
 
     exploded_services.add(data.test_type)
 
-    # Si ambos sistemas explotaron, esperar 10 segundos y enviar análisis
-    if "asterisk" in exploded_services and "freeswitch" in exploded_services:
+    # Si ambos sistemas explotaron y aún no se ha enviado el análisis, enviar después de 10s
+    if not analysis_sent and "asterisk" in exploded_services and "freeswitch" in exploded_services:
+        analysis_sent = True
         await asyncio.sleep(10)
         asyncio.create_task(send_analysis_to_clients())
 

@@ -11,6 +11,9 @@
     <script src="/static/js/confetti.min.js"></script>
 </head>
 <body>
+<div class="start-button-container">
+  <button class="start-btn" id="start-btn" onclick="startTests()">🚀 Start Stress Tests</button>
+</div>
 <audio id="explosion-sound" src="/static/audios/explosion.mp3"></audio>
 <audio id="winner-sound" src="/static/audios/winner.mp3"></audio>
 <div class="container">
@@ -38,9 +41,6 @@
         <canvas id="freeswitch-chart"></canvas>
         <div class="message-box" id="freeswitch-message">Waiting for data...</div>
     </div>
-</div>
-<div class="footer" id="footer-start">
-    <button class="start-btn" onclick="startTests()">🚀 Start Stress Tests</button>
 </div>
 <div class="footer">
     <div class="winner-box" id="winner-box" style="display: none;"></div>

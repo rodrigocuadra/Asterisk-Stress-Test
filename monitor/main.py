@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, Request
+from fastapi import FastAPI, WebSocket
 from fastapi.responses import JSONResponse, HTMLResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -15,32 +15,28 @@ import asyncio
 import paramiko
 from dotenv import load_dotenv
 
-# ----------------------------------------------------------------------
-# Load environment variables from a .env file located in the same folder
-# ----------------------------------------------------------------------
+# Load environment variables from .env file
 load_dotenv()
 
-# ----------------------------------------------------------------------
-# Load environment-specific settings with fallback defaults
-# These allow customization without changing the code directly
-# ----------------------------------------------------------------------
+# Environment-based configuration
 progress_file = Path(os.getenv("PROGRESS_FILE", "/opt/stresstest_monitor/results.json"))
 index_html_path = Path(os.getenv("INDEX_HTML_PATH", "/var/www/stresstest_monitor/index.html"))
 CALLS_THRESHOLD = int(os.getenv("CALLS_THRESHOLD", "500"))
 openai.api_key = os.getenv("OPENAI_API_KEY")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4")
 SSH_USER = os.getenv("SSH_USER", "root")
 TERMINAL1_IP = os.getenv("TERMINAL1_IP", "192.168.10.31")
 TERMINAL2_IP = os.getenv("TERMINAL2_IP", "192.168.10.33")
 
-# Initialize data structure for storing results
+# Runtime result buffer
 test_results = {"asterisk": [], "freeswitch": []}
+exploded_services = set()
 
-# Initialize FastAPI application
 app = FastAPI()
 
-# ----------------------------------------------------------------------
-# Data models using Pydantic for validation of incoming JSON data
-# ----------------------------------------------------------------------
+# ------------------------
+# Modelos de datos
+# ------------------------
 
 class ProgressData(BaseModel):
     test_type: str
@@ -66,9 +62,9 @@ class ExplosionData(BaseModel):
 class SSHCommand(BaseModel):
     command: str
 
-# ----------------------------------------------------------------------
-# Route: Serve main HTML dashboard page
-# ----------------------------------------------------------------------
+# ------------------------
+# Página principal
+# ------------------------
 
 @app.get("/")
 async def get_index():
@@ -77,9 +73,9 @@ async def get_index():
     else:
         return JSONResponse(content={"error": "index.html not found"}, status_code=404)
 
-# ----------------------------------------------------------------------
-# WebSocket: Main dashboard metrics connection
-# ----------------------------------------------------------------------
+# ------------------------
+# WebSocket para métricas
+# ------------------------
 
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
@@ -87,14 +83,13 @@ async def websocket_endpoint(ws: WebSocket):
     await manager.connect(ws)
     try:
         while True:
-            await ws.receive_text()  # Keeps the connection alive
+            await ws.receive_text()
     except Exception:
         await manager.disconnect(ws)
 
-# ----------------------------------------------------------------------
-# API: Receives real-time progress metrics during stress test
-# Stores in memory and to disk, then broadcasts to dashboard clients
-# ----------------------------------------------------------------------
+# ------------------------
+# API: Progreso en tiempo real
+# ------------------------
 
 @app.post("/api/progress")
 async def progress(data: ProgressData):
@@ -104,10 +99,9 @@ async def progress(data: ProgressData):
         json.dump(test_results, f)
     await manager.broadcast({"type": "progress", "data": data.dict()})
 
-# ----------------------------------------------------------------------
-# API: Receives "explosion" event (CPU overload alert)
-# Broadcasts the event to frontend
-# ----------------------------------------------------------------------
+# ------------------------
+# API: Evento de explosión
+# ------------------------
 
 @app.post("/api/explosion")
 async def explosion(data: ExplosionData):
@@ -115,10 +109,45 @@ async def explosion(data: ExplosionData):
     test_state[data.test_type]["explosion_data"] = data.dict()
     await manager.broadcast({"type": "explosion", "data": data.dict()})
 
-# ----------------------------------------------------------------------
-# WebSocket Handler: Interactive SSH Terminal using Paramiko
-# Supports bidirectional command I/O between frontend and backend shell
-# ----------------------------------------------------------------------
+    exploded_services.add(data.test_type)
+
+    # Si ambos sistemas explotaron, esperar 10 segundos y enviar análisis
+    if "asterisk" in exploded_services and "freeswitch" in exploded_services:
+        await asyncio.sleep(10)
+        asyncio.create_task(send_analysis_to_clients())
+
+# ------------------------
+# Función: Enviar análisis a los clientes
+# ------------------------
+
+async def send_analysis_to_clients():
+    try:
+        with open(progress_file, "r") as f:
+            result_data = json.load(f)
+
+        prompt = (
+            "Analyze and compare the performance results of Asterisk and FreeSWITCH based on this JSON data. "
+            "Identify strengths, weaknesses, and causes for high CPU, memory or bandwidth use. "
+            "Return the output in clear markdown-style sections, highlighting issues and possible optimizations.\n\n"
+            f"{json.dumps(result_data)}"
+        )
+
+        response = openai.ChatCompletion.create(
+            model=OPENAI_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7
+        )
+
+        analysis = response.choices[0].message.content
+
+        await manager.broadcast({"type": "analysis", "data": analysis})
+
+    except Exception as e:
+        print(f"Failed to generate analysis: {e}")
+
+# ------------------------
+# WebSockets: SSH interactivo
+# ------------------------
 
 async def ssh_handler(websocket: WebSocket, ip: str):
     await websocket.accept()
@@ -147,36 +176,6 @@ async def ssh_handler(websocket: WebSocket, ip: str):
     except:
         channel.close()
         ssh.close()
-
-@app.get("/api/analyze")
-async def analyze_results():
-    import openai
-
-    with open(progress_file, "r") as f:
-        result_data = json.load(f)
-
-    prompt = (
-        "Analyze and compare the performance results of Asterisk and FreeSWITCH based on this JSON data. "
-        "Identify strengths, weaknesses, and causes for high CPU, memory or bandwidth use. "
-        "Return the output in clear markdown-style sections, highlighting issues and possible optimizations.\n\n"
-        f"{json.dumps(result_data)}"
-    )
-
-    try:
-        response = openai.ChatCompletion.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-4"),
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7
-        )
-        analysis = response.choices[0].message.content
-        return PlainTextResponse(content=analysis)
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
-
-# ----------------------------------------------------------------------
-# WebSocket Endpoints for two remote terminals
-# Each connects to a separate IP as defined in environment variables
-# ----------------------------------------------------------------------
 
 @app.websocket("/ws/terminal1")
 async def ws_terminal1(websocket: WebSocket):

@@ -115,6 +115,49 @@ const charts = {
     })
 };
 
+// ===  Display AI analysis as overlay === 
+async function showAnalysisOverlay() {
+    const res = await fetch('/api/analyze');
+    const text = await res.text();
+
+    const overlay = document.createElement("div");
+    overlay.style.position = "fixed";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.backgroundColor = "rgba(0, 0, 0, 0.65)";
+    overlay.style.zIndex = "9999";
+    overlay.style.overflow = "auto";
+    overlay.style.padding = "40px";
+    overlay.style.color = "#fff";
+    overlay.style.fontSize = "1.2em";
+
+    const content = document.createElement("div");
+    content.style.background = "#222";
+    content.style.padding = "20px";
+    content.style.borderRadius = "10px";
+    content.style.maxWidth = "900px";
+    content.style.margin = "0 auto";
+    content.style.whiteSpace = "pre-wrap";
+    content.innerText = text;
+
+    const closeBtn = document.createElement("button");
+    closeBtn.innerText = "Close";
+    closeBtn.style.marginTop = "20px";
+    closeBtn.style.padding = "10px 20px";
+    closeBtn.style.fontSize = "1em";
+    closeBtn.style.background = "#007BFF";
+    closeBtn.style.border = "none";
+    closeBtn.style.borderRadius = "5px";
+    closeBtn.style.cursor = "pointer";
+    closeBtn.onclick = () => overlay.remove();
+
+    content.appendChild(closeBtn);
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+}
+
 // === Handle incoming WebSocket messages for metrics ===
 ws.onmessage = (event) => {
     const msg = JSON.parse(event.data);

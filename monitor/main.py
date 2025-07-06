@@ -140,35 +140,48 @@ async def send_analysis_to_clients():
         with open(progress_file, "r") as f:
             result_data = json.load(f)
 
-        prompt = (
-            "Analyze and compare the performance results of Asterisk and FreeSWITCH based on this JSON data. "
-            "Identify strengths, weaknesses, and causes for high CPU, memory or bandwidth use. "
-            "Return the output in clear markdown-style sections, highlighting issues and possible optimizations. "
-            "At the end, clearly state the winner between Asterisk and FreeSWITCH.\n\n"
-            f"{json.dumps(result_data)}"
-        )
+        # Extraer métricas comparativas
+        def extract_max(values, key):
+            return max(v.get(key, 0) for v in values if key in v)
 
-        response = client.chat.completions.create(
-            model=OPENAI_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7
-        )
+        a_data = result_data["asterisk"]
+        f_data = result_data["freeswitch"]
 
-        analysis = response.choices[0].message.content
-        print("[DEBUG] Analysis generated successfully")
+        comparison = [
+            {"metric": "Max Calls", "asterisk": len(a_data) * 100, "freeswitch": len(f_data) * 100},
+            {"metric": "Max CPU %", "asterisk": f"{extract_max(a_data, 'cpu')}%", "freeswitch": f"{extract_max(f_data, 'cpu')}%"},
+            {"metric": "Max Memory %", "asterisk": extract_max_percent(a_data, 'memory'), "freeswitch": extract_max_percent(f_data, 'memory')},
+            {"metric": "Max Load", "asterisk": extract_max_float(a_data, 'load'), "freeswitch": extract_max_float(f_data, 'load')},
+        ]
 
         winner = determine_winner()
         duration = round(time.time() - start_time)
 
         await manager.broadcast({
             "type": "analysis",
-            "data": analysis,
             "winner": winner,
-            "confetti": True,
-            "duration": duration
+            "duration": duration,
+            "comparison": comparison,
+            "confetti": True
         })
     except Exception as e:
         print(f"[ERROR] Failed to generate analysis: {e}")
+
+# ------------------------
+# Helpers para métricas
+# ------------------------
+
+def extract_max_percent(data, key):
+    try:
+        return max(float(item[key].strip('%')) for item in data if key in item)  # devuelve float
+    except:
+        return "0%"
+
+def extract_max_float(data, key):
+    try:
+        return max(float(item[key]) for item in data if key in item)
+    except:
+        return 0.0
 
 # ------------------------
 # Determinar ganador según duración
@@ -223,3 +236,4 @@ async def ws_terminal1(websocket: WebSocket):
 @app.websocket("/ws/terminal2")
 async def ws_terminal2(websocket: WebSocket):
     await ssh_handler(websocket, TERMINAL2_IP)
+

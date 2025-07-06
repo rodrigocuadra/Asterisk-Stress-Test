@@ -118,8 +118,11 @@ async def explosion(data: ExplosionData):
 
     if not analysis_sent and "asterisk" in exploded_services and "freeswitch" in exploded_services:
         analysis_sent = True
-        await asyncio.sleep(10)
-        asyncio.create_task(send_analysis_to_clients())
+        asyncio.create_task(schedule_analysis())
+
+async def schedule_analysis():
+    await asyncio.sleep(10)
+    await send_analysis_to_clients()
 
 # ------------------------
 # Función: Enviar análisis a los clientes
@@ -133,8 +136,7 @@ async def send_analysis_to_clients():
         prompt = (
             "Analyze and compare the performance results of Asterisk and FreeSWITCH based on this JSON data. "
             "Identify strengths, weaknesses, and causes for high CPU, memory or bandwidth use. "
-            "Determine the winner of the test. Return the output in clear markdown-style sections, highlighting issues, optimizations, and the winner."
-            "\n\n"
+            "Return the output in clear markdown-style sections, highlighting issues and possible optimizations.\n\n"
             f"{json.dumps(result_data)}"
         )
 
@@ -145,10 +147,28 @@ async def send_analysis_to_clients():
         )
 
         analysis = response.choices[0].message.content
-        await manager.broadcast({"type": "analysis", "data": analysis, "confetti": True})
+        winner = determine_winner(result_data)
+        await manager.broadcast({"type": "analysis", "data": analysis, "confetti": True, "winner": winner})
 
     except Exception as e:
         print(f"Failed to generate analysis: {e}")
+
+# ------------------------
+# Determine winner based on fewer steps to explosion
+# ------------------------
+
+def determine_winner(data):
+    try:
+        steps_ast = len(data["asterisk"])
+        steps_fs = len(data["freeswitch"])
+        if steps_ast > steps_fs:
+            return "Asterisk"
+        elif steps_fs > steps_ast:
+            return "FreeSWITCH"
+        else:
+            return "Draw"
+    except:
+        return "Unknown"
 
 # ------------------------
 # WebSockets: SSH interactivo

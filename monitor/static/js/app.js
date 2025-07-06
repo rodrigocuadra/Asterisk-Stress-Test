@@ -71,11 +71,11 @@ function declareWinner(type) {
 // Trigger explosion overlay and sound
 function triggerExplosion(type) {
     const overlay = document.getElementById(type + "-overlay");
-    overlay.style.display = "flex";
-    document.getElementById("explosion-sound").play();
+    overlay.classList.add("show");
     setTimeout(() => {
-        overlay.style.display = "none";
-    }, 10000);
+        overlay.classList.remove("show");
+        overlay.style.opacity = "0.2"; // permanece tenue
+    }, 10000); // 10s
 }
 
 // === Chart Initialization ===

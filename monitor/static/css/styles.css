@@ -102,9 +102,8 @@ canvas {
     top: 0;
     left: 0;
     right: 0;
-    height: 120px; /* altura del gráfico */
-    background: radial-gradient(circle, rgba(255,0,0,0.3), rgba(255,165,0,0.2), rgba(255,255,0,0.1));
-    z-index: 2;
+    height: 320px; /* debe coincidir con el alto de los gráficos */
+    z-index: 10;
     pointer-events: none;
     display: flex;
     justify-content: center;
@@ -113,22 +112,31 @@ canvas {
     font-size: 2em;
     font-weight: bold;
     opacity: 0;
-    transition: opacity 0.3s ease-in-out;
+    background: radial-gradient(circle, red, orange, yellow);
+    transition: opacity 0.5s ease-in-out;
 }
 
-.explode-effect.show {
-    opacity: 1;
-    animation: explode 10s ease-out;
-}
-
+/* Icono de explosión */
 .explode-effect i {
     font-size: 3em;
     margin-right: 10px;
 }
 
-@keyframes explode {
-    0% { transform: scale(1.1); opacity: 1; }
-    100% { transform: scale(1); opacity: 0.6; }
+/* Clase activa: se aplica durante la animación */
+.explode-effect.show {
+    animation: explodeAnim 10s ease-out;
+    opacity: 1;
+}
+
+/* Clase persistente: queda una versión tenue del efecto */
+.explode-effect.persistent {
+    opacity: 0.3;
+}
+
+/* Animación única de 10s */
+@keyframes explodeAnim {
+    0% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.3; }
 }
 
 @keyframes pulse {

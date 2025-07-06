@@ -1,60 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Stress Test Dashboard</title>
-    <link rel="stylesheet" href="/static/css/styles.css" />
-    <link rel="stylesheet" href="/static/css/xterm.css" />
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="xterm.css">
+    <script src="chart.min.js"></script>
+    <script src="canvas-confetti.min.js"></script>
+    <script src="xterm.min.js"></script>
+    <script src="xterm-addon-fit.min.js"></script>
 </head>
-
 <body>
-    <audio id="explosion-sound" src="/static/audio/explosion.mp3"></audio>
-    <audio id="winner-sound" src="/static/audio/winner.mp3"></audio>
-
-    <div class="container">
-        <div class="panel" id="asterisk-panel">
-            <h2>Asterisk</h2>
-            <div class="explode-effect" id="asterisk-overlay"><i>💥</i> BOOM!</div>
-            <div class="metrics">
-                <div class="card" id="asterisk-cpu">CPU: --%</div>
-                <div class="card" id="asterisk-mem">Memory: --%</div>
-                <div class="card" id="asterisk-calls">Active Calls: --</div>
-                <div class="card" id="asterisk-bw">BW TX: -- kb/s</div>
-            </div>
-            <canvas id="asterisk-chart"></canvas>
-            <div class="message-box" id="asterisk-message">Waiting for data...</div>
+<audio id="explosion-sound" src="explosion.mp3"></audio>
+<audio id="winner-sound" src="winner.mp3"></audio>
+<div class="container">
+    <div class="panel" id="asterisk-panel">
+        <h2>Asterisk</h2>
+        <div class="explode-effect" id="asterisk-overlay"><i>💥</i> BOOM!</div>
+        <div class="metrics">
+            <div class="card" id="asterisk-cpu">CPU: --%</div>
+            <div class="card" id="asterisk-mem">Memory: --%</div>
+            <div class="card" id="asterisk-calls">Active Calls: --</div>
+            <div class="card" id="asterisk-bw">BW TX: -- kb/s</div>
         </div>
-        <div class="panel" id="freeswitch-panel">
-            <h2>FreeSWITCH</h2>
-            <div class="explode-effect" id="freeswitch-overlay"><i>💥</i> BOOM!</div>
-            <div class="metrics">
-                <div class="card" id="freeswitch-cpu">CPU: --%</div>
-                <div class="card" id="freeswitch-mem">Memory: --%</div>
-                <div class="card" id="freeswitch-calls">Active Calls: --</div>
-                <div class="card" id="freeswitch-bw">BW TX: -- kb/s</div>
-            </div>
-            <canvas id="freeswitch-chart"></canvas>
-            <div class="message-box" id="freeswitch-message">Waiting for data...</div>
+        <canvas id="asterisk-chart"></canvas>
+        <div class="message-box" id="asterisk-message">Waiting for data...</div>
+    </div>
+    <div class="panel" id="freeswitch-panel">
+        <h2>FreeSWITCH</h2>
+        <div class="explode-effect" id="freeswitch-overlay"><i>💥</i> BOOM!</div>
+        <div class="metrics">
+            <div class="card" id="freeswitch-cpu">CPU: --%</div>
+            <div class="card" id="freeswitch-mem">Memory: --%</div>
+            <div class="card" id="freeswitch-calls">Active Calls: --</div>
+            <div class="card" id="freeswitch-bw">BW TX: -- kb/s</div>
         </div>
+        <canvas id="freeswitch-chart"></canvas>
+        <div class="message-box" id="freeswitch-message">Waiting for data...</div>
     </div>
-    <div class="footer" id="footer-start">
-        <button class="start-btn" onclick="startTests()">🚀 Start Stress Tests</button>
-    </div>
-    <div class="footer">
-        <div class="winner-box" id="winner-box" style="display: none;"></div>
-    </div>
-    <div class="terminal-row">
-        <div class="terminal-container" id="terminal1"></div>
-        <div class="terminal-container" id="terminal2"></div>
-    </div>
-
-    <script src="/static/js/xterm.min.js"></script>
-    <script src="/static/js/xterm-addon-fit.min.js"></script>
-    <script src="/static/js/chart.umd.min.js"></script>
-    <script src="/static/js/confetti.min.js"></script>
-    <script src="/static/js/app.js"></script>
-    
+</div>
+<div class="footer" id="footer-start">
+    <button class="start-btn" onclick="startTests()">🚀 Start Stress Tests</button>
+</div>
+<div class="footer">
+    <div class="winner-box" id="winner-box" style="display: none;"></div>
+</div>
+<div class="terminal-row">
+    <div class="terminal-container" id="terminal1"></div>
+    <div class="terminal-container" id="terminal2"></div>
+</div>
+<script src="app.js"></script>
 </body>
-
 </html>

@@ -69,13 +69,21 @@ function declareWinner(type) {
 }
 
 // Trigger explosion overlay and sound
-// Trigger explosion overlay and sound
 function triggerExplosion(type) {
-    const overlay = document.getElementById(type + "-overlay");
-    overlay.style.display = "flex";
-    document.getElementById("explosion-sound").play();
+    const overlay = document.getElementById(`${type}-overlay`);
+    const sound = document.getElementById("explosion-sound");
+
+    // Reinicia animación
+    overlay.classList.remove("show", "persistent");
+    void overlay.offsetWidth; // Forzar reflow
+
+    overlay.classList.add("show");
+    sound.currentTime = 0;
+    sound.play().catch(() => {});
+
     setTimeout(() => {
-        overlay.style.display = "none";
+        overlay.classList.remove("show");
+        overlay.classList.add("persistent");
     }, 10000);
 }
 

@@ -4,7 +4,7 @@
 # Update & Install Dependencies
 # -----------------------------
 # Update the package list and install Python 3 and pip
-apt update && apt install -y python3 python3-pip
+apt update && apt install -y python3 python3-pip python-dotenv
 
 # Install required Python packages for the FastAPI application
 # --break-system-packages ensures compatibility on newer systems like Ubuntu 23+

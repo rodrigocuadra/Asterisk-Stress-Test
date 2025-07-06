@@ -133,7 +133,8 @@ async def send_analysis_to_clients():
         prompt = (
             "Analyze and compare the performance results of Asterisk and FreeSWITCH based on this JSON data. "
             "Identify strengths, weaknesses, and causes for high CPU, memory or bandwidth use. "
-            "Return the output in clear markdown-style sections, highlighting issues and possible optimizations.\n\n"
+            "Determine the winner of the test. Return the output in clear markdown-style sections, highlighting issues, optimizations, and the winner."
+            "\n\n"
             f"{json.dumps(result_data)}"
         )
 
@@ -144,7 +145,7 @@ async def send_analysis_to_clients():
         )
 
         analysis = response.choices[0].message.content
-        await manager.broadcast({"type": "analysis", "data": analysis})
+        await manager.broadcast({"type": "analysis", "data": analysis, "confetti": True})
 
     except Exception as e:
         print(f"Failed to generate analysis: {e}")

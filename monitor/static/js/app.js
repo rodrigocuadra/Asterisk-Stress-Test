@@ -21,12 +21,10 @@ const socket2 = new WebSocket(`ws://${location.host}/ws/terminal2`);
 socket2.onmessage = e => term2.write(e.data);
 term2.onData(data => socket2.send(data));
 
-// === Dashboard Controls ===
 function startTests() {
     document.getElementById("explosion-sound").play().catch(() => {});
     document.getElementById("winner-sound").play().catch(() => {});
     document.getElementById("start-btn").style.display = "none";
-
     socket1.send("cd /opt/stress_test && ./stress_test.sh --notify --auto\n");
     socket2.send("cd /opt/stress_test && ./stress_test.sh --notify --auto\n");
 }
@@ -64,14 +62,11 @@ function declareWinner(type) {
 function triggerExplosion(type) {
     const overlay = document.getElementById(`${type}-overlay`);
     const sound = document.getElementById("explosion-sound");
-
     overlay.classList.remove("show", "persistent");
     void overlay.offsetWidth;
-
     overlay.classList.add("show");
     sound.currentTime = 0;
     sound.play().catch(() => {});
-
     setTimeout(() => {
         overlay.classList.remove("show");
         overlay.classList.add("persistent");
@@ -105,12 +100,6 @@ const charts = {
     })
 };
 
-let testStart = Date.now();
-setInterval(() => {
-    const elapsed = Math.floor((Date.now() - testStart) / 1000);
-    document.getElementById("test-timer").textContent = `Elapsed: ${elapsed}s`;
-}, 1000);
-
 ws.onmessage = (event) => {
     const msg = JSON.parse(event.data);
     const t = msg.data?.test_type;
@@ -138,11 +127,7 @@ ws.onmessage = (event) => {
         triggerExplosion(t);
     }
 
-    if (msg.type === 'winner') {
-        declareWinner(t);
-    }
-
-    if (msg.type === "analysis") {
+    if (msg.type === 'analysis') {
         const overlay = document.createElement("div");
         overlay.style.position = "fixed";
         overlay.style.top = "0";
@@ -160,10 +145,20 @@ ws.onmessage = (event) => {
         content.style.background = "#222";
         content.style.padding = "20px";
         content.style.borderRadius = "10px";
-        content.style.maxWidth = "900px";
+        content.style.maxWidth = "1000px";
         content.style.margin = "0 auto";
         content.style.whiteSpace = "pre-wrap";
-        content.innerText = `🏆 Winner: ${msg.winner}\n\n⏱ Duration: ${msg.duration} seconds\n\n${msg.data}`;
+
+        let table = `<h2 style='text-align:center'>🏆 ${msg.winner}</h2>`;
+        table += `<p style='text-align:center'>⏱ Duration: ${msg.duration} seconds</p>`;
+        table += `<table style='width:100%;border-collapse:collapse;margin-top:20px'>`;
+        table += `<thead><tr><th style='border:1px solid #ccc;padding:8px'>Metric</th><th style='border:1px solid #ccc;padding:8px'>Asterisk</th><th style='border:1px solid #ccc;padding:8px'>FreeSWITCH</th></tr></thead><tbody>`;
+        msg.comparison.forEach(row => {
+            table += `<tr><td style='border:1px solid #ccc;padding:8px'>${row.metric}</td><td style='border:1px solid #ccc;padding:8px'>${row.asterisk}</td><td style='border:1px solid #ccc;padding:8px'>${row.freeswitch}</td></tr>`;
+        });
+        table += `</tbody></table>`;
+
+        content.innerHTML = table;
 
         const closeBtn = document.createElement("button");
         closeBtn.innerText = "Close";
@@ -184,18 +179,8 @@ ws.onmessage = (event) => {
             const duration = 10 * 1000;
             const end = Date.now() + duration;
             (function frame() {
-                confetti({
-                    particleCount: 5,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 }
-                });
-                confetti({
-                    particleCount: 5,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 }
-                });
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
                 if (Date.now() < end) {
                     requestAnimationFrame(frame);
                 }
@@ -203,3 +188,9 @@ ws.onmessage = (event) => {
         }
     }
 };
+
+let testStart = Date.now();
+setInterval(() => {
+    const elapsed = Math.floor((Date.now() - testStart) / 1000);
+    document.getElementById("test-timer").textContent = `Elapsed: ${elapsed}s`;
+}, 1000);

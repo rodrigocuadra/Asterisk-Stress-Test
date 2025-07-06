@@ -27,7 +27,8 @@ term2.onData(data => socket2.send(data));
 function startTests() {
     document.getElementById("explosion-sound").play().catch(() => {});
     document.getElementById("winner-sound").play().catch(() => {});
-
+    document.getElementById("start-btn").style.display = "none";
+    
     // Send command to both terminals to start stress test
     socket1.send("cd /opt/stress_test && ./stress_test.sh --notify --auto\n");
     socket2.send("cd /opt/stress_test && ./stress_test.sh --notify --auto\n");

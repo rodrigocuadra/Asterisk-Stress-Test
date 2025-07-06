@@ -158,6 +158,74 @@ async function showAnalysisOverlay() {
     document.body.appendChild(overlay);
 }
 
+socket.onmessage = async (event) => {
+    const msg = JSON.parse(event.data);
+
+    if (msg.type === "analysis") {
+        // Crea una variable temporal para almacenar el análisis
+        const overlay = document.createElement("div");
+        overlay.style.position = "fixed";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100%";
+        overlay.style.height = "100%";
+        overlay.style.backgroundColor = "rgba(0, 0, 0, 0.65)";
+        overlay.style.zIndex = "9999";
+        overlay.style.overflow = "auto";
+        overlay.style.padding = "40px";
+        overlay.style.color = "#fff";
+        overlay.style.fontSize = "1.2em";
+
+        const content = document.createElement("div");
+        content.style.background = "#222";
+        content.style.padding = "20px";
+        content.style.borderRadius = "10px";
+        content.style.maxWidth = "900px";
+        content.style.margin = "0 auto";
+        content.style.whiteSpace = "pre-wrap";
+        content.innerText = `🏆 Winner: ${msg.winner}\n\n⏱ Duration: ${msg.duration} seconds\n\n${msg.data}`;
+
+        const closeBtn = document.createElement("button");
+        closeBtn.innerText = "Close";
+        closeBtn.style.marginTop = "20px";
+        closeBtn.style.padding = "10px 20px";
+        closeBtn.style.fontSize = "1em";
+        closeBtn.style.background = "#007BFF";
+        closeBtn.style.border = "none";
+        closeBtn.style.borderRadius = "5px";
+        closeBtn.style.cursor = "pointer";
+        closeBtn.onclick = () => overlay.remove();
+
+        content.appendChild(closeBtn);
+        overlay.appendChild(content);
+        document.body.appendChild(overlay);
+
+        // Confetti
+        if (msg.confetti && window.confetti) {
+            const duration = 10 * 1000;
+            const end = Date.now() + duration;
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 }
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 }
+                });
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            })();
+        }
+    }
+};
+
+
 // === Handle incoming WebSocket messages for metrics ===
 ws.onmessage = (event) => {
     const msg = JSON.parse(event.data);

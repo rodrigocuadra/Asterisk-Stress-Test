@@ -5,6 +5,8 @@ pip3 install --break-system-packages fastapi uvicorn paramiko pydantic aiofiles 
 pip3 install openai --break-system-packages
 
 mkdir -p /opt/stresstest_monitor
+
+# 
 wget -O /opt/stresstest_monitor/main.py  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/main.py
 wget -O /opt/stresstest_monitor/state.py  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/state.py
 wget -O /opt/stresstest_monitor/ws_manager.py  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/ws_manager.py
@@ -12,6 +14,7 @@ wget -O /opt/stresstest_monitor/ws_manager.py  https://raw.githubusercontent.com
 mkdir -p /var/www/stresstest_monitor
 mkdir -p /var/www/stresstest_monitor/static/js
 mkdir -p /var/www/stresstest_monitor/static/css
+mkdir -p /var/www/stresstest_monitor/static/audios
 
 # JS libraries
 wget https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js -O /var/www/stresstest_monitor/static/js/xterm.min.js
@@ -25,8 +28,8 @@ wget https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css -O /var/www/stresste
 wget https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/static/css/styles.css -O /var/www/stresstest_monitor/static/css/tyles.css
 
 # Audios
-wget -O /var/www/stresstest_monitor/explosion.mp3  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/explosion.mp3
-wget -O /var/www/stresstest_monitor/winner.mp3  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/winner.mp3
+wget -O /var/www/stresstest_monitor/static/audios/explosion.mp3  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/static/audios/explosion.mp3
+wget -O /var/www/stresstest_monitor/static/audios/winner.mp3  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/static/audios/winner.mp3
 
 # web
 wget -O /var/www/stresstest_monitor/index.html  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/index.html

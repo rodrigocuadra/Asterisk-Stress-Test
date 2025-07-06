@@ -14,6 +14,7 @@ import subprocess
 import asyncio
 import paramiko
 from dotenv import load_dotenv
+import time
 
 # Load environment variables from .env file
 load_dotenv()
@@ -35,6 +36,7 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 test_results = {"asterisk": [], "freeswitch": []}
 exploded_services = set()
 analysis_sent = False
+start_time = time.time()
 
 app = FastAPI()
 
@@ -120,6 +122,10 @@ async def explosion(data: ExplosionData):
         analysis_sent = True
         asyncio.create_task(schedule_analysis())
 
+# ------------------------
+# Programar análisis 10s después del segundo explote
+# ------------------------
+
 async def schedule_analysis():
     await asyncio.sleep(10)
     await send_analysis_to_clients()
@@ -130,13 +136,15 @@ async def schedule_analysis():
 
 async def send_analysis_to_clients():
     try:
+        print("[DEBUG] Preparing to send analysis to clients...")
         with open(progress_file, "r") as f:
             result_data = json.load(f)
 
         prompt = (
             "Analyze and compare the performance results of Asterisk and FreeSWITCH based on this JSON data. "
             "Identify strengths, weaknesses, and causes for high CPU, memory or bandwidth use. "
-            "Return the output in clear markdown-style sections, highlighting issues and possible optimizations.\n\n"
+            "Return the output in clear markdown-style sections, highlighting issues and possible optimizations. "
+            "At the end, clearly state the winner between Asterisk and FreeSWITCH.\n\n"
             f"{json.dumps(result_data)}"
         )
 
@@ -147,28 +155,34 @@ async def send_analysis_to_clients():
         )
 
         analysis = response.choices[0].message.content
-        winner = determine_winner(result_data)
-        await manager.broadcast({"type": "analysis", "data": analysis, "confetti": True, "winner": winner})
+        print("[DEBUG] Analysis generated successfully")
 
+        winner = determine_winner()
+        duration = round(time.time() - start_time)
+
+        await manager.broadcast({
+            "type": "analysis",
+            "data": analysis,
+            "winner": winner,
+            "confetti": True,
+            "duration": duration
+        })
     except Exception as e:
-        print(f"Failed to generate analysis: {e}")
+        print(f"[ERROR] Failed to generate analysis: {e}")
 
 # ------------------------
-# Determine winner based on fewer steps to explosion
+# Determinar ganador según duración
 # ------------------------
 
-def determine_winner(data):
-    try:
-        steps_ast = len(data["asterisk"])
-        steps_fs = len(data["freeswitch"])
-        if steps_ast > steps_fs:
-            return "Asterisk"
-        elif steps_fs > steps_ast:
-            return "FreeSWITCH"
-        else:
-            return "Draw"
-    except:
-        return "Unknown"
+def determine_winner():
+    len_ast = len(test_results["asterisk"])
+    len_fs = len(test_results["freeswitch"])
+    if len_ast > len_fs:
+        return "Asterisk"
+    elif len_fs > len_ast:
+        return "FreeSWITCH"
+    else:
+        return "Tie"
 
 # ------------------------
 # WebSockets: SSH interactivo

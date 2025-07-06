@@ -225,6 +225,11 @@ socket.onmessage = async (event) => {
     }
 };
 
+let testStart = Date.now();
+setInterval(() => {
+    const elapsed = Math.floor((Date.now() - testStart) / 1000);
+    document.getElementById("test-timer").textContent = `Elapsed: ${elapsed}s`;
+}, 1000);
 
 // === Handle incoming WebSocket messages for metrics ===
 ws.onmessage = (event) => {

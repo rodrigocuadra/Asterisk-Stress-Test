@@ -1,7 +1,6 @@
 // app.js - Handles dashboard UI, charts, and interactive SSH terminals for Stress Test Monitor
 
 // === Terminal Initialization ===
-// Initialize two interactive SSH terminals (Asterisk & FreeSWITCH)
 const term1 = new Terminal({ cursorBlink: true, fontSize: 14 });
 const fitAddon1 = new FitAddon.FitAddon();
 term1.loadAddon(fitAddon1);
@@ -23,32 +22,27 @@ socket2.onmessage = e => term2.write(e.data);
 term2.onData(data => socket2.send(data));
 
 // === Dashboard Controls ===
-// Play sounds and trigger confetti animation on test start
 function startTests() {
     document.getElementById("explosion-sound").play().catch(() => {});
     document.getElementById("winner-sound").play().catch(() => {});
     document.getElementById("start-btn").style.display = "none";
-    
-    // Send command to both terminals to start stress test
+
     socket1.send("cd /opt/stress_test && ./stress_test.sh --notify --auto\n");
     socket2.send("cd /opt/stress_test && ./stress_test.sh --notify --auto\n");
 }
 
-// === WebSocket for Dashboard Metrics ===
 const ws = new WebSocket("ws://" + location.hostname + ":8000/ws");
 
-// Update the color of metric cards based on value (e.g., CPU usage)
 function updateCardColor(card, value) {
     if (value >= 50) {
-        card.style.background = '#f8d7da'; // red
+        card.style.background = '#f8d7da';
     } else if (value >= 30) {
-        card.style.background = '#fff3cd'; // yellow
+        card.style.background = '#fff3cd';
     } else {
-        card.style.background = '#d4edda'; // green
+        card.style.background = '#d4edda';
     }
 }
 
-// Update the line chart with new CPU value
 function updateChart(chart, value) {
     chart.data.labels.push('');
     chart.data.datasets[0].data.push(value);
@@ -59,7 +53,6 @@ function updateChart(chart, value) {
     chart.update();
 }
 
-// Trigger winner animation and message
 function declareWinner(type) {
     const name = type === 'asterisk' ? 'Asterisk' : 'FreeSWITCH';
     document.getElementById("winner-box").innerText = "🏆 " + name + " is the Winner!";
@@ -68,14 +61,12 @@ function declareWinner(type) {
     document.getElementById("winner-sound").play();
 }
 
-// Trigger explosion overlay and sound
 function triggerExplosion(type) {
     const overlay = document.getElementById(`${type}-overlay`);
     const sound = document.getElementById("explosion-sound");
 
-    // Reinicia animación
     overlay.classList.remove("show", "persistent");
-    void overlay.offsetWidth; // Forzar reflow
+    void overlay.offsetWidth;
 
     overlay.classList.add("show");
     sound.currentTime = 0;
@@ -87,7 +78,6 @@ function triggerExplosion(type) {
     }, 10000);
 }
 
-// === Chart Initialization ===
 const charts = {
     asterisk: new Chart(document.getElementById("asterisk-chart"), {
         type: 'line',
@@ -115,54 +105,44 @@ const charts = {
     })
 };
 
-// ===  Display AI analysis as overlay === 
-async function showAnalysisOverlay() {
-    const res = await fetch('/api/analyze');
-    const text = await res.text();
+let testStart = Date.now();
+setInterval(() => {
+    const elapsed = Math.floor((Date.now() - testStart) / 1000);
+    document.getElementById("test-timer").textContent = `Elapsed: ${elapsed}s`;
+}, 1000);
 
-    const overlay = document.createElement("div");
-    overlay.style.position = "fixed";
-    overlay.style.top = "0";
-    overlay.style.left = "0";
-    overlay.style.width = "100%";
-    overlay.style.height = "100%";
-    overlay.style.backgroundColor = "rgba(0, 0, 0, 0.65)";
-    overlay.style.zIndex = "9999";
-    overlay.style.overflow = "auto";
-    overlay.style.padding = "40px";
-    overlay.style.color = "#fff";
-    overlay.style.fontSize = "1.2em";
-
-    const content = document.createElement("div");
-    content.style.background = "#222";
-    content.style.padding = "20px";
-    content.style.borderRadius = "10px";
-    content.style.maxWidth = "900px";
-    content.style.margin = "0 auto";
-    content.style.whiteSpace = "pre-wrap";
-    content.innerText = text;
-
-    const closeBtn = document.createElement("button");
-    closeBtn.innerText = "Close";
-    closeBtn.style.marginTop = "20px";
-    closeBtn.style.padding = "10px 20px";
-    closeBtn.style.fontSize = "1em";
-    closeBtn.style.background = "#007BFF";
-    closeBtn.style.border = "none";
-    closeBtn.style.borderRadius = "5px";
-    closeBtn.style.cursor = "pointer";
-    closeBtn.onclick = () => overlay.remove();
-
-    content.appendChild(closeBtn);
-    overlay.appendChild(content);
-    document.body.appendChild(overlay);
-}
-
-socket.onmessage = async (event) => {
+ws.onmessage = (event) => {
     const msg = JSON.parse(event.data);
+    const t = msg.data?.test_type;
+
+    if (msg.type === 'progress') {
+        document.getElementById(t + "-cpu").innerText = "CPU: " + msg.data.cpu + "%";
+        document.getElementById(t + "-mem").innerText = "Memory: " + msg.data.memory;
+        document.getElementById(t + "-calls").innerText = "Active Calls: " + msg.data.active_calls;
+        document.getElementById(t + "-bw").innerText = "BW TX: " + msg.data.bw_tx + " kb/s";
+
+        updateCardColor(document.getElementById(t + "-cpu"), msg.data.cpu);
+        updateChart(charts[t], msg.data.cpu);
+
+        const mbox = document.getElementById(t + "-message");
+        if (msg.data.cpu < 35) {
+            mbox.innerText = "💪 More calls! I can handle more load!";
+        } else if (msg.data.cpu < 60) {
+            mbox.innerText = "😅 Take it easy, I'm getting tired...";
+        } else {
+            mbox.innerText = "🥵 Please stop! I'm overloaded!";
+        }
+    }
+
+    if (msg.type === 'explosion') {
+        triggerExplosion(t);
+    }
+
+    if (msg.type === 'winner') {
+        declareWinner(t);
+    }
 
     if (msg.type === "analysis") {
-        // Crea una variable temporal para almacenar el análisis
         const overlay = document.createElement("div");
         overlay.style.position = "fixed";
         overlay.style.top = "0";
@@ -200,7 +180,6 @@ socket.onmessage = async (event) => {
         overlay.appendChild(content);
         document.body.appendChild(overlay);
 
-        // Confetti
         if (msg.confetti && window.confetti) {
             const duration = 10 * 1000;
             const end = Date.now() + duration;
@@ -222,44 +201,5 @@ socket.onmessage = async (event) => {
                 }
             })();
         }
-    }
-};
-
-let testStart = Date.now();
-setInterval(() => {
-    const elapsed = Math.floor((Date.now() - testStart) / 1000);
-    document.getElementById("test-timer").textContent = `Elapsed: ${elapsed}s`;
-}, 1000);
-
-// === Handle incoming WebSocket messages for metrics ===
-ws.onmessage = (event) => {
-    const msg = JSON.parse(event.data);
-    const t = msg.data.test_type;
-
-    if (msg.type === 'progress') {
-        document.getElementById(t + "-cpu").innerText = "CPU: " + msg.data.cpu + "%";
-        document.getElementById(t + "-mem").innerText = "Memory: " + msg.data.memory;
-        document.getElementById(t + "-calls").innerText = "Active Calls: " + msg.data.active_calls;
-        document.getElementById(t + "-bw").innerText = "BW TX: " + msg.data.bw_tx + " kb/s";
-
-        updateCardColor(document.getElementById(t + "-cpu"), msg.data.cpu);
-        updateChart(charts[t], msg.data.cpu);
-
-        const mbox = document.getElementById(t + "-message");
-        if (msg.data.cpu < 35) {
-            mbox.innerText = "💪 More calls! I can handle more load!";
-        } else if (msg.data.cpu < 60) {
-            mbox.innerText = "😅 Take it easy, I'm getting tired...";
-        } else {
-            mbox.innerText = "🥵 Please stop! I'm overloaded!";
-        }
-    }
-
-    if (msg.type === 'explosion') {
-        triggerExplosion(t);
-    }
-
-    if (msg.type === 'winner') {
-        declareWinner(t);
     }
 };

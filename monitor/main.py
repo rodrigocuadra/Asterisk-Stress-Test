@@ -1,5 +1,5 @@
-from fastapi import FastAPI, WebSocket
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi import FastAPI, WebSocket, Request
+from fastapi.responses import JSONResponse, HTMLResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from ws_manager import manager
@@ -147,6 +147,31 @@ async def ssh_handler(websocket: WebSocket, ip: str):
     except:
         channel.close()
         ssh.close()
+
+@app.get("/api/analyze")
+async def analyze_results():
+    import openai
+
+    with open(progress_file, "r") as f:
+        result_data = json.load(f)
+
+    prompt = (
+        "Analyze and compare the performance results of Asterisk and FreeSWITCH based on this JSON data. "
+        "Identify strengths, weaknesses, and causes for high CPU, memory or bandwidth use. "
+        "Return the output in clear markdown-style sections, highlighting issues and possible optimizations.\n\n"
+        f"{json.dumps(result_data)}"
+    )
+
+    try:
+        response = openai.ChatCompletion.create(
+            model=os.getenv("OPENAI_MODEL", "gpt-4"),
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7
+        )
+        analysis = response.choices[0].message.content
+        return PlainTextResponse(content=analysis)
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
 # ----------------------------------------------------------------------
 # WebSocket Endpoints for two remote terminals

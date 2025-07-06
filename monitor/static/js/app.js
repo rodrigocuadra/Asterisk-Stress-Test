@@ -69,13 +69,14 @@ function declareWinner(type) {
 }
 
 // Trigger explosion overlay and sound
+// Trigger explosion overlay and sound
 function triggerExplosion(type) {
     const overlay = document.getElementById(type + "-overlay");
-    overlay.classList.add("show");
+    overlay.style.display = "flex";
+    document.getElementById("explosion-sound").play();
     setTimeout(() => {
-        overlay.classList.remove("show");
-        overlay.style.opacity = "0.2"; // permanece tenue
-    }, 10000); // 10s
+        overlay.style.display = "none";
+    }, 10000);
 }
 
 // === Chart Initialization ===

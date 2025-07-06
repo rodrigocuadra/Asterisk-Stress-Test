@@ -44,7 +44,7 @@ wget https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/h
 # Download CSS Stylesheets
 # -----------------------------
 wget https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css -O /var/www/stresstest_monitor/static/css/xterm.css
-wget https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/static/css/styles.css -O /var/www/stresstest_monitor/static/css/tyles.css
+wget https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/static/css/styles.css -O /var/www/stresstest_monitor/static/css/styles.css
 
 # -----------------------------
 # Download Audio Effects

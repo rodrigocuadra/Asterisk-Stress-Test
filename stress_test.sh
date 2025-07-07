@@ -469,7 +469,7 @@ R1=$(cat /sys/class/net/"$interface_name"/statistics/rx_bytes)
 T1=$(cat /sys/class/net/"$interface_name"/statistics/tx_bytes)
 date1=$(date +"%s")
 # slepcall=$(printf %.2f "$((1000000000 * call_step_seconds / call_step))e-9")
-# Convertir call_step_seconds a milisegundos
+# Convert call_step_seconds to milliseconds
 target_ms=$((call_step_seconds * 1000))
 sleep 4
 echo -e "step, calls, active calls, cpu load (%), memory (%), bwtx (kb/s), bwrx (kb/s), delay (ms)" > data.csv
@@ -538,10 +538,9 @@ while [ "$exitcalls" = "false" ]; do
         call_end=$(date +%s%3N)
         call_elapsed=$((call_end - call_start))
         total_elapsed=$((total_elapsed + call_elapsed))
-        sleep "$slepcall"
     done
 
-    # Calcular cuánto dormir si es necesario
+    # Calculate how much sleep you need if necessary
     if [ "$batch_elapsed_ms" -lt "$target_ms" ]; then
         sleep_ms=$((target_ms - batch_elapsed_ms))
         sleep_sec=$(awk "BEGIN { printf(\"%.3f\", $sleep_ms / 1000) }")

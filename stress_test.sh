@@ -491,7 +491,7 @@ date1=$(date +"%s")
 # slepcall=$(printf %.2f "$((1000000000 * call_step_seconds / call_step))e-9")
 # Convert call_step_seconds to milliseconds
 target_ms=$((call_step_seconds * 1000))
-sleep 4
+sleep 8
 echo -e "step, calls, active calls, cpu load (%), memory (%), bwtx (kb/s), bwrx (kb/s), delay (ms)" > data.csv
 
 while [ "$exitcalls" = "false" ]; do

@@ -152,12 +152,32 @@ async def send_analysis_to_clients():
         a_data = result_data.get("asterisk", [])
         f_data = result_data.get("freeswitch", [])
 
+        def get_max(data, key):
+            return max(float(item.get(key, 0)) for item in data)
+
+        def get_max_percent(data, key):
+            return max(float(item[key].strip('%')) for item in data if key in item)
+
+        def average_bw_per_call(data):
+            total_bw = sum(float(item.get('bw_tx', 0)) + float(item.get('bw_rx', 0)) for item in data)
+            max_calls = max(int(item.get('calls', 0)) for item in data)
+            return round(total_bw / max_calls, 2) if max_calls else 0.0
+
+        # Precálculos
+        summary_data = {
+            "Max Calls": {"asterisk": max(item["calls"] for item in a_data), "freeswitch": max(item["calls"] for item in f_data)},
+            "Max CPU %": {"asterisk": get_max(a_data, "cpu"), "freeswitch": get_max(f_data, "cpu")},
+            "Max Memory %": {"asterisk": get_max_percent(a_data, "memory"), "freeswitch": get_max_percent(f_data, "memory")},
+            "Max Load": {"asterisk": get_max(a_data, "load"), "freeswitch": get_max(f_data, "load")},
+            "Avg BW/Call (kbps)": {
+                "asterisk": average_bw_per_call(a_data),
+                "freeswitch": average_bw_per_call(f_data)
+            }
+        }
+
         comparison = [
-            {"metric": "Max Calls", "asterisk": len(a_data) * 100, "freeswitch": len(f_data) * 100},
-            {"metric": "Max CPU %", "asterisk": f"{extract_max(a_data, 'cpu')}%", "freeswitch": f"{extract_max(f_data, 'cpu')}%"},
-            {"metric": "Max Memory %", "asterisk": extract_max_percent(a_data, 'memory'), "freeswitch": extract_max_percent(f_data, 'memory')},
-            {"metric": "Max Load", "asterisk": extract_max_float(a_data, 'load'), "freeswitch": extract_max_float(f_data, 'load')},
-            {"metric": "Max BW TX (kbps)", "asterisk": extract_max_float(a_data, 'bw_tx'), "freeswitch": extract_max_float(f_data, 'bw_tx')}
+            {"metric": metric, "asterisk": value["asterisk"], "freeswitch": value["freeswitch"]}
+            for metric, value in summary_data.items()
         ]
 
         winner = determine_winner()
@@ -165,13 +185,12 @@ async def send_analysis_to_clients():
 
         # 💬 Generate natural language summary with OpenAI
         ai_prompt = (
-            "You are a concise performance analyst. You will receive a JSON object with two keys: 'asterisk' and 'freeswitch', "
-            "each containing step-wise performance metrics (cpu, memory, load, bw_tx, bw_rx, calls, etc.).\n"
-            "Please do the following:\n"
-            "1. Compare the two systems based on these metrics and write ONLY 3 short technical bullet points (each max one line).\n"
-            "2. Then, in a single short sentence, declare which system won and why.\n"
-            "Be objective, avoid exaggeration or lengthy wording.\n\n"
-            f"Input JSON:\n{json.dumps(result_data)}"
+            "You are a concise performance analyst. You will receive summary performance metrics for Asterisk and FreeSWITCH, "
+            "including max calls, CPU%, memory%, load, and average bandwidth per call.\n"
+            "Please:\n"
+            "1. Write ONLY 3 short bullet points comparing them (one per line).\n"
+            "2. Then, give a short winner declaration sentence.\n\n"
+            f"Summary JSON:\n{json.dumps(summary_data)}"
         )
 
         summary = "No summary available"
@@ -217,6 +236,14 @@ def extract_max_float(data, key):
 def extract_max(data, key):
     try:
         return max(float(item[key]) for item in data if key in item)
+    except:
+        return 0.0
+
+def average_bw_per_call(data):
+    try:
+        total_bw = sum(float(item['bw_tx']) + float(item['bw_rx']) for item in data if 'bw_tx' in item and 'bw_rx' in item)
+        total_calls = max(int(item['calls']) for item in data if 'calls' in item)
+        return round(total_bw / total_calls, 2) if total_calls else 0.0
     except:
         return 0.0
 

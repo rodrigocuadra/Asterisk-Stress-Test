@@ -205,6 +205,12 @@ def extract_max_float(data, key):
     except:
         return 0.0
 
+def extract_max(data, key):
+    try:
+        return max(float(item[key]) for item in data if key in item)
+    except:
+        return 0.0
+
 # ------------------------
 # Determinar ganador según duración
 # ------------------------

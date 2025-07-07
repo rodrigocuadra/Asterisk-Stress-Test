@@ -99,6 +99,14 @@ async def websocket_endpoint(ws: WebSocket):
 
 @app.post("/api/progress")
 async def progress(data: ProgressData):
+    global test_results
+    # Limpiar resultados si ambos están vacíos (es decir, antes de comenzar cualquier test)
+    if not test_results["asterisk"] and not test_results["freeswitch"]:
+        test_results = {"asterisk": [], "freeswitch": []}
+        if progress_file.exists():
+            progress_file.unlink()
+            print("[DEBUG] Limpieza inicial de results.json")
+    
     test_state[data.test_type]["steps"].append(data.dict())
     test_results[data.test_type].append(data.dict())
     with open(progress_file, "w") as f:

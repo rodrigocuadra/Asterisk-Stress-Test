@@ -525,18 +525,20 @@ while [ "$exitcalls" = "false" ]; do
     
     exitstep=false
     x=1
-    start_batch=$(date +%s%3N)
+    total_elapsed=0
     while [ "$exitstep" = "false" ]; do
         x=$((x + 1))
         if [ "$call_step" -lt "$x" ]; then
             exitstep=true
         fi
+        call_start=$(date +%s%3N)
         asterisk -rx "channel originate Local/200@stress_test application Playback jonathan&jonathan&jonathan"
+        call_end=$(date +%s%3N)
+        call_elapsed=$((call_end - call_start))
+        total_elapsed=$((total_elapsed + call_elapsed))
         sleep "$slepcall"
     done
-    end_batch=$(date +%s%3N)
-    batch_elapsed=$((end_batch - start_batch))
-    avg_elapsed=$((batch_elapsed / call_step))
+    avg_elapsed=$((total_elapsed / call_step))
     step=$((step + 1))
     i=$((i + call_step))
     if [ "$cpu" -gt "$maxcpuload" ]; then

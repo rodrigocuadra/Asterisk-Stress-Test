@@ -570,7 +570,7 @@ systemctl restart asterisk
 ssh -p $ssh_remote_port root@$ip_remote "systemctl restart asterisk"
 rm -rf /tmp/*.wav
 
-# Generate summary report
+echo -e "\n\033[1;32m✅ Test complete. Results saved to data.csv\033[0m"
 echo -e "***************************************************************************************************"
 echo -e "*                                     Summary Report                                              *"
 echo -e "***************************************************************************************************"

@@ -541,7 +541,7 @@ while [ "$exitcalls" = "false" ]; do
     done
 
     # Calculate how much sleep you need if necessary
-    if [ "$batch_elapsed_ms" -lt "$target_ms" ]; then
+    if [ "$total_elapsed" -lt "$target_ms" ]; then
         sleep_ms=$((target_ms - batch_elapsed_ms))
         sleep_sec=$(awk "BEGIN { printf(\"%.3f\", $sleep_ms / 1000) }")
         sleep "$sleep_sec"

@@ -468,9 +468,9 @@ for i in {1..10}; do
     fi
 done
 
-# Since Freeswitch takes longer to start, a 7-second delay is configured for the Asterisk test to start.
+# Since Freeswitch takes longer to start, a 6-second delay is configured for the Asterisk test to start.
 if [ "$WEB_NOTIFY" = true ]; then
-    sleep 7
+    sleep 6
 fi
 
 echo -e "*****************************************************************************************"

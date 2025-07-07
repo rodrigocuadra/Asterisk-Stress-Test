@@ -149,9 +149,9 @@ ws.onmessage = (event) => {
         content.style.margin = "0 auto";
         content.style.whiteSpace = "pre-wrap";
 
-        let table = `<h2 style='text-align:center'>🏆 ${msg.winner}</h2>`;
-        table += `<p style='text-align:center'>⏱ Duration: ${msg.duration} seconds</p>`;
-        table += `<table style='width:100%;border-collapse:collapse;margin-top:20px'>`;
+        let table = `<h2 style='text-align:center;font-size:2em'>🏆 ${msg.winner}</h2>`;
+        table += `<p style='text-align:center;font-size:1.1em'>⏱ Duration: ${msg.duration} seconds</p>`;
+        table += `<table style='width:100%;border-collapse:collapse;margin-top:20px;font-size:1em'>`;
         table += `<thead><tr><th style='border:1px solid #ccc;padding:8px'>Metric</th><th style='border:1px solid #ccc;padding:8px'>Asterisk</th><th style='border:1px solid #ccc;padding:8px'>FreeSWITCH</th></tr></thead><tbody>`;
         msg.comparison.forEach(row => {
             table += `<tr><td style='border:1px solid #ccc;padding:8px'>${row.metric}</td><td style='border:1px solid #ccc;padding:8px'>${row.asterisk}</td><td style='border:1px solid #ccc;padding:8px'>${row.freeswitch}</td></tr>`;
@@ -190,7 +190,21 @@ ws.onmessage = (event) => {
 };
 
 let testStart = Date.now();
+const timerEl = document.createElement("div");
+timerEl.id = "test-timer";
+timerEl.style.position = "fixed";
+timerEl.style.top = "10px";
+timerEl.style.right = "20px";
+timerEl.style.background = "rgba(0, 0, 0, 0.7)";
+timerEl.style.color = "white";
+timerEl.style.padding = "10px 20px";
+timerEl.style.borderRadius = "8px";
+timerEl.style.fontSize = "1.2em";
+timerEl.style.fontWeight = "bold";
+timerEl.style.zIndex = "1000";
+document.body.appendChild(timerEl);
+
 setInterval(() => {
     const elapsed = Math.floor((Date.now() - testStart) / 1000);
-    document.getElementById("test-timer").textContent = `Elapsed: ${elapsed}s`;
+    timerEl.textContent = `Elapsed: ${elapsed}s`;
 }, 1000);

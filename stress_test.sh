@@ -609,15 +609,15 @@ if [ -f data.csv ]; then
         avg_cpu = (count > 0) ? sum_cpu / count-1 : 0;
         avg_bw = (count > 0) ? sum_bw_per_call / count-1 : 0;
         est_calls_per_hour = (dur > 0) ? max_calls * (3600 / dur) : 0;
-        avg_delay_per_call = (total_calls > 0) ? total_batch_delay / max_calls : 0;
+        avg_delay_per_call = (total_batch_delay > 0) ? total_batch_delay / max_calls : 0;
 
         printf("\n📊 Summary:\n");
-        printf("• Max CPU Usage.............: %.2f%%\n", max_cpu);
-        printf("• Average CPU Usage.........: %.2f%%\n", avg_cpu);
-        printf("• Max Concurrent Calls......: %d\n", max_calls);
-        printf("• Average Bandwidth/Call....: %.2f kb/s (TX + RX)\n", avg_bw);
-        printf("• ⏱️ Total Originate Delay..: %.0f ms\n", total_batch_delay);
-        printf("• ⌛ Avg Delay per Call.....: %.2f ms\n", avg_delay_per_call);
+        printf("• Max CPU Usage...................: %.2f%%\n", max_cpu);
+        printf("• Average CPU Usage...............: %.2f%%\n", avg_cpu);
+        printf("• Max Concurrent Calls............: %d\n", max_calls);
+        printf("• Average Bandwidth/Call..........: %.2f kb/s (TX + RX)\n", avg_bw);
+        printf("• ⏱️ Total Originate Delay.......: %.0f ms\n", total_batch_delay);
+        printf("• ⌛ Avg Delay per Call..........: %.2f ms\n", avg_delay_per_call);
         printf("• ➕ Estimated Calls/Hour (~%ds): %.0f\n", dur, est_calls_per_hour);
     }'
 

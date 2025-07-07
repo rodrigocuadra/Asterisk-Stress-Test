@@ -456,7 +456,7 @@ numcores=$(nproc --all)
 exitcalls=false
 i=0
 step=0
-avg_elapsed=0
+total_elapsed=0
 clear
 asterisk_version=$(asterisk -V)
 echo -e "***************************************************************************************************"
@@ -470,7 +470,7 @@ T1=$(cat /sys/class/net/"$interface_name"/statistics/tx_bytes)
 date1=$(date +"%s")
 slepcall=$(printf %.2f "$((1000000000 * call_step_seconds / call_step))e-9")
 sleep 4
-echo -e "calls, active calls, cpu load (%), memory (%), bwtx (kb/s), bwrx(kb/s), interval(seg)" > data.csv
+echo -e "step, calls, active calls, cpu load (%), memory (%), bwtx (kb/s), bwrx (kb/s), delay (ms)" > data.csv
 
 while [ "$exitcalls" = "false" ]; do
     R2=$(cat /sys/class/net/"$interface_name"/statistics/rx_bytes)
@@ -502,7 +502,7 @@ while [ "$exitcalls" = "false" ]; do
         echo -e "\e[91m---------------------------------------------------------------------------------------------------"
     fi
     printf "%2s %7s %10s %19s %10s %10s %10s %12s %12s\n" "|" " $step |" "$i |" "$activecalls |" "$cpu% |" "$load |" "$memory |" "$bwtx |" "$bwrx |"
-    echo -e "$i, $activecalls, $cpu, $load, $memory, $bwtx, $bwrx, $seconds, $avg_elapsed" >> data.csv
+    echo -e "$i, $activecalls, $cpu, $load, $memory, $bwtx, $bwrx, $total_elapsed" >> data.csv
 
     if [ "$web_notify_url_base" != "" ] && [ "$WEB_NOTIFY" = true ]; then
         curl --silent --output /dev/null --write-out '' -X POST "$progress_url" \
@@ -538,7 +538,6 @@ while [ "$exitcalls" = "false" ]; do
         total_elapsed=$((total_elapsed + call_elapsed))
         sleep "$slepcall"
     done
-    avg_elapsed=$((total_elapsed / call_step))
     step=$((step + 1))
     i=$((i + call_step))
     if [ "$cpu" -gt "$maxcpuload" ]; then
@@ -592,7 +591,7 @@ if [ -f data.csv ]; then
         calls = $2 + 0;
         tx = $6 + 0;
         rx = $7 + 0;
-        avg_elapsed = $9 + 0;
+        elapsed = $8 + 0;
 
         # Bandwidth per call (includes both legs: TX + RX)
         bw_per_call = (calls > 0) ? (tx + rx) / calls : 0;
@@ -603,15 +602,15 @@ if [ -f data.csv ]; then
         sum_cpu += cpu;
         sum_calls += calls;
         sum_bw_per_call += bw_per_call;
-        total_batch_delay = total_batch_delay + (avg_elapsed * calls);
+        total_batch_delay = total_batch_delay + elapsed;
         count++;
     }
     END {
-        avg_cpu = (count > 0) ? sum_cpu / count : 0;
-        avg_calls = (count > 0) ? sum_calls / count : 0;
-        avg_bw = (count > 0) ? sum_bw_per_call / count : 0;
+        avg_cpu = (count > 0) ? sum_cpu / count-1 : 0;
+        avg_calls = (count > 0) ? sum_calls / count-1 : 0;
+        avg_bw = (count > 0) ? sum_bw_per_call / count-1 : 0;
         est_calls_per_hour = (dur > 0) ? max_calls * (3600 / dur) : 0;
-        avg_delay_per_call = (total_calls > 0) ? total_batch_delay / count : 0;
+        avg_delay_per_call = (total_calls > 0) ? total_batch_delay / sum_calls : 0;
 
 
         printf("\n📊 Summary:\n");

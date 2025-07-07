@@ -603,7 +603,7 @@ if [ -f data.csv ]; then
         sum_cpu += cpu;
         sum_calls += calls;
         sum_bw_per_call += bw_per_call;
-        total_batch_delay += avg_elapsed * calls;
+        total_batch_delay = total_batch_delay + (avg_elapsed * calls);
         count++;
     }
     END {
@@ -611,7 +611,7 @@ if [ -f data.csv ]; then
         avg_calls = (count > 0) ? sum_calls / count : 0;
         avg_bw = (count > 0) ? sum_bw_per_call / count : 0;
         est_calls_per_hour = (dur > 0) ? max_calls * (3600 / dur) : 0;
-        avg_delay_per_call = (total_calls > 0) ? total_batch_delay / sum_calls : 0;
+        avg_delay_per_call = (total_calls > 0) ? total_batch_delay / count : 0;
 
 
         printf("\n📊 Summary:\n");

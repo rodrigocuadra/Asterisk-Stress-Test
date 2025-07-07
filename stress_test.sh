@@ -467,7 +467,11 @@ for i in {1..10}; do
         sleep 1
     fi
 done
-#sleep 10
+
+#Since Freeswitch takes longer to start, a 7-second delay is configured for the Asterisk test to start.
+if [ "$web_notify_url_base" != "" ] && [ "$WEB_NOTIFY" = true ]; then
+    sleep 7
+fi
 
 echo -e "*****************************************************************************************"
 echo -e "*                                  Start stress test                                    *"
@@ -491,7 +495,6 @@ date1=$(date +"%s")
 # slepcall=$(printf %.2f "$((1000000000 * call_step_seconds / call_step))e-9")
 # Convert call_step_seconds to milliseconds
 target_ms=$((call_step_seconds * 1000))
-sleep 8
 echo -e "step, calls, active calls, cpu load (%), memory (%), bwtx (kb/s), bwrx (kb/s), delay (ms)" > data.csv
 
 while [ "$exitcalls" = "false" ]; do

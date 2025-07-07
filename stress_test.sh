@@ -543,7 +543,7 @@ while [ "$exitcalls" = "false" ]; do
         exitcalls=true
             if [ "$web_notify_url_base" != "" ] && [ "$WEB_NOTIFY" = true ]; then
                 # echo "🔥 Threshold reached ($cpu%). Notifying control server..."
-                curl -X POST "$explosion_url" \
+                curl -s -X POST "$explosion_url" \
                     -H "Content-Type: application/json" \
                     -d "{
                     \"test_type\": \"$test_type\",

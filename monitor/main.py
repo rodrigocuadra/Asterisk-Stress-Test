@@ -140,7 +140,6 @@ async def send_analysis_to_clients():
         with open(progress_file, "r") as f:
             result_data = json.load(f)
 
-        # Extraer métricas comparativas
         def extract_max(values, key):
             return max(v.get(key, 0) for v in values if key in v)
 
@@ -157,11 +156,27 @@ async def send_analysis_to_clients():
         winner = determine_winner()
         duration = round(time.time() - start_time)
 
+        # Generate AI Summary
+        try:
+            prompt = f"""You are an expert VoIP engineer. Summarize this stress test result comparing Asterisk and FreeSWITCH.\nData:\n{json.dumps(comparison, indent=2)}\n\nWinner: {winner}\nDuration: {duration} seconds\n\nProvide a short and insightful paragraph for a dashboard overlay."""
+            ai_response = client.chat.completions.create(
+                model=OPENAI_MODEL,
+                messages=[
+                    {"role": "system", "content": "You are a technical AI assistant."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            summary = ai_response.choices[0].message.content.strip()
+        except Exception as e:
+            print(f"[ERROR] AI summary generation failed: {e}")
+            summary = "AI analysis not available."
+
         await manager.broadcast({
             "type": "analysis",
             "winner": winner,
             "duration": duration,
             "comparison": comparison,
+            "summary": summary,
             "confetti": True
         })
     except Exception as e:
@@ -173,7 +188,7 @@ async def send_analysis_to_clients():
 
 def extract_max_percent(data, key):
     try:
-        return max(float(item[key].strip('%')) for item in data if key in item)  # devuelve float
+        return max(float(item[key].strip('%')) for item in data if key in item)
     except:
         return "0%"
 
@@ -236,4 +251,3 @@ async def ws_terminal1(websocket: WebSocket):
 @app.websocket("/ws/terminal2")
 async def ws_terminal2(websocket: WebSocket):
     await ssh_handler(websocket, TERMINAL2_IP)
-

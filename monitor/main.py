@@ -135,41 +135,48 @@ async def schedule_analysis():
 # ------------------------
 
 async def send_analysis_to_clients():
+    global test_results
     try:
         print("[DEBUG] Preparing to send analysis to clients...")
         with open(progress_file, "r") as f:
             result_data = json.load(f)
 
-        def extract_max(values, key):
-            return max(v.get(key, 0) for v in values if key in v)
-
-        a_data = result_data["asterisk"]
-        f_data = result_data["freeswitch"]
+        a_data = result_data.get("asterisk", [])
+        f_data = result_data.get("freeswitch", [])
 
         comparison = [
             {"metric": "Max Calls", "asterisk": len(a_data) * 100, "freeswitch": len(f_data) * 100},
             {"metric": "Max CPU %", "asterisk": f"{extract_max(a_data, 'cpu')}%", "freeswitch": f"{extract_max(f_data, 'cpu')}%"},
             {"metric": "Max Memory %", "asterisk": extract_max_percent(a_data, 'memory'), "freeswitch": extract_max_percent(f_data, 'memory')},
             {"metric": "Max Load", "asterisk": extract_max_float(a_data, 'load'), "freeswitch": extract_max_float(f_data, 'load')},
+            {"metric": "Max BW TX (kbps)", "asterisk": extract_max_float(a_data, 'bw_tx'), "freeswitch": extract_max_float(f_data, 'bw_tx')}
         ]
 
         winner = determine_winner()
         duration = round(time.time() - start_time)
 
-        # Generate AI Summary
-        try:
-            prompt = f"""You are an expert VoIP engineer. Summarize this stress test result comparing Asterisk and FreeSWITCH.\nData:\n{json.dumps(comparison, indent=2)}\n\nWinner: {winner}\nDuration: {duration} seconds\n\nProvide a short and insightful paragraph for a dashboard overlay."""
-            ai_response = client.chat.completions.create(
+        # 💬 Generate natural language summary with OpenAI
+        ai_prompt = (
+            "You are a performance analyst. I will give you a JSON object with two sections: 'asterisk' and 'freeswitch', "
+            "each containing multiple step results with metrics like cpu, memory, bw_tx, bw_rx, etc.\n"
+            "Analyze it and provide:\n"
+            "- A short summary of the most relevant technical differences\n"
+            "- An engaging and energetic one-sentence declaration of the winner\n\n"
+            f"Input JSON:\n{json.dumps(result_data)}"
+        )
+
+        summary = "No summary available"
+        if OPENAI_API_KEY:
+            response = client.chat.completions.create(
                 model=OPENAI_MODEL,
                 messages=[
-                    {"role": "system", "content": "You are a technical AI assistant."},
-                    {"role": "user", "content": prompt}
-                ]
+                    {"role": "system", "content": "You are an expert in performance benchmarking."},
+                    {"role": "user", "content": ai_prompt}
+                ],
+                temperature=0.7,
+                max_tokens=300
             )
-            summary = ai_response.choices[0].message.content.strip()
-        except Exception as e:
-            print(f"[ERROR] AI summary generation failed: {e}")
-            summary = "AI analysis not available."
+            summary = response.choices[0].message.content.strip()
 
         await manager.broadcast({
             "type": "analysis",

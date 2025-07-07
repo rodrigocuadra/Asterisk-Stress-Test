@@ -505,7 +505,7 @@ while [ "$exitcalls" = "false" ]; do
     echo -e "$i, $activecalls, $cpu, $load, $memory, $bwtx, $bwrx, $seconds, $avg_elapsed" >> data.csv
 
     if [ "$web_notify_url_base" != "" ] && [ "$WEB_NOTIFY" = true ]; then
-        curl -s -X POST "$progress_url" \
+        curl --silent --output /dev/null --write-out '' -X POST "$progress_url" \
             -H "Content-Type: application/json" \
             -d "{
                 \"test_type\": \"$test_type\",
@@ -543,7 +543,7 @@ while [ "$exitcalls" = "false" ]; do
         exitcalls=true
             if [ "$web_notify_url_base" != "" ] && [ "$WEB_NOTIFY" = true ]; then
                 # echo "🔥 Threshold reached ($cpu%). Notifying control server..."
-                curl -s -X POST "$explosion_url" \
+                curl --silent --output /dev/null --write-out '' -X POST "$explosion_url" \
                     -H "Content-Type: application/json" \
                     -d "{
                     \"test_type\": \"$test_type\",

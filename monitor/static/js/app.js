@@ -21,7 +21,33 @@ const socket2 = new WebSocket(`ws://${location.host}/ws/terminal2`);
 socket2.onmessage = e => term2.write(e.data);
 term2.onData(data => socket2.send(data));
 
+let testStart;
+const timerEl = document.createElement("div");
+timerEl.id = "test-timer";
+timerEl.style.position = "fixed";
+timerEl.style.top = "10px";
+timerEl.style.right = "20px";
+timerEl.style.background = "rgba(0, 0, 0, 0.8)";
+timerEl.style.color = "white";
+timerEl.style.padding = "12px 24px";
+timerEl.style.borderRadius = "10px";
+timerEl.style.fontSize = "1.6em";
+timerEl.style.fontWeight = "bold";
+timerEl.style.zIndex = "1000";
+timerEl.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
+timerEl.textContent = "Elapsed: 0s";
+document.body.appendChild(timerEl);
+
+let timerInterval;
+
 function startTests() {
+    testStart = Date.now();
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - testStart) / 1000);
+        timerEl.textContent = `Elapsed: ${elapsed}s`;
+    }, 1000);
+
     document.getElementById("explosion-sound").play().catch(() => {});
     document.getElementById("winner-sound").play().catch(() => {});
     document.getElementById("start-btn").style.display = "none";
@@ -142,9 +168,9 @@ ws.onmessage = (event) => {
         overlay.style.position = "fixed";
         overlay.style.top = "0";
         overlay.style.left = "0";
-        overlay.style.width = "100%";
-        overlay.style.height = "100%";
-        overlay.style.backgroundColor = "rgba(0, 0, 0, 0.65)";
+        overlay.style.width = "100vw";
+        overlay.style.height = "100vh";
+        overlay.style.backgroundColor = "rgba(0, 0, 0, 0.85)";
         overlay.style.zIndex = "9999";
         overlay.style.overflow = "auto";
         overlay.style.padding = "40px";
@@ -161,7 +187,7 @@ ws.onmessage = (event) => {
 
         let table = `<h2 style='text-align:center;font-size:2em'>🏆 ${msg.winner}</h2>`;
         table += `<p style='text-align:center;font-size:1.1em'>⏱ Duration: ${msg.duration} seconds</p>`;
-        table += `<p style='text-align:center;font-size:1.1em;margin-bottom:20px'>${msg.summary}</p>`;
+        table += `<p style='text-align:center;font-size:1.2em;margin-bottom:20px;font-weight:bold'>${msg.summary}</p>`;
         table += `<table style='width:100%;border-collapse:collapse;margin-top:20px;font-size:1em'>`;
         table += `<thead><tr><th style='border:1px solid #ccc;padding:8px'>Metric</th><th style='border:1px solid #ccc;padding:8px'>Asterisk</th><th style='border:1px solid #ccc;padding:8px'>FreeSWITCH</th></tr></thead><tbody>`;
         msg.comparison.forEach(row => {
@@ -190,24 +216,3 @@ ws.onmessage = (event) => {
         declareWinner(msg.winner.toLowerCase());
     }
 };
-
-let testStart = Date.now();
-const timerEl = document.createElement("div");
-timerEl.id = "test-timer";
-timerEl.style.position = "fixed";
-timerEl.style.top = "10px";
-timerEl.style.right = "20px";
-timerEl.style.background = "rgba(0, 0, 0, 0.7)";
-timerEl.style.color = "white";
-timerEl.style.padding = "10px 20px";
-timerEl.style.borderRadius = "8px";
-timerEl.style.fontSize = "1.4em";
-timerEl.style.fontWeight = "bold";
-timerEl.style.zIndex = "1000";
-timerEl.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
-document.body.appendChild(timerEl);
-
-setInterval(() => {
-    const elapsed = Math.floor((Date.now() - testStart) / 1000);
-    timerEl.textContent = `Elapsed: ${elapsed}s`;
-}, 1000);

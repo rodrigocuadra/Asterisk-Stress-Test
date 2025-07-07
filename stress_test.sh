@@ -449,10 +449,10 @@ systemctl restart asterisk
 # Wait for Asterisk to raise
 for i in {1..10}; do
     if asterisk -rx "core show uptime" &>/dev/null; then
-        echo "✅ Asterisk está arriba"
+        # echo "✅ Asterisk está arriba"
         break
     else
-        echo "⏳ Esperando que Asterisk inicie..."
+        # echo "⏳ Esperando que Asterisk inicie..."
         sleep 1
     fi
 done
@@ -460,10 +460,10 @@ ssh -p $ssh_remote_port root@$ip_remote "systemctl restart asterisk"
 # Wait for Asterisk to raise
 for i in {1..10}; do
     if ssh -p $ssh_remote_port root@$ip_remote "asterisk -rx 'core show uptime' &>/dev/null"; then
-        echo "✅ Asterisk en $ip_remote está operativo"
+        # echo "✅ Asterisk en $ip_remote está operativo"
         break
     else
-        echo "⏳ Esperando que Asterisk se levante en $ip_remote..."
+        # echo "⏳ Esperando que Asterisk se levante en $ip_remote..."
         sleep 1
     fi
 done

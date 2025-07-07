@@ -468,8 +468,8 @@ for i in {1..10}; do
     fi
 done
 
-#Since Freeswitch takes longer to start, a 7-second delay is configured for the Asterisk test to start.
-if [ "$web_notify_url_base" != "" ] && [ "$WEB_NOTIFY" = true ]; then
+# Since Freeswitch takes longer to start, a 7-second delay is configured for the Asterisk test to start.
+if [ "$WEB_NOTIFY" = true ]; then
     sleep 7
 fi
 

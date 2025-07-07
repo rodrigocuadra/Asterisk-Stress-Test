@@ -157,11 +157,12 @@ async def send_analysis_to_clients():
 
         # 💬 Generate natural language summary with OpenAI
         ai_prompt = (
-            "You are a performance analyst. I will give you a JSON object with two sections: 'asterisk' and 'freeswitch', "
-            "each containing multiple step results with metrics like cpu, memory, bw_tx, bw_rx, etc.\n"
-            "Analyze it and provide:\n"
-            "- A short summary of the most relevant technical differences\n"
-            "- An engaging and energetic one-sentence declaration of the winner\n\n"
+            "You are a concise performance analyst. You will receive a JSON object with two keys: 'asterisk' and 'freeswitch', "
+            "each containing step-wise performance metrics (cpu, memory, load, bw_tx, bw_rx, calls, etc.).\n"
+            "Please do the following:\n"
+            "1. Compare the two systems based on these metrics and write ONLY 3 short technical bullet points (each max one line).\n"
+            "2. Then, in a single short sentence, declare which system won and why.\n"
+            "Be objective, avoid exaggeration or lengthy wording.\n\n"
             f"Input JSON:\n{json.dumps(result_data)}"
         )
 

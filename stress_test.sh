@@ -468,7 +468,9 @@ printf "%2s %7s %10s %19s %10s %10s %10s %12s %12s\n" "|" " Step |" "Calls |" "A
 R1=$(cat /sys/class/net/"$interface_name"/statistics/rx_bytes)
 T1=$(cat /sys/class/net/"$interface_name"/statistics/tx_bytes)
 date1=$(date +"%s")
-slepcall=$(printf %.2f "$((1000000000 * call_step_seconds / call_step))e-9")
+# slepcall=$(printf %.2f "$((1000000000 * call_step_seconds / call_step))e-9")
+# Convertir call_step_seconds a milisegundos
+target_ms=$((call_step_seconds * 1000))
 sleep 4
 echo -e "step, calls, active calls, cpu load (%), memory (%), bwtx (kb/s), bwrx (kb/s), delay (ms)" > data.csv
 
@@ -538,6 +540,14 @@ while [ "$exitcalls" = "false" ]; do
         total_elapsed=$((total_elapsed + call_elapsed))
         sleep "$slepcall"
     done
+
+    # Calcular cuánto dormir si es necesario
+    if [ "$batch_elapsed_ms" -lt "$target_ms" ]; then
+        sleep_ms=$((target_ms - batch_elapsed_ms))
+        sleep_sec=$(awk "BEGIN { printf(\"%.3f\", $sleep_ms / 1000) }")
+        sleep "$sleep_sec"
+    fi
+   
     step=$((step + 1))
     i=$((i + call_step))
     if [ "$cpu" -gt "$maxcpuload" ]; then
@@ -612,12 +622,12 @@ if [ -f data.csv ]; then
         avg_delay_per_call = (total_batch_delay > 0) ? total_batch_delay / max_calls : 0;
 
         printf("\n📊 Summary:\n");
-        printf("• Max CPU Usage...................: %.2f%%\n", max_cpu);
-        printf("• Average CPU Usage...............: %.2f%%\n", avg_cpu);
-        printf("• Max Concurrent Calls............: %d\n", max_calls);
-        printf("• Average Bandwidth/Call..........: %.2f kb/s (TX + RX)\n", avg_bw);
-        printf("• ⏱️ Total Originate Delay.........: %.0f ms\n", total_batch_delay);
-        printf("• ⌛ Avg Delay per Call...........: %.2f ms\n", avg_delay_per_call);
+        printf("• Max CPU Usage..................: %.2f%%\n", max_cpu);
+        printf("• Average CPU Usage..............: %.2f%%\n", avg_cpu);
+        printf("• Max Concurrent Calls...........: %d\n", max_calls);
+        printf("• Average Bandwidth/Call.........: %.2f kb/s (TX + RX)\n", avg_bw);
+        printf("• ⏱️ Total Originate Delay........: %.0f ms\n", total_batch_delay);
+        printf("• ⌛ Avg Delay per Call..........: %.2f ms\n", avg_delay_per_call);
         printf("• ➕ Estimated Calls/Hour (~%ds): %.0f\n", dur, est_calls_per_hour);
     }'
 

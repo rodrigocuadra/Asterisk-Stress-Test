@@ -590,8 +590,8 @@ if [ -f data.csv ]; then
     {
         cpu = $3 + 0;
         calls = $2 + 0;
-        tx = $5 + 0;
-        rx = $6 + 0;
+        tx = $6 + 0;
+        rx = $7 + 0;
         avg_elapsed = $9 + 0;
 
         # Bandwidth per call (includes both legs: TX + RX)
@@ -603,8 +603,8 @@ if [ -f data.csv ]; then
         sum_cpu += cpu;
         sum_calls += calls;
         sum_bw_per_call += bw_per_call;
-        total_batch_delay += avg_elapsed * calls_per_step;
-        total_calls += calls_per_step;
+        total_batch_delay += avg_elapsed;
+        count_steps += 1;
         count++;
     }
     END {
@@ -612,7 +612,8 @@ if [ -f data.csv ]; then
         avg_calls = (count > 0) ? sum_calls / count : 0;
         avg_bw = (count > 0) ? sum_bw_per_call / count : 0;
         est_calls_per_hour = (dur > 0) ? max_calls * (3600 / dur) : 0;
-        avg_delay_per_call = (total_calls > 0) ? total_batch_delay / total_calls : 0;
+        avg_delay_per_call = (count_steps > 0) ? total_batch_delay / count_steps : 0;
+
 
         printf("\n📊 Summary:\n");
         printf("• Max CPU Usage.............: %.2f%%\n", max_cpu);

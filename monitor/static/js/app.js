@@ -55,8 +55,18 @@ function declareWinner(type) {
     const name = type === 'asterisk' ? 'Asterisk' : 'FreeSWITCH';
     document.getElementById("winner-box").innerText = "🏆 " + name + " is the Winner!";
     document.getElementById("winner-box").style.display = "block";
-    confetti();
     document.getElementById("winner-sound").play();
+    if (window.confetti) {
+        const duration = 10 * 1000;
+        const end = Date.now() + duration;
+        (function frame() {
+            confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+            confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        })();
+    }
 }
 
 function triggerExplosion(type) {
@@ -151,6 +161,7 @@ ws.onmessage = (event) => {
 
         let table = `<h2 style='text-align:center;font-size:2em'>🏆 ${msg.winner}</h2>`;
         table += `<p style='text-align:center;font-size:1.1em'>⏱ Duration: ${msg.duration} seconds</p>`;
+        table += `<p style='text-align:center;font-size:1.1em;margin-bottom:20px'>${msg.summary}</p>`;
         table += `<table style='width:100%;border-collapse:collapse;margin-top:20px;font-size:1em'>`;
         table += `<thead><tr><th style='border:1px solid #ccc;padding:8px'>Metric</th><th style='border:1px solid #ccc;padding:8px'>Asterisk</th><th style='border:1px solid #ccc;padding:8px'>FreeSWITCH</th></tr></thead><tbody>`;
         msg.comparison.forEach(row => {
@@ -175,17 +186,8 @@ ws.onmessage = (event) => {
         overlay.appendChild(content);
         document.body.appendChild(overlay);
 
-        if (msg.confetti && window.confetti) {
-            const duration = 10 * 1000;
-            const end = Date.now() + duration;
-            (function frame() {
-                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
-                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
-                if (Date.now() < end) {
-                    requestAnimationFrame(frame);
-                }
-            })();
-        }
+        document.getElementById("winner-sound").play().catch(() => {});
+        declareWinner(msg.winner.toLowerCase());
     }
 };
 
@@ -199,9 +201,10 @@ timerEl.style.background = "rgba(0, 0, 0, 0.7)";
 timerEl.style.color = "white";
 timerEl.style.padding = "10px 20px";
 timerEl.style.borderRadius = "8px";
-timerEl.style.fontSize = "1.2em";
+timerEl.style.fontSize = "1.4em";
 timerEl.style.fontWeight = "bold";
 timerEl.style.zIndex = "1000";
+timerEl.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
 document.body.appendChild(timerEl);
 
 setInterval(() => {

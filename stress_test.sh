@@ -620,9 +620,9 @@ if [ -f data.csv ]; then
         printf("• Max Concurrent Calls......: %d\n", max_calls);
         printf("• Average Calls per Step....: %.2f\n", avg_calls);
         printf("• Average Bandwidth/Call....: %.2f kb/s (TX + RX)\n", avg_bw);
-        printf("• ➕ Estimated Calls/Hour (~%ds): %.0f\n", dur, est_calls_per_hour);
         printf("• ⏱️ Total Originate Delay...: %.0f ms\n", total_batch_delay);
         printf("• ⌛ Avg Delay per Call......: %.2f ms\n", avg_delay_per_call);
+        printf("• ➕ Estimated Calls/Hour (~%ds): %.0f\n", dur, est_calls_per_hour);
     }'
 
     # ✅ Append system info

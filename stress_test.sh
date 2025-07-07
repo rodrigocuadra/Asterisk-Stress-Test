@@ -520,7 +520,7 @@ while [ "$exitcalls" = "false" ]; do
                 \"bw_tx\": $bwtx,
                 \"bw_rx\": $bwrx,
                 \"timestamp\": \"$(date --iso-8601=seconds)\"
-            }" > /dev/null &
+            }" &
     fi
     
     exitstep=false
@@ -552,7 +552,7 @@ while [ "$exitcalls" = "false" ]; do
                     \"active_calls\": $activecalls,
                     \"step\": $step,
                     \"timestamp\": \"$(date --iso-8601=seconds)\"
-                    }" > /dev/null &
+                    }" &
                     # echo "📤 Explosion request sent for $test_type (CPU: $cpu%, Active Calls: $activecalls)"
             fi
     fi

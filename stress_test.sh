@@ -108,7 +108,7 @@ if [ -f "$filename" ]; then
     echo -e "Seconds between each step (Recommended 5-30).......... >  $call_step_seconds"
     echo -e "Estimated Call Duration Seconds (e.g., 180)........... >  $call_duration"
     if [ "$WEB_NOTIFY" = true ]; then
-        echo -e "Web server URL base (e.g., http://192.168.5.5:8000)... >   $web_notify_url_base"
+        echo -e "Web server URL base (e.g., http://192.168.5.5:8000)... >  $web_notify_url_base"
     fi
 fi
 

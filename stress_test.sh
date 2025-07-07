@@ -440,14 +440,34 @@ ssh -p $ssh_remote_port root@$ip_remote "echo 'transmit_silence = yes' >> /etc/a
 ssh -p $ssh_remote_port root@$ip_remote "echo 'hide_messaging_ami_events = yes' >> /etc/asterisk/asterisk.conf"
 fi
 
-# Restart Asterisk on both servers
-systemctl restart asterisk
-ssh -p $ssh_remote_port root@$ip_remote "systemctl restart asterisk"
 echo -e "${GREEN}*** Done ***${NC}"
 echo -e "*****************************************************************************************"
 echo -e "*                        Restarting Asterisk in both servers                            *"
 echo -e "*****************************************************************************************"
-sleep 10
+# Restart Asterisk on both servers
+systemctl restart asterisk
+# Wait for Asterisk to raise
+for i in {1..10}; do
+    if asterisk -rx "core show uptime" &>/dev/null; then
+        echo "✅ Asterisk está arriba"
+        break
+    else
+        echo "⏳ Esperando que Asterisk inicie..."
+        sleep 1
+    fi
+done
+ssh -p $ssh_remote_port root@$ip_remote "systemctl restart asterisk"
+# Wait for Asterisk to raise
+for i in {1..10}; do
+    if ssh -p $ssh_remote_port root@$ip_remote "asterisk -rx 'core show uptime' &>/dev/null"; then
+        echo "✅ Asterisk en $ip_remote está operativo"
+        break
+    else
+        echo "⏳ Esperando que Asterisk se levante en $ip_remote..."
+        sleep 1
+    fi
+done
+#sleep 10
 
 echo -e "*****************************************************************************************"
 echo -e "*                                  Start stress test                                    *"
@@ -577,7 +597,17 @@ echo -e "***********************************************************************
 echo -e "*                                     Restarting Asterisk                                         *"
 echo -e "***************************************************************************************************"
 systemctl restart asterisk
-sleep 1
+# Wait for Asterisk to raise
+for i in {1..10}; do
+    if asterisk -rx "core show uptime" &>/dev/null; then
+        echo "✅ Asterisk está arriba"
+        break
+    else
+        echo "⏳ Esperando que Asterisk inicie..."
+        sleep 1
+    fi
+done
+
 ssh -p $ssh_remote_port root@$ip_remote "systemctl restart asterisk"
 rm -rf /tmp/*.wav
 

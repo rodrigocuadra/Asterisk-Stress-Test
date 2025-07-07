@@ -603,7 +603,7 @@ if [ -f data.csv ]; then
         sum_cpu += cpu;
         sum_calls += calls;
         sum_bw_per_call += bw_per_call;
-        total_batch_delay += avg_elapsed;
+        total_batch_delay += avg_elapsed * calls;
         count++;
     }
     END {

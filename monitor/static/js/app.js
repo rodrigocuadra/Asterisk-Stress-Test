@@ -164,6 +164,8 @@ ws.onmessage = (event) => {
     }
 
     if (msg.type === 'analysis') {
+        clearInterval(timerInterval);
+
         const overlay = document.createElement("div");
         overlay.style.position = "fixed";
         overlay.style.top = "0";
@@ -189,7 +191,7 @@ ws.onmessage = (event) => {
 
         let table = `<h2 style='text-align:center;font-size:2em'>🏆 ${msg.winner}</h2>`;
         table += `<p style='text-align:center;font-size:1.1em'>⏱ Duration: ${msg.duration} seconds</p>`;
-        table += `<p style='text-align:center;font-size:1.2em;margin-bottom:20px;font-weight:bold'>${msg.summary}</p>`;
+        table += `<p style='text-align:center;font-size:1.2em;margin-bottom:20px;font-weight:bold'>${msg.summary || 'No summary available.'}</p>`;
         table += `<table style='width:100%;border-collapse:collapse;margin-top:20px;font-size:1em'>`;
         table += `<thead><tr><th style='border:1px solid #ccc;padding:8px'>Metric</th><th style='border:1px solid #ccc;padding:8px'>Asterisk</th><th style='border:1px solid #ccc;padding:8px'>FreeSWITCH</th></tr></thead><tbody>`;
         msg.comparison.forEach(row => {
@@ -202,6 +204,9 @@ ws.onmessage = (event) => {
         const closeBtn = document.createElement("button");
         closeBtn.innerText = "Close";
         closeBtn.style.marginTop = "20px";
+        closeBtn.style.display = "block";
+        closeBtn.style.marginLeft = "auto";
+        closeBtn.style.marginRight = "auto";
         closeBtn.style.padding = "10px 20px";
         closeBtn.style.fontSize = "1em";
         closeBtn.style.background = "#007BFF";

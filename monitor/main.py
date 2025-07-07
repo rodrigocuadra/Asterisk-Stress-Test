@@ -86,16 +86,8 @@ async def get_index():
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
     await ws.accept()
-    ip = ws.client.host
-    print(f"[DEBUG] WebSocket connection from {ip}")
+    await manager.connect(ws)
     try:
-        msg = await ws.receive_text()
-        kind = json.loads(msg).get("kind", "unknown")
-        print(f"[DEBUG] Client {ip} kind: {kind}")
-        if kind != "dashboard":
-            print(f"[DEBUG] Ignoring non-dashboard WebSocket from {ip}")
-            return  # O incluso await ws.close()
-        await manager.connect(ws)
         while True:
             await ws.receive_text()
     except Exception:

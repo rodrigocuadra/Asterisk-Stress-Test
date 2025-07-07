@@ -456,6 +456,7 @@ numcores=$(nproc --all)
 exitcalls=false
 i=0
 step=0
+avg_elapsed=0
 clear
 asterisk_version=$(asterisk -V)
 echo -e "***************************************************************************************************"
@@ -501,7 +502,7 @@ while [ "$exitcalls" = "false" ]; do
         echo -e "\e[91m---------------------------------------------------------------------------------------------------"
     fi
     printf "%2s %7s %10s %19s %10s %10s %10s %12s %12s\n" "|" " $step |" "$i |" "$activecalls |" "$cpu% |" "$load |" "$memory |" "$bwtx |" "$bwrx |"
-    echo -e "$i, $activecalls, $cpu, $load, $memory, $bwtx, $bwrx, $seconds" >> data.csv
+    echo -e "$i, $activecalls, $cpu, $load, $memory, $bwtx, $bwrx, $seconds, $avg_elapsed" >> data.csv
 
     if [ "$web_notify_url_base" != "" ] && [ "$WEB_NOTIFY" = true ]; then
         curl -s -X POST "$progress_url" \
@@ -515,6 +516,7 @@ while [ "$exitcalls" = "false" ]; do
                 \"cpu\": $cpu,
                 \"load\": \"$load\",
                 \"memory\": \"$memory\",
+           		\"avg_elapsed\": \"$avg_elapsed\",
                 \"bw_tx\": $bwtx,
                 \"bw_rx\": $bwrx,
                 \"timestamp\": \"$(date --iso-8601=seconds)\"
@@ -523,6 +525,7 @@ while [ "$exitcalls" = "false" ]; do
     
     exitstep=false
     x=1
+    start_batch=$(date +%s%3N)
     while [ "$exitstep" = "false" ]; do
         x=$((x + 1))
         if [ "$call_step" -lt "$x" ]; then
@@ -531,6 +534,9 @@ while [ "$exitcalls" = "false" ]; do
         asterisk -rx "channel originate Local/200@stress_test application Playback jonathan&jonathan&jonathan"
         sleep "$slepcall"
     done
+    end_batch=$(date +%s%3N)
+    batch_elapsed=$((end_batch - start_batch))
+    avg_elapsed=$((batch_elapsed / call_step))
     step=$((step + 1))
     i=$((i + call_step))
     if [ "$cpu" -gt "$maxcpuload" ]; then
@@ -576,12 +582,15 @@ if [ -f data.csv ]; then
         max_cpu=0; sum_cpu=0; count=0;
         max_calls=0; sum_calls=0;
         sum_bw_per_call=0;
+        total_batch_delay = 0;
+        total_calls = 0;
     }
     {
         cpu = $3 + 0;
         calls = $2 + 0;
         tx = $5 + 0;
         rx = $6 + 0;
+        avg_elapsed = $9 + 0;
 
         # Bandwidth per call (includes both legs: TX + RX)
         bw_per_call = (calls > 0) ? (tx + rx) / calls : 0;
@@ -592,6 +601,8 @@ if [ -f data.csv ]; then
         sum_cpu += cpu;
         sum_calls += calls;
         sum_bw_per_call += bw_per_call;
+        total_batch_delay += avg_elapsed * calls_per_step;
+        total_calls += calls_per_step;
         count++;
     }
     END {
@@ -599,6 +610,7 @@ if [ -f data.csv ]; then
         avg_calls = (count > 0) ? sum_calls / count : 0;
         avg_bw = (count > 0) ? sum_bw_per_call / count : 0;
         est_calls_per_hour = (dur > 0) ? max_calls * (3600 / dur) : 0;
+        avg_delay_per_call = (total_calls > 0) ? total_batch_delay / total_calls : 0;
 
         printf("\n📊 Summary:\n");
         printf("• Max CPU Usage.............: %.2f%%\n", max_cpu);
@@ -607,6 +619,8 @@ if [ -f data.csv ]; then
         printf("• Average Calls per Step....: %.2f\n", avg_calls);
         printf("• Average Bandwidth/Call....: %.2f kb/s (TX + RX)\n", avg_bw);
         printf("• ➕ Estimated Calls/Hour (~%ds): %.0f\n", dur, est_calls_per_hour);
+        printf("• ⏱️ Total Originate Delay...: %.0f ms\n", total_batch_delay);
+        printf("• ⌛ Avg Delay per Call......: %.2f ms\n", avg_delay_per_call);
     }'
 
     # ✅ Append system info

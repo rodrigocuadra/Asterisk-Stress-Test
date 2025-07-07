@@ -86,10 +86,12 @@ async def get_index():
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
     await ws.accept()
-    await manager.connect(ws)
+    ip = ws.client.host
+    print(f"[DEBUG] WebSocket connection from {ip}")
     try:
-        while True:
-            await ws.receive_text()
+        initial_msg = await ws.receive_text()
+        print(f"[DEBUG] Initial message from {ip}: {initial_msg}")
+        ...
     except Exception:
         await manager.disconnect(ws)
 

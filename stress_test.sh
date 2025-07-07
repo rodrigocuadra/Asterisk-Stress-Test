@@ -577,6 +577,7 @@ echo -e "***********************************************************************
 echo -e "*                                     Restarting Asterisk                                         *"
 echo -e "***************************************************************************************************"
 systemctl restart asterisk
+sleep 1
 ssh -p $ssh_remote_port root@$ip_remote "systemctl restart asterisk"
 rm -rf /tmp/*.wav
 

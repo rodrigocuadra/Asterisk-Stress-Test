@@ -56,6 +56,9 @@ function startTests() {
 }
 
 const ws = new WebSocket("ws://" + location.hostname + ":8000/ws");
+ws.onopen = () => {
+    ws.send(JSON.stringify({ kind: "dashboard" }));
+};
 
 function updateCardColor(card, value) {
     if (value >= 50) {

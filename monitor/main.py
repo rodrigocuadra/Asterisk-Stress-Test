@@ -89,9 +89,15 @@ async def websocket_endpoint(ws: WebSocket):
     ip = ws.client.host
     print(f"[DEBUG] WebSocket connection from {ip}")
     try:
-        initial_msg = await ws.receive_text()
-        print(f"[DEBUG] Initial message from {ip}: {initial_msg}")
-        ...
+        msg = await ws.receive_text()
+        kind = json.loads(msg).get("kind", "unknown")
+        print(f"[DEBUG] Client {ip} kind: {kind}")
+        if kind != "dashboard":
+            print(f"[DEBUG] Ignoring non-dashboard WebSocket from {ip}")
+            return  # O incluso await ws.close()
+        await manager.connect(ws)
+        while True:
+            await ws.receive_text()
     except Exception:
         await manager.disconnect(ws)
 

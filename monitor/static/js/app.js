@@ -141,17 +141,13 @@ ws.onmessage = (event) => {
     const t = msg.data?.test_type;
 
     if (msg.type === 'system_info') {
-        const div = document.getElementById(`${msg.test_type}-info`);
-        const label = msg.test_type === 'asterisk' ? 'Asterisk' : 'FreeSWITCH';
-        div.innerHTML = `
-            <ul>
-                <li><strong>Version:</strong> ${msg.version}</li>
-                <li><strong>CPU Cores:</strong> ${msg.core_cpu}</li>
-                <li><strong>CPU Model:</strong> ${msg.cpu_model}</li>
-                <li><strong>Total RAM:</strong> ${msg.total_ram}</li>
-                <li><strong>Timestamp:</strong> ${msg.timestamp}</li>
-            </ul>
-        `;
+        // Actualizar el título con la versión
+        const versionSpan = document.getElementById(`${msg.test_type}-version`);
+        versionSpan.textContent = `(${msg.version})`;
+
+        // Insertar el hardware info en una sola línea
+        const infoDiv = document.getElementById(`${msg.test_type}-info`);
+        infoDiv.innerText = `${msg.core_cpu} cores • ${msg.cpu_model} • RAM ${msg.total_ram}`;
     }
     
     if (msg.type === 'progress') {

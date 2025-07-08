@@ -175,23 +175,29 @@ ws.onmessage = (event) => {
         overlay.style.backgroundColor = "rgba(0, 0, 0, 0.92)";
         overlay.style.zIndex = "9999";
         overlay.style.overflow = "auto";
-        overlay.style.padding = "40px";
+        overlay.style.padding = "20px";
         overlay.style.color = "#fff";
         overlay.style.fontSize = "1.2em";
+        overlay.style.backdropFilter = "blur(2px)";
 
         const content = document.createElement("div");
+        const summaryText = (msg.summary || 'No summary available.').replace(/\*\*/g, "");
         content.style.background = "#222";
         content.style.padding = "20px";
         content.style.borderRadius = "10px";
-        content.style.width = "100%";
-        content.style.maxWidth = "960px";
+        content.style.width = "96vw";
+        content.style.maxWidth = "96vw";
+        content.style.fontSize = "1.4rem";
+        content.style.lineHeight = "1.8";
         content.style.margin = "0 auto";
         content.style.whiteSpace = "pre-wrap";
         content.style.boxSizing = "border-box";
-
+        
         let table = `<h2 style='text-align:center;font-size:2em'>🏆 ${msg.winner}</h2>`;
         table += `<p style='text-align:center;font-size:1.1em'>⏱ Duration: ${msg.duration} seconds</p>`;
         table += `<p style='text-align:center;font-size:1.2em;margin-bottom:20px;font-weight:bold'>${msg.summary || 'No summary available.'}</p>`;
+        table += `<p style='text-align:center;font-size:1.4em;margin-bottom:30px;'>${summaryText}</p>`;
+
         table += `<table style='width:100%;border-collapse:collapse;margin-top:20px;font-size:1em'>`;
         table += `<thead><tr><th style='border:1px solid #ccc;padding:8px'>Metric</th><th style='border:1px solid #ccc;padding:8px'>Asterisk</th><th style='border:1px solid #ccc;padding:8px'>FreeSWITCH</th></tr></thead><tbody>`;
         msg.comparison.forEach(row => {

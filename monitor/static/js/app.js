@@ -140,6 +140,28 @@ ws.onmessage = (event) => {
     const msg = JSON.parse(event.data);
     const t = msg.data?.test_type;
 
+    if (msg.type === 'system_info') {
+        const div = document.getElementById(`${msg.test_type}-info`);
+        const versionLabel = msg.test_type === 'asterisk' ? "Asterisk" : "FreeSWITCH";
+
+        div.innerHTML = `
+            <h3>🧠 ${versionLabel} System Info</h3>
+            <ul style="list-style:none; padding:0; margin:0;">
+                <li><strong>Version:</strong> ${msg.version}</li>
+                <li><strong>CPU Cores:</strong> ${msg.core_cpu}</li>
+                <li><strong>CPU Model:</strong> ${msg.cpu_model}</li>
+                <li><strong>Total RAM:</strong> ${msg.total_ram}</li>
+                <li><strong>Timestamp:</strong> ${msg.timestamp}</li>
+            </ul>
+        `;
+        div.style.background = "#f8f9fa";
+        div.style.padding = "10px 20px";
+        div.style.borderRadius = "10px";
+        div.style.marginBottom = "20px";
+        div.style.border = "1px solid #ccc";
+        div.style.maxWidth = "400px";
+    }
+    
     if (msg.type === 'progress') {
         document.getElementById(t + "-cpu").innerText = "CPU: " + msg.data.cpu + "%";
         document.getElementById(t + "-mem").innerText = "Memory: " + msg.data.memory;

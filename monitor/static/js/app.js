@@ -103,6 +103,8 @@ function declareWinner(type) {
 }
 
 function triggerExplosion(type) {
+    // Detener el cronómetro del test que explotó
+    stopTimer(type);
     const overlay = document.getElementById(`${type}-overlay`);
     const sound = document.getElementById("explosion-sound");
     overlay.classList.remove("show", "persistent");
@@ -190,7 +192,8 @@ ws.onmessage = (event) => {
     if (msg.type === 'analysis') {
         const aioverlay = document.getElementById("ai-loading-overlay");
         if (aioverlay) aioverlay.style.display = "none";
-        clearInterval(timerInterval);
+        stopTimer("asterisk");
+        stopTimer("freeswitch");
 
         const overlay = document.createElement("div");
         overlay.style.position = "fixed";

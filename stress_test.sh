@@ -238,6 +238,7 @@ else
 fi
 
 test_type="asterisk"
+info_url="${web_notify_url_base}/api/info"
 progress_url="${web_notify_url_base}/api/progress"
 explosion_url="${web_notify_url_base}/api/explosion"
 
@@ -487,9 +488,10 @@ if [ "$web_notify_url_base" != "" ] && [ "$WEB_NOTIFY" = true ]; then
     TOTAL_RAM=$(free -h | awk '/^Mem:/ {print $2}')
 
     # Sends information about the hardware features and Asterisk version
-    curl --silent --output /dev/null --write-out '' -X POST "$progress_url" \
+    curl --silent --output /dev/null --write-out '' -X POST "$info_url" \
         -H "Content-Type: application/json" \
         -d "{
+            \"test_type\": \"$test_type\",
             \"asterisk_version\": \"$ASTERISK_VERSION\",
             \"core_cpu\": \"$CPU_CORES\",
             \"cpu_model\": \"$CPU_MODEL\",

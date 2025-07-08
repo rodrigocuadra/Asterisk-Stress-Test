@@ -137,6 +137,12 @@ async def progress(data: ProgressData):
 
     # 🧹 Borrar resultados si este es el primer paso (step 0) de su tipo
     if data.step == 0:
+        # ✅ Resetear estado global para nuevo análisis
+        global exploded_services, analysis_sent, start_time
+        exploded_services.clear()
+        analysis_sent = False
+        start_time = time.time()
+        print("[DEBUG] Estado global reiniciado para nuevo test.")
         print(f"[DEBUG] Detected start of new test: {data.test_type}")
         test_results[data.test_type] = []
         test_state[data.test_type]["steps"].clear()

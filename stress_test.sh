@@ -468,8 +468,35 @@ for i in {1..10}; do
     fi
 done
 
-# Since Freeswitch takes longer to start, a 6-second delay is configured for the Asterisk test to start.
-if [ "$WEB_NOTIFY" = true ]; then
+# Obtains information about the Asterisk version and hardware characteristics, as well as applying a 6-second delay to start the test in parity with freeswitch.
+if [ "$web_notify_url_base" != "" ] && [ "$WEB_NOTIFY" = true ]; then
+
+    # Get Asterisk version number only (e.g., 20.4.0)
+    ASTERISK_VERSION=$(asterisk -rx 'core show version' | awk '{print $2}')
+
+    # Get FreeSWITCH version number only (e.g., 1.10.12)
+    # FREESWITCH_VERSION=$(fs_cli -x 'version' | awk '{print $3}' | cut -d'-' -f1)
+
+    # Get the total number of logical CPU cores
+    CPU_CORES=$(lscpu | grep "^CPU(s):" | awk '{print $2}')
+
+    # Get the CPU model and speed (e.g., Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz)
+    CPU_MODEL=$(lscpu | grep "BIOS Model name:" | sed -E 's/BIOS Model name:\s+//')
+
+    # Get total system memory (RAM) in human-readable format (e.g., 32G)
+    TOTAL_RAM=$(free -h | awk '/^Mem:/ {print $2}')
+
+    # Sends information about the hardware features and Asterisk version
+    curl --silent --output /dev/null --write-out '' -X POST "$progress_url" \
+        -H "Content-Type: application/json" \
+        -d "{
+            \"asterisk_version\": \"$ASTERISK_VERSION\",
+            \"core_cpu\": \"$CPU_CORES\",
+            \"cpu_model\": \"$CPU_MODEL\",
+            \"total_ram\": \"$TOTAL_RAM\",
+            \"timestamp\": \"$(date --iso-8601=seconds)\"
+        }" &
+
     sleep 6
 fi
 

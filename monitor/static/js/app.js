@@ -174,28 +174,40 @@ ws.onmessage = (event) => {
         overlay.style.height = "100vh";
         overlay.style.backgroundColor = "rgba(0, 0, 0, 0.92)";
         overlay.style.zIndex = "9999";
-        overlay.style.overflow = "auto";
-        overlay.style.padding = "20px";
+        overlay.style.overflow = "hidden";
+        overlay.style.display = "flex";
+        overlay.style.alignItems = "center";
+        overlay.style.justifyContent = "center";
         overlay.style.color = "#fff";
         overlay.style.fontSize = "1.2em";
         overlay.style.backdropFilter = "blur(2px)";
 
         const content = document.createElement("div");
-        const summaryText = (msg.summary || 'No summary available.').replace(/\*\*/g, "");
+        const summaryText = (msg.summary || "No summary available.")
+            .replace(/\*\*/g, '') // quitar negritas markdown
+            .replace(/^\s*\d+\.\s+/gm, match => match.trim()) // limpiar numeración si es Markdown
+            .trim();
         content.style.background = "#222";
-        content.style.padding = "20px";
-        content.style.borderRadius = "10px";
-        content.style.width = "96vw";
-        content.style.maxWidth = "96vw";
-        content.style.fontSize = "1.4rem";
-        content.style.lineHeight = "1.8";
+        content.style.padding = "30px";
+        content.style.borderRadius = "12px";
+        content.style.width = "90vw";
+        content.style.maxWidth = "1000px";
+        content.style.maxHeight = "90vh";
+        content.style.overflowY = "auto";
+        content.style.fontSize = "1.4em";
+        content.style.lineHeight = "1.6";
         content.style.margin = "0 auto";
         content.style.whiteSpace = "pre-wrap";
         content.style.boxSizing = "border-box";
         
         let table = `<h2 style='text-align:center;font-size:2em'>🏆 ${msg.winner}</h2>`;
         table += `<p style='text-align:center;font-size:1.1em'>⏱ Duration: ${msg.duration} seconds</p>`;
-        table += `<p style='text-align:center;font-size:1.4em;margin-bottom:30px;'>${summaryText}</p>`;
+        table += `
+        <div style='text-align:left; margin: 20px auto; max-width: 900px; font-size: 1.2em; line-height: 1.6;'>
+            <h3 style='text-align:center; margin-bottom: 10px; font-size: 1.4em;'>📋 Summary</h3>
+            <pre style='white-space:pre-wrap; word-break:break-word; font-family:inherit;'>${summaryText}</pre>
+        </div>
+`        ;
         table += `<table style='width:100%;border-collapse:collapse;margin-top:20px;font-size:1em'>`;
         table += `<thead><tr><th style='border:1px solid #ccc;padding:8px'>Metric</th><th style='border:1px solid #ccc;padding:8px'>Asterisk</th><th style='border:1px solid #ccc;padding:8px'>FreeSWITCH</th></tr></thead><tbody>`;
         msg.comparison.forEach(row => {

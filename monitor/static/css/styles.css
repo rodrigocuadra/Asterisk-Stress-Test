@@ -9,12 +9,15 @@ body {
 
 .container {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap; 
+    justify-content: center;
     gap: 20px;
 }
 
 .panel {
-    flex: 1;
+    flex: 1 1 480px;
+    max-width: 600px;
+    min-width: 300px;
     background: #fff;
     padding: 6px 10px; /* antes: 10px */
     border-radius: 8px;
@@ -87,6 +90,9 @@ canvas {
 }
 
 .winner-box {
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
     padding: 10px 16px; 
     margin-top: 6px; 
     margin-bottom: 0; 
@@ -184,15 +190,14 @@ canvas {
 .terminal-row {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 10px;
     margin-top: 40px;
 }
 
 .terminal-container {
-    flex: 1;
-    height: 250px;
-    background: #000;
-    color: #fff;
+    flex: 1 1 100%;
+    min-height: 200px;
 }
 
 .start-button-container {
@@ -203,7 +208,9 @@ canvas {
 }
 
 #asterisk-chart, #freeswitch-chart {
-    height: 320px !important;
+    width: 100%;
+    height: auto;
+    max-height: 280px;
 }
 
 #analysisModal .modal-content {
@@ -253,4 +260,10 @@ canvas {
     height: 100vh;
     pointer-events: none; 
     z-index: 10000;  
+}
+
+@media (min-width: 768px) {
+    .terminal-container {
+        flex: 1 1 45%;
+    }
 }

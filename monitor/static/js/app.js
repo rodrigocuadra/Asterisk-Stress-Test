@@ -53,7 +53,7 @@ function startTests() {
     document.getElementById("explosion-sound").play().catch(() => {});
     document.getElementById("winner-sound").play().catch(() => {});
     document.getElementById("start-btn").style.display = "none";
-    document.getElementById("winner-box").style.display = "none";
+    document.getElementById("start-btn-box").style.display = "none";
     socket1.send("cd /opt/stress_test && ./stress_test.sh --notify --auto\n");
     socket2.send("cd /opt/stress_test && ./stress_test.sh --notify --auto\n");
 }

@@ -82,12 +82,17 @@ function declareWinner(type) {
     document.getElementById("winner-box").innerText = "🏆 " + name + " is the Winner!";
     document.getElementById("winner-box").style.display = "block";
     document.getElementById("winner-sound").play();
+
+    // Trigger confetti on the custom canvas
     if (window.confetti) {
+        const canvas = document.getElementById("confetti-canvas");
+        const myConfetti = confetti.create(canvas, { resize: true, useWorker: true });
         const duration = 10 * 1000;
         const end = Date.now() + duration;
+
         (function frame() {
-            confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
-            confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+            myConfetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+            myConfetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
             if (Date.now() < end) {
                 requestAnimationFrame(frame);
             }

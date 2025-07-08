@@ -199,15 +199,18 @@ ws.onmessage = (event) => {
         
         let table = `<h2 style='text-align:center;font-size:2em'>🏆 ${msg.winner}</h2>`;
         table += `<p style='text-align:center;font-size:1.1em'>⏱ Duration: ${msg.duration} seconds</p>`;
+
         table += `
-        <div style='margin: 30px auto; max-width: 1000px; font-size: 1.2em; line-height: 1.8; text-align: left;'>
+        <div style='margin: 30px auto; max-width: 100%; font-size: 1.2em; line-height: 1.8; text-align: justify;'>
             <h3 style='text-align: center; font-size: 1.5em; margin-bottom: 15px;'>📋 Summary</h3>
-            <div style='padding: 10px 20px; background: #2c2c2c; border-radius: 8px; color: #f0f0f0;'>
+            <div style='padding: 20px; background: #2c2c2c; border-radius: 10px; color: #f0f0f0;'>
                 ${summaryText
-                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")    // negritas
-                    .replace(/^\s*\d+\.\s+/gm, m => `<p style="margin: 8px 0;">${m.trimStart()} `) // bullets
-                    .replace(/🏁|🚩|✅|✔️|🔚|📌/g, "🏁")                   // normaliza íconos finales
-                    + "</p>"}
+                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")  // Convertir negritas
+                    .replace(/(?:^|\n)\s*(\d+\.\s+)(.*?)(?=(?:\n\d+\.|\n🏁|$))/gs, (_, num, content) =>
+                        `<p><span style="color:#00bfff;">${num.trim()}</span> ${content.trim()}</p>`)
+                    .replace(/\n?🏁\s*(.*)/, (_, finalLine) =>
+                        `<p style="margin-top: 20px;"><span style="color:#ccc;">🏁</span> <strong>${finalLine.trim()}</strong></p>`)
+                }
             </div>
         </div>`;
         table += `<table style='width:100%;border-collapse:collapse;margin-top:20px;font-size:1em'>`;

@@ -206,33 +206,74 @@ ws.onmessage = (event) => {
         content.style.color = "#fff";
         content.style.fontSize = "1.2em";
         content.style.textAlign = "left";
-        
-        let table = `<h2 style='text-align:center;font-size:2em'>🏆 ${msg.winner}</h2>`;
-        table += `<p style='text-align:center;font-size:1.1em'>⏱ Duration: ${msg.duration} seconds</p>`;
 
-        table += `
-        <div style='margin: 30px auto; max-width: 100%; font-size: 1.2em; line-height: 1.8; text-align: justify;'>
-            <h3 style='text-align: center; font-size: 1.5em; margin-bottom: 15px;'>📋 Summary</h3>
-            <div style='padding: 20px; background: #2c2c2c; border-radius: 10px; color: #f0f0f0;'>
-                ${
-                    summaryText
-                        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")  // resaltar negritas
-                        .replace(/\s*\d+\.\s/g, '\n$&')                     // forzar salto antes de cada numeral
-                        .replace(/🏁/g, '\n🏁')                              // forzar salto antes del juicio final
-                        .split('\n')                                       // dividir por líneas
-                        .filter(line => line.trim())                       // eliminar líneas vacías
-                        .map(line => `<p>${line.trim()}</p>`)              // envolver cada línea en <p>
-                        .join('\n')                                        // recombinar
-                }
+        let table = `
+            <div id="winner-summary" style="position: relative; padding-top: 30px;">
+
+                <div class="test-duration" style="
+                    position: absolute;
+                    top: 0;
+                    right: 20px;
+                    font-size: 1em;
+                    color: #ccc;">
+                    ⏱ Duration: ${msg.duration} seconds
+                </div>
+
+                <h2 style="
+                    font-size: 3em;
+                    text-align: center;
+                    color: #ffd700;
+                    margin-bottom: 10px;">
+                    🏆 ${msg.winner}
+                </h2>
+
+                <h3 style="text-align: center; font-size: 1.5em; margin-bottom: 15px;">📋 Summary</h3>
+                <div style="
+                    padding: 20px;
+                    background: #2c2c2c;
+                    border-radius: 10px;
+                    color: #f0f0f0;
+                    font-size: 1.2em;
+                    line-height: 1.8;
+                    text-align: justify;
+                    margin-bottom: 30px;">
+                    ${
+                        summaryText
+                            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                            .replace(/\s*\d+\.\s/g, '\n$&')
+                            .replace(/🏁/g, '\n🏁')
+                            .split('\n')
+                            .filter(line => line.trim())
+                            .map(line => `<p>${line.trim()}</p>`)
+                            .join('\n')
+                    }
+                </div>
+
+                <table style="
+                    width: 50%;
+                    max-width: 50%;
+                    margin: 0 auto 20px auto;
+                    border-collapse: collapse;
+                    font-size: 1em;
+                    color: #fff;">
+                    <thead>
+                        <tr>
+                            <th style="border:1px solid #ccc;padding:8px">Metric</th>
+                            <th style="border:1px solid #ccc;padding:8px">Asterisk</th>
+                            <th style="border:1px solid #ccc;padding:8px">FreeSWITCH</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${msg.comparison.map(row => `
+                            <tr>
+                                <td style="border:1px solid #ccc;padding:8px">${row.metric}</td>
+                                <td style="border:1px solid #ccc;padding:8px">${row.asterisk}</td>
+                                <td style="border:1px solid #ccc;padding:8px">${row.freeswitch}</td>
+                            </tr>`).join('\n')}
+                    </tbody>
+                </table>
             </div>
-        </div>`;
-        
-        table += `<table style='width:100%;border-collapse:collapse;margin-top:20px;font-size:1em'>`;
-        table += `<thead><tr><th style='border:1px solid #ccc;padding:8px'>Metric</th><th style='border:1px solid #ccc;padding:8px'>Asterisk</th><th style='border:1px solid #ccc;padding:8px'>FreeSWITCH</th></tr></thead><tbody>`;
-        msg.comparison.forEach(row => {
-            table += `<tr><td style='border:1px solid #ccc;padding:8px'>${row.metric}</td><td style='border:1px solid #ccc;padding:8px'>${row.asterisk}</td><td style='border:1px solid #ccc;padding:8px'>${row.freeswitch}</td></tr>`;
-        });
-        table += `</tbody></table>`;
+        `;
 
         content.innerHTML = table;
 

@@ -16,7 +16,7 @@ body {
 .panel {
     flex: 1;
     background: #fff;
-    padding: 10px;
+    padding: 6px 10px; /* antes: 10px */
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     display: flex;
@@ -27,7 +27,8 @@ body {
 }
 
 h2 {
-    margin-top: 0;
+    margin: 5px 0;        /* antes: margin-top: 0 */
+    font-size: 1.3em;     /* más compacto */
 }
 
 .metrics {
@@ -54,11 +55,11 @@ canvas {
 }
 
 .message-box {
-    margin-top: 20px;
-    padding: 20px;
+    margin-top: 10px;
+    padding: 12px;
     background: #e9ecef;
     border-radius: 10px;
-    font-size: 1.6em;
+    font-size: 1.4em;
     font-weight: bold;
     color: #333;
     text-align: center;
@@ -85,15 +86,15 @@ canvas {
 }
 
 .winner-box {
-    padding: 20px;
+    padding: 8px;
     background: #d1ecf1;
     border: 2px solid #bee5eb;
     color: #0c5460;
     border-radius: 10px;
-    font-size: 1.6em;
+    font-size: 1.3em;
     font-weight: bold;
     text-align: center;
-    margin-top: 20px;
+    margin-top: 10px;
     animation: pulse 1s infinite alternate;
 }
 
@@ -207,6 +208,8 @@ canvas {
 }
 
 .version-text {
+    margin-bottom: 6px;   /* antes: 10px */
+    font-size: 0.85em;
     font-size: 0.95em;    /* más grande y legible */
     color: #888;
     margin-left: 8px;

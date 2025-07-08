@@ -146,6 +146,8 @@ async def send_analysis_to_clients():
     global test_results
     try:
         print("[DEBUG] Preparing to send analysis to clients...")
+        await asyncio.sleep(2)  # Esperar 2 segundos para asegurar que el JSON está actualizado
+
         with open(progress_file, "r") as f:
             result_data = json.load(f)
 
@@ -158,20 +160,29 @@ async def send_analysis_to_clients():
         def get_max_percent(data, key):
             return max(float(item[key].strip('%')) for item in data if key in item)
 
-        def average_bw_per_call(data):
-            total_bw = sum(float(item.get('bw_tx', 0)) + float(item.get('bw_rx', 0)) for item in data)
-            max_calls = max(int(item.get('calls', 0)) for item in data)
-            return round(total_bw / max_calls, 2) if max_calls else 0.0
+        def extract_last_bandwidth_per_call(data):
+            last = data[-1]
+            calls = int(last.get("active_calls", 0))
+            bw_tx = float(last.get("bw_tx", 0))
+            return round(bw_tx / calls, 2) if calls > 0 else 0.0
 
-        # Precálculos
+        # Precálculos resumidos
         summary_data = {
-            "Max Calls": {"asterisk": max(item["calls"] for item in a_data), "freeswitch": max(item["calls"] for item in f_data)},
-            "Max CPU %": {"asterisk": get_max(a_data, "cpu"), "freeswitch": get_max(f_data, "cpu")},
-            "Max Memory %": {"asterisk": get_max_percent(a_data, "memory"), "freeswitch": get_max_percent(f_data, "memory")},
-            "Max Load": {"asterisk": get_max(a_data, "load"), "freeswitch": get_max(f_data, "load")},
+            "Max Calls": {
+                "asterisk": max(item["calls"] for item in a_data),
+                "freeswitch": max(item["calls"] for item in f_data)
+            },
+            "Max CPU %": {
+                "asterisk": get_max(a_data, "cpu"),
+                "freeswitch": get_max(f_data, "cpu")
+            },
+            "Max Memory %": {
+                "asterisk": get_max_percent(a_data, "memory"),
+                "freeswitch": get_max_percent(f_data, "memory")
+            },
             "Avg BW/Call (kbps)": {
-                "asterisk": average_bw_per_call(a_data),
-                "freeswitch": average_bw_per_call(f_data)
+                "asterisk": extract_last_bandwidth_per_call(a_data),
+                "freeswitch": extract_last_bandwidth_per_call(f_data)
             }
         }
 
@@ -185,12 +196,17 @@ async def send_analysis_to_clients():
 
         # 💬 Generate natural language summary with OpenAI
         ai_prompt = (
-            "You are a concise performance analyst. You will receive summary performance metrics for Asterisk and FreeSWITCH, "
-            "including max calls, CPU%, memory%, load, and average bandwidth per call.\n"
-            "Please:\n"
-            "1. Write ONLY 3 short bullet points comparing them (one per line).\n"
-            "2. Then, give a short winner declaration sentence.\n\n"
-            f"Summary JSON:\n{json.dumps(summary_data)}"
+            "You are a VoIP performance analyst comparing two telephony systems: Asterisk and FreeSWITCH. "
+            "They have been tested on identical hardware under the same conditions.\n\n"
+            "You are provided with the following summary metrics:\n"
+            "- Max Calls\n"
+            "- Max CPU %\n"
+            "- Max Memory %\n"
+            "- Avg BW/Call (kbps)\n\n"
+            "Your task is:\n"
+            "1. 🔹 Provide 3 short and objective technical comparisons (one line each), prioritizing Max Calls.\n"
+            "2. 🏁 Declare the winner in a single enthusiastic sentence based on Max Calls and efficiency.\n\n"
+            f"Input Summary JSON:\n{json.dumps(summary_data)}"
         )
 
         summary = "No summary available"
@@ -214,6 +230,7 @@ async def send_analysis_to_clients():
             "summary": summary,
             "confetti": True
         })
+
     except Exception as e:
         print(f"[ERROR] Failed to generate analysis: {e}")
 

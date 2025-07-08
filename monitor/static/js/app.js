@@ -21,6 +21,11 @@ const socket2 = new WebSocket(`ws://${location.host}/ws/terminal2`);
 socket2.onmessage = e => term2.write(e.data);
 term2.onData(data => socket2.send(data));
 
+window.addEventListener('resize', () => {
+    fitAddon1.fit();
+    fitAddon2.fit();
+});
+
 let testStart;
 const timerEl = document.createElement("div");
 timerEl.id = "test-timer";

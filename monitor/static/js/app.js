@@ -26,32 +26,29 @@ window.addEventListener('resize', () => {
     fitAddon2.fit();
 });
 
-let testStart;
-const timerEl = document.createElement("div");
-timerEl.id = "test-timer";
-timerEl.style.position = "fixed";
-timerEl.style.top = "20px";
-timerEl.style.right = "20px";
-timerEl.style.background = "rgba(0, 0, 0, 0.85)";
-timerEl.style.color = "white";
-timerEl.style.padding = "10px 20px";
-timerEl.style.borderRadius = "10px";
-timerEl.style.fontSize = "1.5em";
-timerEl.style.fontWeight = "bold";
-timerEl.style.zIndex = "1000";
-timerEl.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
-timerEl.textContent = "Elapsed: 0s";
-document.body.appendChild(timerEl);
+let timers = {
+    asterisk: { start: null, interval: null },
+    freeswitch: { start: null, interval: null }
+};
 
-let timerInterval;
+function startTimer(type) {
+    timers[type].start = Date.now();
+    timers[type].interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - timers[type].start) / 1000);
+        document.getElementById(`timer-${type}`).textContent = `${elapsed}s`;
+    }, 1000);
+}
+
+function stopTimer(type) {
+    if (timers[type].interval) {
+        clearInterval(timers[type].interval);
+        timers[type].interval = null;
+    }
+}
 
 function startTests() {
-    testStart = Date.now();
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - testStart) / 1000);
-        timerEl.textContent = `Elapsed: ${elapsed}s`;
-    }, 1000);
+    startTimer("asterisk");
+    startTimer("freeswitch");
 
     document.getElementById("explosion-sound").play().catch(() => {});
     document.getElementById("winner-sound").play().catch(() => {});

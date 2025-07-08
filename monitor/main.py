@@ -199,7 +199,14 @@ async def send_analysis_to_clients():
     global test_results
     try:
         print("[DEBUG] Preparing to send analysis to clients...")
-        await asyncio.sleep(2)  # Esperar 2 segundos para asegurar que el JSON está actualizado
+
+        # 1. Mostrar el mensaje de espera ("dangerous demo") justo antes del request
+        await manager.broadcast({
+            "type": "ai_waiting",
+            "message": "☠️ Dangerous Demo in progress...\nSending critical data to the AI overlord...\nHope this doesn’t break everything! 😱"
+        })
+
+        await asyncio.sleep(1)  # Dejá que el frontend muestre la animación
 
         with open(progress_file, "r") as f:
             result_data = json.load(f)
@@ -219,7 +226,6 @@ async def send_analysis_to_clients():
             bw_tx = float(last.get("bw_tx", 0))
             return round(bw_tx / calls, 2) if calls > 0 else 0.0
 
-        # Precálculos resumidos
         summary_data = {
             "Max Calls": {
                 "asterisk": max(item["calls"] for item in a_data),
@@ -247,38 +253,23 @@ async def send_analysis_to_clients():
         winner = determine_winner()
         duration = round(time.time() - start_time)
 
-        # 💬 Generate natural language summary with OpenAI
-        ai_prompt = (
-            "You are a VoIP benchmarking expert comparing two telephony systems: Asterisk and FreeSWITCH. "
-            "Both systems were tested under identical hardware conditions. You are provided with key summary metrics:\n"
-            "- Maximum simultaneous calls\n"
-            "- Max CPU usage (%)\n"
-            "- Max memory usage (%)\n"
-            "- Average bandwidth per call (kbps)\n\n"
-
-            "📌 The main performance goal is to determine which system handles more simultaneous calls **relative to its resource usage**. "
-            "Higher CPU or memory usage is acceptable **if it results in handling more calls**. "
-            "Please consider efficiency: how much CPU and memory are used **per call**.\n\n"
-
-            "🔍 Your task is:\n"
-            "1. 🔹 Write three concise technical bullet points (1 line each) comparing both systems, focusing on call-handling efficiency.\n"
-            "2. 🏁 Conclude with a 1-line final judgment clearly stating the winner and why.\n\n"
-            f"Input Summary JSON:\n{json.dumps(summary_data)}"
-        )
-
         summary = "No summary available"
         if OPENAI_API_KEY:
             response = client.chat.completions.create(
                 model=OPENAI_MODEL,
                 messages=[
                     {"role": "system", "content": "You are an expert in performance benchmarking."},
-                    {"role": "user", "content": ai_prompt}
+                    {"role": "user", "content": (
+                        "You are a VoIP benchmarking expert comparing two telephony systems: Asterisk and FreeSWITCH..."
+                        f"\nInput Summary JSON:\n{json.dumps(summary_data)}"
+                    )}
                 ],
                 temperature=0.7,
                 max_tokens=300
             )
             summary = response.choices[0].message.content.strip()
 
+        # 2. Ahora que tenemos la respuesta, enviar el análisis completo
         await manager.broadcast({
             "type": "analysis",
             "winner": winner,

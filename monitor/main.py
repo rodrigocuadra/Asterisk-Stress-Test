@@ -100,17 +100,26 @@ async def websocket_endpoint(ws: WebSocket):
 @app.post("/api/progress")
 async def progress(data: ProgressData):
     global test_results
-    # Limpiar resultados si ambos están vacíos (es decir, antes de comenzar cualquier test)
-    if not test_results["asterisk"] and not test_results["freeswitch"]:
-        test_results = {"asterisk": [], "freeswitch": []}
-        if progress_file.exists():
-            progress_file.unlink()
-            print("[DEBUG] Limpieza inicial de results.json")
-    
+
+    # 🧹 Borrar resultados si este es el primer paso (step 0) de su tipo
+    if data.step == 0:
+        print(f"[DEBUG] Detected start of new test: {data.test_type}")
+        test_results[data.test_type] = []
+        test_state[data.test_type]["steps"].clear()
+
+        # Si ambos están ahora vacíos (inicia ambos tests), borra el archivo
+        if not test_results["asterisk"] and not test_results["freeswitch"]:
+            if progress_file.exists():
+                progress_file.unlink()
+                print("[DEBUG] Limpieza inicial de results.json")
+
+    # 💾 Guardar nuevo progreso
     test_state[data.test_type]["steps"].append(data.dict())
     test_results[data.test_type].append(data.dict())
+
     with open(progress_file, "w") as f:
         json.dump(test_results, f)
+
     await manager.broadcast({"type": "progress", "data": data.dict()})
 
 # ------------------------

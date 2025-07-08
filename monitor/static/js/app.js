@@ -200,11 +200,16 @@ ws.onmessage = (event) => {
         let table = `<h2 style='text-align:center;font-size:2em'>🏆 ${msg.winner}</h2>`;
         table += `<p style='text-align:center;font-size:1.1em'>⏱ Duration: ${msg.duration} seconds</p>`;
         table += `
-        <div style='text-align:left; margin: 20px auto; max-width: 900px; font-size: 1.2em; line-height: 1.6;'>
-            <h3 style='text-align:center; margin-bottom: 10px; font-size: 1.4em;'>📋 Summary</h3>
-            <pre style='white-space:pre-wrap; word-break:break-word; font-family:inherit;'>${summaryText}</pre>
-        </div>
-`        ;
+        <div style='margin: 30px auto; max-width: 1000px; font-size: 1.2em; line-height: 1.8; text-align: left;'>
+            <h3 style='text-align: center; font-size: 1.5em; margin-bottom: 15px;'>📋 Summary</h3>
+            <div style='padding: 10px 20px; background: #2c2c2c; border-radius: 8px; color: #f0f0f0;'>
+                ${summaryText
+                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")    // negritas
+                    .replace(/^\s*\d+\.\s+/gm, m => `<p style="margin: 8px 0;">${m.trimStart()} `) // bullets
+                    .replace(/🏁|🚩|✅|✔️|🔚|📌/g, "🏁")                   // normaliza íconos finales
+                    + "</p>"}
+            </div>
+        </div>`;
         table += `<table style='width:100%;border-collapse:collapse;margin-top:20px;font-size:1em'>`;
         table += `<thead><tr><th style='border:1px solid #ccc;padding:8px'>Metric</th><th style='border:1px solid #ccc;padding:8px'>Asterisk</th><th style='border:1px solid #ccc;padding:8px'>FreeSWITCH</th></tr></thead><tbody>`;
         msg.comparison.forEach(row => {

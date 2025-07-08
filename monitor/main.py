@@ -253,16 +253,32 @@ async def send_analysis_to_clients():
         winner = determine_winner()
         duration = round(time.time() - start_time)
 
+        # 💬 Generate natural language summary with OpenAI
+        ai_prompt = (
+            "You are a VoIP benchmarking expert comparing two telephony systems: Asterisk and FreeSWITCH. "
+            "Both systems were tested under identical hardware conditions. You are provided with key summary metrics:\n"
+            "- Maximum simultaneous calls\n"
+            "- Max CPU usage (%)\n"
+            "- Max memory usage (%)\n"
+            "- Average bandwidth per call (kbps)\n\n"
+
+            "📌 The main performance goal is to determine which system handles more simultaneous calls **relative to its resource usage**. "
+            "Higher CPU or memory usage is acceptable **if it results in handling more calls**. "
+            "Please consider efficiency: how much CPU and memory are used **per call**.\n\n"
+
+            "🔍 Your task is:\n"
+            "1. 🔹 Write three concise technical bullet points (1 line each) comparing both systems, focusing on call-handling efficiency.\n"
+            "2. 🏁 Conclude with a 1-line final judgment clearly stating the winner and why.\n\n"
+            f"Input Summary JSON:\n{json.dumps(summary_data)}"
+        )
+
         summary = "No summary available"
         if OPENAI_API_KEY:
             response = client.chat.completions.create(
                 model=OPENAI_MODEL,
                 messages=[
                     {"role": "system", "content": "You are an expert in performance benchmarking."},
-                    {"role": "user", "content": (
-                        "You are a VoIP benchmarking expert comparing two telephony systems: Asterisk and FreeSWITCH..."
-                        f"\nInput Summary JSON:\n{json.dumps(summary_data)}"
-                    )}
+                    {"role": "user", "content": ai_prompt}
                 ],
                 temperature=0.7,
                 max_tokens=300

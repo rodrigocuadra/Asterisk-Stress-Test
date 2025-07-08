@@ -205,16 +205,20 @@ async def send_analysis_to_clients():
 
         # 💬 Generate natural language summary with OpenAI
         ai_prompt = (
-            "You are a VoIP performance analyst comparing two telephony systems: Asterisk and FreeSWITCH. "
-            "They have been tested on identical hardware under the same conditions.\n\n"
-            "You are provided with the following summary metrics:\n"
-            "- Max Calls\n"
-            "- Max CPU %\n"
-            "- Max Memory %\n"
-            "- Avg BW/Call (kbps)\n\n"
-            "Your task is:\n"
-            "1. 🔹 Provide 3 short and objective technical comparisons (one line each), prioritizing Max Calls.\n"
-            "2. 🏁 Declare the winner in a single enthusiastic sentence based on Max Calls and efficiency.\n\n"
+            "You are a VoIP benchmarking expert comparing two telephony systems: Asterisk and FreeSWITCH. "
+            "Both systems were tested under identical hardware conditions. You are provided with key summary metrics:\n"
+            "- Maximum simultaneous calls\n"
+            "- Max CPU usage (%)\n"
+            "- Max memory usage (%)\n"
+            "- Average bandwidth per call (kbps)\n\n"
+
+            "📌 The main performance goal is to determine which system handles more simultaneous calls **relative to its resource usage**. "
+            "Higher CPU or memory usage is acceptable **if it results in handling more calls**. "
+            "Please consider efficiency: how much CPU and memory are used **per call**.\n\n"
+
+            "🔍 Your task is:\n"
+            "1. 🔹 Write three concise technical bullet points (1 line each) comparing both systems, focusing on call-handling efficiency.\n"
+            "2. 🏁 Conclude with a 1-line final judgment clearly stating the winner and why.\n\n"
             f"Input Summary JSON:\n{json.dumps(summary_data)}"
         )
 

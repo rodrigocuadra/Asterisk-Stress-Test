@@ -67,7 +67,8 @@ canvas {
 }
 
 .footer {
-    margin-top: 40px;
+    margin-top: 10px;
+    margin-bottom: 0;
     text-align: center;
 }
 
@@ -86,15 +87,16 @@ canvas {
 }
 
 .winner-box {
-    padding: 8px;
+    padding: 10px 16px; 
+    margin-top: 6px; 
+    margin-bottom: 0; 
+    font-size: 1.2em;
     background: #d1ecf1;
     border: 2px solid #bee5eb;
     color: #0c5460;
     border-radius: 10px;
-    font-size: 1.3em;
     font-weight: bold;
     text-align: center;
-    margin-top: 10px;
     animation: pulse 1s infinite alternate;
 }
 

@@ -13,9 +13,6 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-<div class="start-button-container">
-  <button class="start-btn" id="start-btn" onclick="startTests()">🚀 Start Stress Tests</button>
-</div>
 <div id="test-timer" style="position: fixed; top: 20px; right: 20px; font-size: 1.2em; font-weight: bold; z-index: 1000;"></div>
 <audio id="explosion-sound" src="/static/audios/explosion.mp3"></audio>
 <audio id="winner-sound" src="/static/audios/winner.mp3"></audio>
@@ -50,7 +47,10 @@
     </div>
 </div>
 <div class="footer">
-    <div class="winner-box" id="winner-box" style="display: none;"></div>
+    <div class="winner-box" id="winner-box" style="display: none;">
+        <div id="winner-name"></div>
+        <button id="start-btn" class="start-btn" style="margin-top: 20px;">Start Stress Tests</button>
+    </div>
 </div>
 <div class="terminal-row">
     <div class="terminal-container" id="terminal1"></div>

@@ -204,15 +204,19 @@ ws.onmessage = (event) => {
         <div style='margin: 30px auto; max-width: 100%; font-size: 1.2em; line-height: 1.8; text-align: justify;'>
             <h3 style='text-align: center; font-size: 1.5em; margin-bottom: 15px;'>📋 Summary</h3>
             <div style='padding: 20px; background: #2c2c2c; border-radius: 10px; color: #f0f0f0;'>
-                ${summaryText
-                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")  // Convertir negritas
-                    .replace(/(?:^|\n)\s*(\d+\.\s+)(.*?)(?=(?:\n\d+\.|\n🏁|$))/gs, (_, num, content) =>
-                        `<p><span style="color:#00bfff;">${num.trim()}</span> ${content.trim()}</p>`)
-                    .replace(/\n?🏁\s*(.*)/, (_, finalLine) =>
-                        `<p style="margin-top: 20px;"><span style="color:#ccc;">🏁</span> <strong>${finalLine.trim()}</strong></p>`)
+                ${
+                    summaryText
+                        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")  // resaltar negritas
+                        .replace(/\s*\d+\.\s/g, '\n$&')                     // forzar salto antes de cada numeral
+                        .replace(/🏁/g, '\n🏁')                              // forzar salto antes del juicio final
+                        .split('\n')                                       // dividir por líneas
+                        .filter(line => line.trim())                       // eliminar líneas vacías
+                        .map(line => `<p>${line.trim()}</p>`)              // envolver cada línea en <p>
+                        .join('\n')                                        // recombinar
                 }
             </div>
         </div>`;
+        
         table += `<table style='width:100%;border-collapse:collapse;margin-top:20px;font-size:1em'>`;
         table += `<thead><tr><th style='border:1px solid #ccc;padding:8px'>Metric</th><th style='border:1px solid #ccc;padding:8px'>Asterisk</th><th style='border:1px solid #ccc;padding:8px'>FreeSWITCH</th></tr></thead><tbody>`;
         msg.comparison.forEach(row => {

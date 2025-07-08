@@ -172,6 +172,10 @@ ws.onmessage = (event) => {
         overlay.style.left = "0";
         overlay.style.width = "100vw";
         overlay.style.height = "100vh";
+        overlay.style.overflow = "hidden"; // evitar scroll innecesario
+        overlay.style.display = "flex";
+        overlay.style.justifyContent = "center";
+        overlay.style.alignItems = "center";
         overlay.style.backgroundColor = "rgba(0, 0, 0, 0.92)";
         overlay.style.zIndex = "9999";
         overlay.style.overflow = "hidden";
@@ -190,8 +194,10 @@ ws.onmessage = (event) => {
         content.style.background = "#222";
         content.style.padding = "30px";
         content.style.borderRadius = "12px";
-        content.style.width = "90vw";
-        content.style.maxWidth = "1000px";
+        content.style.width = "90vw";  // usa el 90% del ancho visible
+        content.style.maxWidth = "1200px";  // da más margen superior si se necesita
+        content.style.maxHeight = "90vh";  // evita desbordamiento vertical
+        content.style.overflowY = "auto";  // scroll solo si el contenido es muy grande
         content.style.maxHeight = "90vh";
         content.style.overflowY = "auto";
         content.style.fontSize = "1.4em";

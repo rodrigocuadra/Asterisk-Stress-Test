@@ -184,7 +184,11 @@ async def explosion(data: ExplosionData):
 # ------------------------
 
 async def schedule_analysis():
-    await asyncio.sleep(10)
+    await asyncio.sleep(2)
+    await manager.broadcast({
+        "type": "ai_waiting",
+        "message": "Sending critical analysis request to the AI...\nHold tight. This could go *very* wrong. ☠️"
+    })
     await send_analysis_to_clients()
 
 # ------------------------

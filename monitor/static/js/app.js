@@ -179,15 +179,15 @@ ws.onmessage = (event) => {
     }
 
     if (msg.type === 'ai_waiting') {
-        const overlay = document.getElementById("ai-loading-overlay");
-        overlay.style.display = "flex";
-        const p = overlay.querySelector('.ai-message');
+        const aioverlay = document.getElementById("ai-loading-overlay");
+        aioverlay.style.display = "flex";
+        const p = aioverlay.querySelector('.ai-message');
         p.textContent = msg.message || "Sending request to AI...";
     }
    
     if (msg.type === 'analysis') {
         const overlay = document.getElementById("ai-loading-overlay");
-        if (overlay) overlay.style.display = "none";
+        if (aioverlay) aioverlay.style.display = "none";
         clearInterval(timerInterval);
 
         const overlay = document.createElement("div");

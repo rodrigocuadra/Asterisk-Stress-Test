@@ -68,6 +68,15 @@ class ExplosionData(BaseModel):
 class SSHCommand(BaseModel):
     command: str
 
+class SystemInfo(BaseModel):
+    test_type: str  # "asterisk" o "freeswitch"
+    asterisk_version: str | None = None
+    freeswitch_version: str | None = None
+    core_cpu: str
+    cpu_model: str
+    total_ram: str
+    timestamp: str
+
 # ------------------------
 # Página principal
 # ------------------------
@@ -92,6 +101,31 @@ async def websocket_endpoint(ws: WebSocket):
             await ws.receive_text()
     except Exception:
         await manager.disconnect(ws)
+
+# ------------------------
+# API: Optiene informacion de Hardware y version de Asterisk/Freeswitch
+# ------------------------
+
+@app.post("/api/system_info")
+async def system_info(data: SystemInfo):
+    # Guardar info en el estado global
+    test_state[data.test_type]["system_info"] = data.dict()
+
+    # Limpiar versiones innecesarias para el otro sistema
+    version = data.asterisk_version or data.freeswitch_version
+
+    # Notificar a la interfaz web
+    await manager.broadcast({
+        "type": "system_info",
+        "test_type": data.test_type,
+        "version": version,
+        "core_cpu": data.core_cpu,
+        "cpu_model": data.cpu_model,
+        "total_ram": data.total_ram,
+        "timestamp": data.timestamp
+    })
+
+    return {"status": "ok"}
 
 # ------------------------
 # API: Progreso en tiempo real

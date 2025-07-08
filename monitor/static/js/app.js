@@ -178,7 +178,16 @@ ws.onmessage = (event) => {
         triggerExplosion(t);
     }
 
+    if (msg.type === 'ai_waiting') {
+        const overlay = document.getElementById("ai-loading-overlay");
+        overlay.style.display = "flex";
+        const p = overlay.querySelector('.ai-message');
+        p.textContent = msg.message || "Sending request to AI...";
+    }
+   
     if (msg.type === 'analysis') {
+        const overlay = document.getElementById("ai-loading-overlay");
+        if (overlay) overlay.style.display = "none";
         clearInterval(timerInterval);
 
         const overlay = document.createElement("div");

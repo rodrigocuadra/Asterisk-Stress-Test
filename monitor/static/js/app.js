@@ -186,7 +186,7 @@ ws.onmessage = (event) => {
     }
    
     if (msg.type === 'analysis') {
-        const overlay = document.getElementById("ai-loading-overlay");
+        const aioverlay = document.getElementById("ai-loading-overlay");
         if (aioverlay) aioverlay.style.display = "none";
         clearInterval(timerInterval);
 

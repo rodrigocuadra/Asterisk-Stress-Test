@@ -238,7 +238,7 @@ else
 fi
 
 test_type="asterisk"
-info_url="${web_notify_url_base}/api/info"
+info_url="${web_notify_url_base}/api/system_info"
 progress_url="${web_notify_url_base}/api/progress"
 explosion_url="${web_notify_url_base}/api/explosion"
 

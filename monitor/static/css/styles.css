@@ -100,6 +100,28 @@ canvas {
     animation: pulse 1s infinite alternate;
 }
 
+#winner-summary table {
+    margin: 20px auto;
+    width: 50%;
+    max-width: 50%;
+    border-collapse: collapse;
+}
+
+#winner-summary .test-duration {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 1em;
+    color: #ccc;
+}
+
+#winner-summary h2 {
+    font-size: 3em !important;
+    text-align: center;
+    color: #ffd700; /* opcional: dorado estilo trofeo */
+    margin-bottom: 10px;
+}
+
 .explode-effect {
     position: absolute;
     top: 0;

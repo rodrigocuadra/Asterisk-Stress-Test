@@ -60,14 +60,28 @@ h2 {
 }
 
 .card {
-    flex: 1 1 45%;
-    background: #2e2e2e;           /* Dark card background */
-    color: #c0ffc0;                /* Light green metric text */
-    padding: 15px;
     border-radius: 6px;
     text-align: center;
     font-size: 1.2em;
-    transition: background 0.3s;
+    font-weight: bold;
+    transition: background 0.3s, color 0.3s;
+    color: white;
+}
+
+/* Colores por estado */
+.card.green {
+    background: #28a745;
+    color: white;
+}
+
+.card.yellow {
+    background: #ffc107;
+    color: black;
+}
+
+.card.red {
+    background: #dc3545;
+    color: white;
 }
 
 /* === GRAPHS/CHARTS === */

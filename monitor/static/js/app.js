@@ -318,7 +318,27 @@ ws.onmessage = (event) => {
         overlay.appendChild(content);
         document.body.appendChild(overlay);
 
+        // Mostrar y activar confetti
+        const confettiCanvas = document.getElementById("confetti-canvas");
+        confettiCanvas.style.display = "block";
+
+        confetti.create(confettiCanvas, {
+            resize: true,
+            useWorker: true
+        })({
+            particleCount: 200,
+            spread: 160,
+            origin: { y: 0.6 }
+        });
+
+        // Ocultar luego de unos segundos
+        setTimeout(() => {
+            confettiCanvas.style.display = "none";
+        }, 5000);
+
+        // 🏆 Sonido y declaración de ganador
         document.getElementById("winner-sound").play().catch(() => {});
         declareWinner(msg.winner.toLowerCase());
+        
     }
 };

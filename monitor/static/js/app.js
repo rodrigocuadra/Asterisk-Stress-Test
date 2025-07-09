@@ -61,12 +61,15 @@ function startTests() {
 const ws = new WebSocket("ws://" + location.hostname + ":8000/ws");
 
 function updateCardColor(card, value) {
-    if (value >= 50) {
-        card.style.background = '#f8d7da';
-    } else if (value >= 30) {
-        card.style.background = '#fff3cd';
+    // Limpiar estilos previos
+    card.classList.remove('green', 'yellow', 'red');
+
+    if (value < 50) {
+        card.classList.add('green');
+    } else if (value < 75) {
+        card.classList.add('yellow');
     } else {
-        card.style.background = '#d4edda';
+        card.classList.add('red');
     }
 }
 

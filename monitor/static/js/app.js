@@ -318,22 +318,28 @@ ws.onmessage = (event) => {
         overlay.appendChild(content);
         document.body.appendChild(overlay);
 
-        // Mostrar y activar confetti
-        const confettiCanvas = document.getElementById("confetti-canvas");
-        confettiCanvas.style.display = "block";
 
-        confetti.create(confettiCanvas, {
+        // Activar confetti
+        const canvas = document.getElementById("confetti-canvas");
+
+        // Reset display (en caso esté oculto)
+        canvas.style.opacity = "1";
+
+        // Crear instancia y disparar confetti
+        const myConfetti = confetti.create(canvas, {
             resize: true,
             useWorker: true
-        })({
+        });
+
+        myConfetti({
             particleCount: 200,
             spread: 160,
             origin: { y: 0.6 }
         });
 
-        // Ocultar luego de unos segundos
+        // Opcional: desvanecer el canvas después
         setTimeout(() => {
-            confettiCanvas.style.display = "none";
+            canvas.style.opacity = "0";
         }, 5000);
 
         // 🏆 Sonido y declaración de ganador

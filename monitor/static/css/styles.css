@@ -73,18 +73,18 @@ h2 {
 
 /* Color states */
 .card.green {
-    background-color: #198754 !important;  /* Bootstrap green */
-    color: white !important;
+    background-color: #006400 !important; /* DarkGreen */
+    color: #ffffff !important;
 }
 
 .card.yellow {
-    background-color: #ffc107 !important;  /* Bootstrap yellow */
-    color: black !important;
+    background-color: #b8860b !important; /* DarkGoldenRod */
+    color: #ffffff !important;
 }
 
 .card.red {
-    background-color: #dc3545 !important;  /* Bootstrap red */
-    color: white !important;
+    background-color: #8b0000 !important; /* DarkRed */
+    color: #ffffff !important;
 }
 
 /* === GRAPHS/CHARTS === */

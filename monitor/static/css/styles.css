@@ -70,18 +70,18 @@ h2 {
 
 /* Colores por estado */
 .card.green {
-    background: #28a745;
-    color: white;
+    background: #28a745 !important;  /* strong green */
+    color: white !important;
 }
 
 .card.yellow {
-    background: #ffc107;
-    color: black;
+    background: #ffc107 !important;  /* yellow */
+    color: black !important;
 }
 
 .card.red {
-    background: #dc3545;
-    color: white;
+    background: #dc3545 !important;  /* strong red */
+    color: white !important;
 }
 
 /* === GRAPHS/CHARTS === */

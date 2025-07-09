@@ -1,12 +1,21 @@
-/* style.css - Styling for Stress Test Dashboard */
+/* ============================================
+   STRESS TEST DASHBOARD - DARK MODE STYLING
+   --------------------------------------------
+   This stylesheet enables a full dark theme
+   with clear annotations for layout, design,
+   component structure, and animations.
+=============================================== */
 
+/* === GLOBAL PAGE LAYOUT === */
 body {
     font-family: sans-serif;
-    background: #f5f5f5;
+    background: #121212;           /* Dark background */
+    color: #e0e0e0;                /* Light text for contrast */
     margin: 0;
     padding: 20px;
 }
 
+/* === MAIN GRID CONTAINER FOR PANELS === */
 .container {
     display: flex;
     flex-wrap: wrap;
@@ -18,14 +27,15 @@ body {
     box-sizing: border-box;
 }
 
+/* === INDIVIDUAL TEST PANEL (Asterisk/FreeSWITCH) === */
 .panel {
     flex: 1 1 45%;
     min-width: 320px;
     max-width: 48%;
-    background: #fff;
+    background: #1e1e1e;           /* Darker panel background */
     padding: 10px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -33,13 +43,14 @@ body {
     overflow: hidden;
 }
 
+/* === SECTION HEADINGS (Per Panel) === */
 h2 {
-    margin: 5px 0;        /* antes: margin-top: 0 */
-    font-size: 1.3em;     /* más compacto */
-    margin-top: 0;
-    margin-bottom: 5px;
+    margin: 5px 0;
+    font-size: 1.3em;
+    color: #f1f1f1;
 }
 
+/* === METRICS AREA WITH CARDS === */
 .metrics {
     display: flex;
     flex-wrap: wrap;
@@ -50,7 +61,8 @@ h2 {
 
 .card {
     flex: 1 1 45%;
-    background: #d4edda;
+    background: #2e2e2e;           /* Dark card background */
+    color: #c0ffc0;                /* Light green metric text */
     padding: 15px;
     border-radius: 6px;
     text-align: center;
@@ -58,33 +70,38 @@ h2 {
     transition: background 0.3s;
 }
 
+/* === GRAPHS/CHARTS === */
 canvas {
     max-width: 100%;
     height: 180px;
+    background: #000;
 }
 
+/* === MESSAGE BOX BELOW GRAPH === */
 .message-box {
     margin-top: 10px;
     padding: 12px;
-    background: #e9ecef;
+    background: #2c2c2c;
     border-radius: 10px;
     font-size: 1.4em;
     font-weight: bold;
-    color: #333;
+    color: #e0e0e0;
     text-align: center;
     width: 100%;
 }
 
+/* === FOOTER FOR WINNER BOX === */
 .footer {
     margin-top: 10px;
     margin-bottom: 0;
     text-align: center;
 }
 
+/* === LAUNCH TEST BUTTON === */
 .start-btn {
     font-size: 1.4em;
     padding: 12px 30px;
-    background: #007BFF;
+    background: #2196f3;           /* Blue button */
     color: white;
     border: none;
     border-radius: 6px;
@@ -92,54 +109,62 @@ canvas {
 }
 
 .start-btn:hover {
-    background: #0056b3;
+    background: #1769aa;
 }
 
+/* === WINNER NOTIFICATION BOX === */
 .winner-box {
     max-width: 90%;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 10px 16px; 
-    margin-top: 6px; 
-    margin-bottom: 0; 
+    margin: 6px auto 0;
+    padding: 10px 16px;
     font-size: 1.2em;
-    background: #d1ecf1;
-    border: 2px solid #bee5eb;
-    color: #0c5460;
+    background: #2c3e50;
+    border: 2px solid #3498db;
+    color: #ecf0f1;
     border-radius: 10px;
     font-weight: bold;
     text-align: center;
     animation: pulse 1s infinite alternate;
 }
 
+/* === WINNER TABLE SUMMARY STYLING === */
 #winner-summary table {
     margin: 20px auto;
     width: 50%;
     max-width: 50%;
     border-collapse: collapse;
+    background: #1e1e1e;
+    color: #f0f0f0;
+    border: 1px solid #444;
 }
 
+#winner-summary th,
+#winner-summary td {
+    border: 1px solid #444;
+    padding: 8px 10px;
+}
+
+/* === TEST DURATION LABEL IN TOP RIGHT === */
 #winner-summary .test-duration {
     position: absolute;
     top: 20px;
     right: 30px;
     font-size: 1em;
-    color: #ccc;
+    color: #bbb;
 }
 
+/* === BIG BOLD HEADER FOR WINNER NAME === */
 #winner-summary h2 {
     font-size: 3em !important;
     text-align: center;
-    color: #ffd700; /* opcional: dorado estilo trofeo */
+    color: #ffcc00;                /* Trophy-style gold */
     margin-bottom: 10px;
 }
 
+/* === EXPLOSION OVERLAY EFFECT === */
 .explode-effect {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     z-index: 20;
     pointer-events: none;
     display: flex;
@@ -149,16 +174,16 @@ canvas {
     font-size: 2em;
     font-weight: bold;
     opacity: 0;
-    background: radial-gradient(circle at center, rgba(255, 0, 0, 0.7), rgba(255, 165, 0, 0.5), rgba(255, 255, 0, 0.3));
+    background: radial-gradient(circle at center, rgba(255, 0, 0, 0.8), rgba(255, 140, 0, 0.5), rgba(255, 255, 0, 0.3));
     transition: opacity 0.5s ease-in-out;
 }
 
-/* ícono boom */
 .explode-effect i {
     font-size: 3em;
     margin-right: 10px;
 }
 
+/* === EXPLOSION ANIMATION === */
 .explode-effect.show {
     animation: explodeFlash 1s steps(2, end) 10;
 }
@@ -169,19 +194,8 @@ canvas {
     100% { opacity: 1; transform: scale(1.2); }
 }
 
-/* Al terminar animación: queda tenue */
 .explode-effect.persistent {
     opacity: 0.25;
-}
-
-/* Animación con pulsos de opacidad y escala */
-@keyframes explodeAnim {
-    0%   { opacity: 1; transform: scale(1.05); }
-    20%  { opacity: 0.8; transform: scale(1); }
-    40%  { opacity: 1; transform: scale(1.03); }
-    60%  { opacity: 0.7; transform: scale(1); }
-    80%  { opacity: 0.9; transform: scale(1.02); }
-    100% { opacity: 0.25; transform: scale(1); }
 }
 
 @keyframes pulse {
@@ -189,18 +203,7 @@ canvas {
     100% { transform: scale(1.05); }
 }
 
-.xterm {
-    padding: 4px;
-}
-
-.terminal-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 40px;
-    justify-content: center;
-}
-
+/* === EMBEDDED TERMINALS === */
 .terminal-container {
     flex: 1 1 100%;
     min-width: 300px;
@@ -208,7 +211,7 @@ canvas {
     width: 100%;
     height: 250px;
     background: #000;
-    color: #fff;
+    color: #0f0;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -220,6 +223,21 @@ canvas {
     }
 }
 
+/* === VERSION & HARDWARE INFO TEXTS === */
+.version-text {
+    margin-bottom: 6px;
+    font-size: 0.95em;
+    color: #ccc;
+    margin-left: 8px;
+}
+
+.hw-info {
+    font-size: 1.05em;
+    color: #aaa;
+    margin-bottom: 10px;
+}
+
+/* === TOP LEFT BUTTON CONTAINER === */
 .start-button-container {
     position: absolute;
     top: 20px;
@@ -227,13 +245,27 @@ canvas {
     z-index: 1000;
 }
 
+/* === STRESS TEST CHART HEIGHT === */
 #asterisk-chart, #freeswitch-chart {
     height: 280px !important;
     width: 100% !important;
     max-width: 100%;
 }
 
+/* === MODAL ANALYSIS OVERLAY === */
+#analysisModal {
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 999;
+}
+
 #analysisModal .modal-content {
+    background: #1e1e1e;
+    color: #f0f0f0;
     max-width: 90vw;
     width: 90vw;
     max-height: 90vh;
@@ -244,44 +276,11 @@ canvas {
     overflow-y: auto;
 }
 
-#analysisModal {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 999;
-}
-
 #analysisModal .modal-content * {
     font-weight: normal !important;
 }
 
-.version-text {
-    margin-bottom: 6px;   /* antes: 10px */
-    font-size: 0.85em;
-    font-size: 0.95em;    /* más grande y legible */
-    color: #888;
-    margin-left: 8px;
-}
-
-.hw-info {
-    font-size: 1.05em;    /* ideal para la línea de hardware */
-    color: #333;
-    margin-bottom: 10px;
-}
-
-#confetti-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none; 
-    z-index: 10000;  
-}
-
+/* === LOADING SCREEN FOR AI ANALYSIS === */
 #ai-loading-overlay {
     position: fixed;
     top: 0; left: 0;
@@ -327,16 +326,12 @@ canvas {
     animation: blink 1s infinite alternate;
 }
 
-.ai-terminal-effect .dot:nth-child(2) {
-    animation-delay: 0.3s;
-}
-.ai-terminal-effect .dot:nth-child(3) {
-    animation-delay: 0.6s;
-}
+.ai-terminal-effect .dot:nth-child(2) { animation-delay: 0.3s; }
+.ai-terminal-effect .dot:nth-child(3) { animation-delay: 0.6s; }
 
 @keyframes blink {
     from { opacity: 0.2; transform: scale(1); }
-    to { opacity: 1; transform: scale(1.3); }
+    to   { opacity: 1; transform: scale(1.3); }
 }
 
 @keyframes pulseRed {
@@ -344,6 +339,7 @@ canvas {
     to   { background-color: #500; }
 }
 
+/* === TIMESTAMP INSIDE PANEL === */
 .panel-timer {
     position: absolute;
     top: 10px;

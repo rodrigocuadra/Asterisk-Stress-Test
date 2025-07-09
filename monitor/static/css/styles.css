@@ -379,11 +379,12 @@ canvas {
 }
 
 #confetti-canvas {
-    position: fixed;
+    display: none;               /* oculto por defecto */
+    position: fixed;             /* ocupa toda la pantalla */
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    pointer-events: none; 
-    z-index: 9999;  /* debe estar bien alto para que esté sobre todo */
+    pointer-events: none;        /* no interfiere con clics */
+    z-index: 9999;               /* muy por encima del resto */
 }

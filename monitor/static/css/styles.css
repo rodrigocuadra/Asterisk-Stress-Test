@@ -59,28 +59,31 @@ h2 {
     width: 100%;
 }
 
+/* Common card style (base look) */
 .card {
+    flex: 1 1 45%;
+    padding: 15px;
     border-radius: 6px;
     text-align: center;
     font-size: 1.2em;
-    font-weight: bold;
-    transition: background 0.3s, color 0.3s;
-    color: white;
+    transition: background 0.3s;
+    background: #444;
+    color: #ccc;
 }
 
-/* Colores por estado */
+/* Color states */
 .card.green {
-    background: #28a745 !important;  /* strong green */
+    background-color: #198754 !important;  /* Bootstrap green */
     color: white !important;
 }
 
 .card.yellow {
-    background: #ffc107 !important;  /* yellow */
+    background-color: #ffc107 !important;  /* Bootstrap yellow */
     color: black !important;
 }
 
 .card.red {
-    background: #dc3545 !important;  /* strong red */
+    background-color: #dc3545 !important;  /* Bootstrap red */
     color: white !important;
 }
 

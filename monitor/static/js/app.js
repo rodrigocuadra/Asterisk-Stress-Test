@@ -318,19 +318,30 @@ ws.onmessage = (event) => {
         overlay.appendChild(content);
         document.body.appendChild(overlay);
         
-        const canvas = document.getElementById("confetti-canvas");
-        canvas.style.opacity = "1";
-        confetti.create(canvas, {
+        // Mostrar y activar confeti al declarar ganador
+        const confettiCanvas = document.getElementById("confetti-canvas");
+        confettiCanvas.style.display = "block";
+        confettiCanvas.style.opacity = "1";
+
+        const myConfetti = confetti.create(confettiCanvas, {
             resize: true,
             useWorker: true
-        })({
+        });
+
+        myConfetti({
             particleCount: 200,
             spread: 160,
             origin: { y: 0.6 }
         });
+
+        // Ocultar luego de unos segundos
         setTimeout(() => {
-            canvas.style.opacity = "0";
+            confettiCanvas.style.opacity = "0";
+            setTimeout(() => {
+                confettiCanvas.style.display = "none";
+            }, 500);
         }, 5000);
+
 
         // 🏆 Sonido y declaración de ganador
         document.getElementById("winner-sound").play().catch(() => {});

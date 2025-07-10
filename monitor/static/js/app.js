@@ -317,27 +317,17 @@ ws.onmessage = (event) => {
         content.appendChild(closeBtn);
         overlay.appendChild(content);
         document.body.appendChild(overlay);
-
-
-        // Activar confetti
+        
         const canvas = document.getElementById("confetti-canvas");
-
-        // Reset display (en caso esté oculto)
         canvas.style.opacity = "1";
-
-        // Crear instancia y disparar confetti
-        const myConfetti = confetti.create(canvas, {
+        confetti.create(canvas, {
             resize: true,
             useWorker: true
-        });
-
-        myConfetti({
+        })({
             particleCount: 200,
             spread: 160,
             origin: { y: 0.6 }
         });
-
-        // Opcional: desvanecer el canvas después
         setTimeout(() => {
             canvas.style.opacity = "0";
         }, 5000);

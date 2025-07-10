@@ -340,7 +340,7 @@ ws.onmessage = (event) => {
             setTimeout(() => {
                 confettiCanvas.style.display = "none";
             }, 500);
-        }, 5000);
+        }, 10000);
 
 
         // 🏆 Sonido y declaración de ganador
@@ -349,25 +349,3 @@ ws.onmessage = (event) => {
         
     }
 };
-
-document.getElementById("test-confetti").addEventListener("click", () => {
-    const canvas = document.getElementById("confetti-canvas");
-    canvas.style.display = "block";
-    canvas.style.opacity = "1";
-
-    confetti.create(canvas, {
-        resize: true,
-        useWorker: true
-    })({
-        particleCount: 200,
-        spread: 160,
-        origin: { y: 0.6 }
-    });
-
-    setTimeout(() => {
-        canvas.style.opacity = "0";
-        setTimeout(() => {
-            canvas.style.display = "none";
-        }, 500);
-    }, 5000);
-});

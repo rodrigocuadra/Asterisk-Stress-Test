@@ -7,7 +7,7 @@ chmod +x monitor_install.sh
 sudo ./monitor_install.sh
 ```
 
-# Create authorization key for the Access between Asterisk/Freeswitch Serto to Monitor Server.
+# Create authorization key for the Access between Asterisk/Freeswitch Server to Monitor Server.
 
 Create key in **Node 1**.
 ```

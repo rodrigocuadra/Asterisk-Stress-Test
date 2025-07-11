@@ -3,7 +3,7 @@
 # -----------------------------
 # Update & Install Dependencies
 # -----------------------------
-# Update the package list and install Python 3 and pip
+# Update the package list and install Python 3 and pip nginx
 apt update && apt install -y python3 python3-pip
 
 # Install required Python packages for the FastAPI application

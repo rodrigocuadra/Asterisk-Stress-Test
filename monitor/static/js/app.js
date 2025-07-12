@@ -173,9 +173,9 @@ ws.onmessage = (event) => {
         updateChart(charts[t], msg.data.cpu);
 
         const mbox = document.getElementById(t + "-message");
-        if (msg.data.cpu < 35) {
+        if (msg.data.cpu < 25) {
             mbox.innerText = "💪 More calls! I can handle more load!";
-        } else if (msg.data.cpu < 60) {
+        } else if (msg.data.cpu < 40) {
             mbox.innerText = "😅 Take it easy, I'm getting tired...";
         } else {
             mbox.innerText = "🥵 Please stop! I'm overloaded!";

@@ -41,3 +41,31 @@ and check to make sure that only the key(s) you wanted were added.
 
 root@vitalpbx-master:~#
 </pre>
+
+# Firewall
+On certain virtual machines, such as those offered by Vurlt, it's necessary to create firewall rules. Here we describe the steps for each server.<br>
+
+### Monitor Server
+
+```
+sudo apt install iptables-persistent
+sudo iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+sudo iptables -I INPUT -p tcp --dport 8000 -j ACCEPT
+sudo netfilter-persistent save
+```
+
+### Asterisk 01 Server
+
+```
+sudo apt install iptables-persistent
+sudo iptables -I INPUT -p tcp --dport 8000 -j ACCEPT
+sudo netfilter-persistent save
+```
+
+### Freeswitch 01 Server
+
+```
+sudo apt install iptables-persistent
+sudo iptables -I INPUT -p tcp --dport 8000 -j ACCEPT
+sudo netfilter-persistent save
+```

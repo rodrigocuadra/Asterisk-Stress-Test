@@ -64,9 +64,9 @@ function updateCardColor(card, value) {
     // Limpiar estilos previos
     card.classList.remove('green', 'yellow', 'red');
 
-    if (value < 35) {
+    if (value < 25) {
         card.classList.add('green');
-    } else if (value < 65) {
+    } else if (value < 40) {
         card.classList.add('yellow');
     } else {
         card.classList.add('red');

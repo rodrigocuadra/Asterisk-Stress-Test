@@ -549,9 +549,9 @@ while [ "$exitcalls" = "false" ]; do
     memory=$(free | awk '/Mem:/ {used=$3; total=$2} END {if (total>0) printf("%.2f%%", used/total*100); else print "N/A"}')
     
     # Color-code output based on CPU load
-    if [ "$cpu" -le 29 ]; then
+    if [ "$cpu" -le 24 ]; then
         echo -e "\e[92m---------------------------------------------------------------------------------------------------"
-    elif [ "$cpu" -ge 30 ] && [ "$cpu" -lt 45 ]; then
+    elif [ "$cpu" -ge 25 ] && [ "$cpu" -lt 40 ]; then
         echo -e "\e[93m---------------------------------------------------------------------------------------------------"
     else
         echo -e "\e[91m---------------------------------------------------------------------------------------------------"

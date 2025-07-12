@@ -103,7 +103,7 @@ if [ -f "$filename" ]; then
     echo -e "Network Interface name (e.g., eth0)................... >  $interface_name"
     echo -e "Codec (1.-PCMU, 2.-OPUS).............................. >  $codec"
     echo -e "Recording Calls (yes,no).............................. >  $recording"
-    echo -e "Max CPU Load (Recommended 75%)........................ >  $maxcpuload"
+    echo -e "Max CPU Load (Recommended 60%)........................ >  $maxcpuload"
     echo -e "Calls Step (Recommended 5-100)........................ >  $call_step"
     echo -e "Seconds between each step (Recommended 5-30).......... >  $call_step_seconds"
     echo -e "Estimated Call Duration Seconds (e.g., 180)........... >  $call_duration"
@@ -549,9 +549,9 @@ while [ "$exitcalls" = "false" ]; do
     memory=$(free | awk '/Mem:/ {used=$3; total=$2} END {if (total>0) printf("%.2f%%", used/total*100); else print "N/A"}')
     
     # Color-code output based on CPU load
-    if [ "$cpu" -le 34 ]; then
+    if [ "$cpu" -le 29 ]; then
         echo -e "\e[92m---------------------------------------------------------------------------------------------------"
-    elif [ "$cpu" -ge 35 ] && [ "$cpu" -lt 65 ]; then
+    elif [ "$cpu" -ge 30 ] && [ "$cpu" -lt 45 ]; then
         echo -e "\e[93m---------------------------------------------------------------------------------------------------"
     else
         echo -e "\e[91m---------------------------------------------------------------------------------------------------"

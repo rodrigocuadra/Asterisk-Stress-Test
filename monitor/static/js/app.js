@@ -34,8 +34,8 @@ let timers = {
 async function checkAuth() {
     const res = await fetch("/", { method: "GET" });
     if (res.status === 200) {
-        document.getElementById("login-box").style.display = "none";
         document.querySelector(".container").style.display = "block";
+        document.getElementById("login-box").style.display = "none";
     } else {
         document.getElementById("login-box").style.display = "block";
         document.querySelector(".container").style.display = "none";
@@ -54,7 +54,7 @@ async function doLogin() {
     if (res.status === 200) {
         location.reload();
     } else {
-        document.getElementById("login-error").innerText = "Login failed";
+        document.getElementById("login-error").innerText = "Login failed.";
     }
 }
 

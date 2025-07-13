@@ -11,6 +11,22 @@
     <script src="/static/js/chart.umd.min.js"></script>
     <script src="/static/js/confetti.browser.min.js"></script>
 </head>
+<script>
+  // Verifica si existe la cookie auth=ok
+  function getCookie(name) {
+    const cookies = document.cookie.split(";");
+    for (let c of cookies) {
+      const [key, value] = c.trim().split("=");
+      if (key === name) return value;
+    }
+    return null;
+  }
+
+  if (getCookie("auth") !== "ok") {
+    // Redirige a login si no está autenticado
+    window.location.href = "/login.html";
+  }
+</script>
 <body>
 <div id="test-timer" style="position: fixed; top: 20px; right: 20px; font-size: 1.2em; font-weight: bold; z-index: 1000;"></div>
 <audio id="explosion-sound" src="/static/audios/explosion.mp3"></audio>

@@ -31,6 +31,35 @@ let timers = {
     freeswitch: { start: null, interval: null }
 };
 
+async function checkAuth() {
+    const res = await fetch("/", { method: "GET" });
+    if (res.status === 200) {
+        document.getElementById("login-box").style.display = "none";
+        document.querySelector(".container").style.display = "block";
+    } else {
+        document.getElementById("login-box").style.display = "block";
+        document.querySelector(".container").style.display = "none";
+    }
+}
+
+async function doLogin() {
+    const u = document.getElementById("username").value;
+    const p = document.getElementById("password").value;
+    const form = new URLSearchParams({ username: u, password: p });
+    const res = await fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: form.toString()
+    });
+    if (res.status === 200) {
+        location.reload();
+    } else {
+        document.getElementById("login-error").innerText = "Login failed";
+    }
+}
+
+window.addEventListener("load", checkAuth);
+
 function startTimer(type) {
     timers[type].start = Date.now();
     timers[type].interval = setInterval(() => {

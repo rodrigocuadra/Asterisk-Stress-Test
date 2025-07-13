@@ -37,13 +37,18 @@ app = FastAPI()
 # Montar archivos estáticos (solo CSS, JS, etc.)
 app.mount("/static", StaticFiles(directory="/var/www/stresstest_monitor/static"), name="static")
 
-# 👉 Página de login
+# Rutas absolutas definidas por entorno o valor por defecto
+login_html_path = Path(os.getenv("LOGIN_HTML_PATH", "/var/www/stresstest_monitor/login.html"))
+index_html_path = Path(os.getenv("INDEX_HTML_PATH", "/var/www/stresstest_monitor/index.html"))
+
+# Página de login
 @app.get("/login.html")
 async def get_login():
-    with open("login.html") as f:
-        return HTMLResponse(f.read())
+    if login_html_path.exists():
+        return HTMLResponse(login_html_path.read_text())
+    return JSONResponse({"error": "login.html not found"}, status_code=404)
 
-# 👉 Página protegida
+# Página principal protegida
 @app.get("/index.html")
 async def get_index(request: Request):
     if request.cookies.get("auth") != "ok":
@@ -52,12 +57,12 @@ async def get_index(request: Request):
         return HTMLResponse(index_html_path.read_text())
     return JSONResponse({"error": "index.html not found"}, status_code=404)
 
-# 👉 Validación de credenciales
+# Validación de credenciales (login)
 @app.post("/api/login")
 async def do_login(response: Response, username: str = Form(...), password: str = Form(...)):
     if username == DEMO_USER and password == DEMO_PASS:
         response = RedirectResponse("/index.html", status_code=302)
-        response.set_cookie("auth", "ok", max_age=60*60*24*2, path="/")
+        response.set_cookie(key="auth", value="ok", max_age=60*60*24*2, path="/")
         return response
     return HTMLResponse("<h3>Credenciales inválidas. <a href='/login.html'>Volver</a></h3>", status_code=401)
 

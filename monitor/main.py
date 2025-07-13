@@ -31,6 +31,9 @@ TERMINAL2_IP = os.getenv("TERMINAL2_IP", "192.168.10.33")
 DEMO_USER = os.getenv("DEMO_USER", "admin")
 DEMO_PASS = os.getenv("DEMO_PASS", "1234")
 
+# ✅ Instanciar la app ANTES de usarla
+app = FastAPI()
+
 # Montar archivos estáticos (solo CSS, JS, etc.)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -65,8 +68,6 @@ test_results = {"asterisk": [], "freeswitch": []}
 exploded_services = set()
 analysis_sent = False
 start_time = time.time()
-
-app = FastAPI()
 
 # ------------------------
 # Modelos de datos

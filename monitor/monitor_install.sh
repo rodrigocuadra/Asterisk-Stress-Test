@@ -8,7 +8,7 @@ apt update && apt install -y python3 python3-pip nginx
 
 # Install required Python packages for the FastAPI application
 # --break-system-packages ensures compatibility on newer systems like Ubuntu 23+
-pip3 install --break-system-packages fastapi uvicorn paramiko pydantic aiofiles python-multipart websockets requests python-dotenv python-jose
+pip3 install --break-system-packages fastapi uvicorn paramiko pydantic aiofiles python-multipart websockets requests python-dotenv
 pip3 install openai --break-system-packages
 
 # -----------------------------
@@ -82,8 +82,6 @@ OPENAI_API_KEY=sk-proj-************************
 INDEX_HTML_PATH=/var/www/stresstest_monitor/index.html
 PROGRESS_FILE=/opt/stresstest_monitor/results.json
 SSH_USER=root
-TERMINAL1_IP=192.168.10.31
-TERMINAL2_IP=192.168.10.33
-DEMO_USER=admin
-DEMO_PASS=1234
+TERMINAL1_IP=xxx.xxx.xxx.xxx
+TERMINAL2_IP=xxx.xxx.xxx.xxx
 EOF

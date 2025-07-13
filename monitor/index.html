@@ -1,74 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Stress Test Dashboard</title>
-  <link rel="stylesheet" href="/static/css/xterm.css">
-  <link rel="stylesheet" href="/static/css/styles.css">
-  <script src="/static/js/xterm.min.js"></script>
-  <script src="/static/js/xterm-addon-fit.min.js"></script>
-  <script src="/static/js/chart.umd.min.js"></script>
-  <script src="/static/js/confetti.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stress Test Dashboard</title>
+    <link rel="stylesheet" href="/static/css/xterm.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="/static/js/xterm.min.js"></script>
+    <script src="/static/js/xterm-addon-fit.min.js"></script>
+    <script src="/static/js/chart.umd.min.js"></script>
+    <script src="/static/js/confetti.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-
-<!-- Login Form -->
-<div id="login-box" style="text-align:center; margin-top:50px; display:none;">
-  <h2>Demo Login</h2>
-  <input id="username" placeholder="Username"><br>
-  <input id="password" type="password" placeholder="Password"><br>
-  <button onclick="doLogin()">Login</button>
-  <p id="login-error" style="color:red;"></p>
-</div>
-
-<!-- Logout Button -->
-<div id="logout-bar" style="display:none; text-align:right; padding: 10px;">
-  <button onclick="logout()" style="padding: 6px 12px; font-size: 14px;">Cerrar sesión</button>
-</div>
-
-<!-- Test Timer -->
 <div id="test-timer" style="position: fixed; top: 20px; right: 20px; font-size: 1.2em; font-weight: bold; z-index: 1000;"></div>
-
-<!-- Audio Effects -->
 <audio id="explosion-sound" src="/static/audios/explosion.mp3"></audio>
 <audio id="winner-sound" src="/static/audios/winner.mp3"></audio>
-
-<!-- Dashboard Container -->
-<div class="container" style="display:none;">
-  <div class="panel" id="asterisk-panel">
-    <h2>Asterisk <span id="asterisk-version" class="version-text"></span></h2>
-    <div class="panel-timer" id="timer-asterisk">0s</div>
-    <div class="hw-info" id="asterisk-info"></div>
-    <div class="explode-effect" id="asterisk-overlay"><i>💥</i> BOOM!</div>
-    <div class="metrics">
-      <div class="card" id="asterisk-cpu">CPU: --%</div>
-      <div class="card" id="asterisk-mem">Memory: --%</div>
-      <div class="card" id="asterisk-calls">Active Calls: --</div>
-      <div class="card" id="asterisk-bw">BW TX: -- kb/s</div>
+<div class="container">
+    <div class="panel" id="asterisk-panel">
+        <h2>Asterisk <span id="asterisk-version" class="version-text"></span></h2>
+        <div class="panel-timer" id="timer-asterisk">0s</div>
+        <div class="hw-info" id="asterisk-info"></div>
+        <div class="explode-effect" id="asterisk-overlay"><i>💥</i> BOOM!</div>
+        <div class="metrics">
+            <div class="card" id="asterisk-cpu">CPU: --%</div>
+            <div class="card" id="asterisk-mem">Memory: --%</div>
+            <div class="card" id="asterisk-calls">Active Calls: --</div>
+            <div class="card" id="asterisk-bw">BW TX: -- kb/s</div>
+        </div>
+        <canvas id="asterisk-chart"></canvas>
+        <div class="message-box" id="asterisk-message">Waiting for data...</div>
     </div>
-    <canvas id="asterisk-chart"></canvas>
-    <div class="message-box" id="asterisk-message">Waiting for data...</div>
-  </div>
-
-  <div class="panel" id="freeswitch-panel">
-    <h2>FreeSWITCH <span id="freeswitch-version" class="version-text"></span></h2>
-    <div class="panel-timer" id="timer-freeswitch">0s</div>
-    <div class="hw-info" id="freeswitch-info"></div>
-    <div class="explode-effect" id="freeswitch-overlay"><i>💥</i> BOOM!</div>
-    <div class="metrics">
-      <div class="card" id="freeswitch-cpu">CPU: --%</div>
-      <div class="card" id="freeswitch-mem">Memory: --%</div>
-      <div class="card" id="freeswitch-calls">Active Calls: --</div>
-      <div class="card" id="freeswitch-bw">BW TX: -- kb/s</div>
+    <div class="panel" id="freeswitch-panel">
+        <h2>FreeSWITCH <span id="freeswitch-version" class="version-text"></span></h2>
+        <div class="panel-timer" id="timer-freeswitch">0s</div>
+        <div class="hw-info" id="freeswitch-info"></div>
+        <div class="explode-effect" id="freeswitch-overlay"><i>💥</i> BOOM!</div>
+        <div class="metrics">
+            <div class="card" id="freeswitch-cpu">CPU: --%</div>
+            <div class="card" id="freeswitch-mem">Memory: --%</div>
+            <div class="card" id="freeswitch-calls">Active Calls: --</div>
+            <div class="card" id="freeswitch-bw">BW TX: -- kb/s</div>
+        </div>
+        <canvas id="freeswitch-chart"></canvas>
+        <div class="message-box" id="freeswitch-message">Waiting for data...</div>
     </div>
-    <canvas id="freeswitch-chart"></canvas>
-    <div class="message-box" id="freeswitch-message">Waiting for data...</div>
-  </div>
 </div>
 
-<!-- Footer -->
+<!-- Área inferior con el resultado del ganador -->
 <div class="footer">
   <div class="winner-box" id="start-btn-box">
     <button class="start-btn" id="start-btn" onclick="startTests()">🚀 Start Stress Tests</button>
@@ -77,67 +56,24 @@
     <div id="winner-name"></div>
   </div>
 </div>
-
-<!-- Terminals -->
+    
 <div class="terminal-row">
-  <div class="terminal-container" id="terminal1"></div>
-  <div class="terminal-container" id="terminal2"></div>
+    <div class="terminal-container" id="terminal1"></div>
+    <div class="terminal-container" id="terminal2"></div>
 </div>
-
-<!-- App logic -->
 <script src="/static/js/app.js"></script>
-
-<!-- AI Overlay -->
 <div id="ai-loading-overlay" style="display:none;">
-  <div class="ai-loading-content">
-    <h1>🧠 Dangerous Demo Mode</h1>
-    <p class="ai-message">Sending critical analysis request to the AI...</p>
-    <div class="ai-terminal-effect">
-      <span class="dot"></span>
-      <span class="dot"></span>
-      <span class="dot"></span>
+    <div class="ai-loading-content">
+        <h1>🧠 Dangerous Demo Mode</h1>
+        <p class="ai-message">Sending critical analysis request to the AI...</p>
+        <div class="ai-terminal-effect">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+        <p class="ai-warning">💥 If this breaks, it's *your* fault. 💀</p>
     </div>
-    <p class="ai-warning">💥 If this breaks, it's *your* fault. 💀</p>
-  </div>
 </div>
-
-<!-- Confetti Canvas -->
 <canvas id="confetti-canvas"></canvas>
-
-<!-- Simple Auth Script -->
-<script>
-  async function checkAuth() {
-    const res = await fetch("/", { method: "GET" });
-    const ok = res.status === 200;
-    document.getElementById("login-box").style.display = ok ? "none" : "block";
-    document.querySelector(".container").style.display = ok ? "block" : "none";
-    document.getElementById("logout-bar").style.display = ok ? "block" : "none";
-  }
-
-  async function doLogin() {
-    const u = document.getElementById("username").value;
-    const p = document.getElementById("password").value;
-    const form = new URLSearchParams({ username: u, password: p });
-    const res = await fetch("/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: form.toString()
-    });
-    if (res.status === 200) {
-      location.reload();
-    } else {
-      document.getElementById("login-error").innerText = "Login failed.";
-    }
-  }
-
-  function logout() {
-    // Borrar cookie: no existe método directo, se sobreescribe
-    document.cookie = "auth=; Max-Age=0; path=/;";
-    location.reload();
-  }
-
-  window.addEventListener("load", checkAuth);
-</script>
-
 </body>
 </html>

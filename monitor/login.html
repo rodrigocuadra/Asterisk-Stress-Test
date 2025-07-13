@@ -1,17 +1,89 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Login</title>
+  <title>Login - Stress Test Demo</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      background-color: #1e1e1e;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 30px;
+      font-size: 28px;
+      color: #00d0ff;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #2a2a2a;
+      color: #ffffff;
+      font-size: 16px;
+    }
+
+    input:focus {
+      outline: 2px solid #00d0ff;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #00d0ff;
+      border: none;
+      border-radius: 5px;
+      color: #000;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #00b0dd;
+    }
+
+    .error-message {
+      color: #ff5555;
+      margin-top: 15px;
+    }
+  </style>
 </head>
 <body>
-  <h2>Demo Login</h2>
-  <form method="POST" action="/api/login">
-    <label>Usuario:</label><br>
-    <input type="text" name="username" required><br><br>
-    <label>Contraseña:</label><br>
-    <input type="password" name="password" required><br><br>
-    <button type="submit">Ingresar</button>
-  </form>
+
+  <div class="login-container">
+    <h2>🔐 Acceso al Demo</h2>
+    <form method="POST" action="/api/login">
+      <input type="text" name="username" placeholder="Usuario" required>
+      <input type="password" name="password" placeholder="Contraseña" required>
+      <button type="submit">Ingresar</button>
+    </form>
+  </div>
+
 </body>
 </html>

@@ -13,16 +13,17 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-<div id="login-box" style="display:none; text-align:center; margin-top:50px;">
-  <h2>Login</h2>
+
+<div id="test-timer" style="position: fixed; top: 20px; right: 20px; font-size: 1.2em; font-weight: bold; z-index: 1000;"></div>
+<audio id="explosion-sound" src="/static/audios/explosion.mp3"></audio>
+<audio id="winner-sound" src="/static/audios/winner.mp3"></audio>
+<div id="login-box" style="text-align:center; margin-top:50px; display:none;">
+  <h2>Demo Login</h2>
   <input id="username" placeholder="Username"><br>
   <input id="password" type="password" placeholder="Password"><br>
   <button onclick="doLogin()">Login</button>
   <p id="login-error" style="color:red;"></p>
 </div>
-<div id="test-timer" style="position: fixed; top: 20px; right: 20px; font-size: 1.2em; font-weight: bold; z-index: 1000;"></div>
-<audio id="explosion-sound" src="/static/audios/explosion.mp3"></audio>
-<audio id="winner-sound" src="/static/audios/winner.mp3"></audio>
 <div class="container">
     <div class="panel" id="asterisk-panel">
         <h2>Asterisk <span id="asterisk-version" class="version-text"></span></h2>

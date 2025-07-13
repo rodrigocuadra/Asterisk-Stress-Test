@@ -48,8 +48,9 @@ async def get_login():
 async def get_index(request: Request):
     if request.cookies.get("auth") != "ok":
         return RedirectResponse("/login.html")
-    with open("index.html") as f:
-        return HTMLResponse(f.read())
+    if index_html_path.exists():
+        return HTMLResponse(index_html_path.read_text())
+    return JSONResponse({"error": "index.html not found"}, status_code=404)
 
 # 👉 Validación de credenciales
 @app.post("/api/login")

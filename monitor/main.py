@@ -376,6 +376,19 @@ async def ssh_handler(websocket: WebSocket, ip: str):
         channel.close()
         ssh.close()
 
+@app.post("/login")
+async def login(response: Response, username: str, password: str):
+    if username == AUTH_USERNAME and password == AUTH_PASSWORD:
+        token = create_access_token({"sub": username})
+        response.set_cookie(
+            key="access_token",
+            value=token,
+            httponly=True,
+            max_age=60 * 60 * 24 * 2  # 2 días en segundos
+        )
+        return {"status": "logged in"}
+    return JSONResponse(content={"error": "Invalid credentials"}, status_code=401)
+
 @app.websocket("/ws/terminal1")
 async def ws_terminal1(websocket: WebSocket):
     await ssh_handler(websocket, TERMINAL1_IP)

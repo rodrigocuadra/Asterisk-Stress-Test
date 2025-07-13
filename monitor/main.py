@@ -1,3 +1,4 @@
+from jose import jwt, JWTError
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import JSONResponse, HTMLResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
@@ -30,6 +31,9 @@ TERMINAL1_IP = os.getenv("TERMINAL1_IP", "192.168.10.31")
 TERMINAL2_IP = os.getenv("TERMINAL2_IP", "192.168.10.33")
 AUTH_USERNAME = os.getenv("AUTH_USERNAME")
 AUTH_PASSWORD = os.getenv("AUTH_PASSWORD")
+SECRET_KEY    = os.getenv("JWT_SECRET", "change-me")
+ALGORITHM     = "HS256"
+ACCESS_TOKEN_EXPIRE_DAYS = 2
 
 # Initialize OpenAI client
 client = OpenAI(api_key=OPENAI_API_KEY)

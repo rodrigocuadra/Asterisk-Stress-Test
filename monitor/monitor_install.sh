@@ -56,6 +56,7 @@ wget -O /var/www/stresstest_monitor/static/audios/winner.mp3  https://raw.github
 # Download Web Entry Point and Favicon
 # -----------------------------
 wget -O /var/www/stresstest_monitor/index.html  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/index.html
+wget -O /var/www/stresstest_monitor/login.html  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/login.html
 wget -O /var/www/stresstest_monitor/favicon.ico  https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/favicon.ico
 
 # -----------------------------

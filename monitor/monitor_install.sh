@@ -85,4 +85,8 @@ PROGRESS_FILE=/opt/stresstest_monitor/results.json
 SSH_USER=root
 TERMINAL1_IP=xxx.xxx.xxx.xxx
 TERMINAL2_IP=xxx.xxx.xxx.xxx
+DEMO_USER=admin
+DEMO_PASS=1234
+INDEX_HTML_PATH=/var/www/stresstest_monitor/index.html
+LOGIN_HTML_PATH=/var/www/stresstest_monitor/login.html
 EOF

@@ -31,6 +31,32 @@ TERMINAL2_IP = os.getenv("TERMINAL2_IP", "192.168.10.33")
 DEMO_USER = os.getenv("DEMO_USER", "admin")
 DEMO_PASS = os.getenv("DEMO_PASS", "1234")
 
+# Montar archivos estáticos (solo CSS, JS, etc.)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# 👉 Página de login
+@app.get("/login.html")
+async def get_login():
+    with open("login.html") as f:
+        return HTMLResponse(f.read())
+
+# 👉 Página protegida
+@app.get("/index.html")
+async def get_index(request: Request):
+    if request.cookies.get("auth") != "ok":
+        return RedirectResponse("/login.html")
+    with open("index.html") as f:
+        return HTMLResponse(f.read())
+
+# 👉 Validación de credenciales
+@app.post("/api/login")
+async def do_login(response: Response, username: str = Form(...), password: str = Form(...)):
+    if username == DEMO_USER and password == DEMO_PASS:
+        response = RedirectResponse("/index.html", status_code=302)
+        response.set_cookie("auth", "ok", max_age=60*60*24*2, path="/")
+        return response
+    return HTMLResponse("<h3>Credenciales inválidas. <a href='/login.html'>Volver</a></h3>", status_code=401)
+
 # Initialize OpenAI client
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -375,30 +401,6 @@ async def ssh_handler(websocket: WebSocket, ip: str):
     except:
         channel.close()
         ssh.close()
-
-# Página de login
-@app.get("/login.html")
-async def get_login():
-    with open("login.html") as f:
-        return HTMLResponse(content=f.read(), status_code=200)
-
-# Página principal protegida
-@app.get("/index.html")
-async def get_index(request: Request):
-    auth_cookie = request.cookies.get("auth")
-    if auth_cookie != "ok":
-        return RedirectResponse(url="/login.html")
-    with open("index.html") as f:
-        return HTMLResponse(content=f.read(), status_code=200)
-
-# Validar login
-@app.post("/api/login")
-async def do_login(response: Response, username: str = Form(...), password: str = Form(...)):
-    if username == DEMO_USER and password == DEMO_PASS:
-        response = RedirectResponse(url="/index.html", status_code=302)
-        response.set_cookie(key="auth", value="ok", max_age=60*60*24*2, path="/")
-        return response
-    return HTMLResponse("<h3>Credenciales inválidas. <a href='/login.html'>Intentar de nuevo</a></h3>", status_code=401)
 
 @app.websocket("/ws/terminal1")
 async def ws_terminal1(websocket: WebSocket):

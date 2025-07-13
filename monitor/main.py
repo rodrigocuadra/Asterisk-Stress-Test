@@ -28,6 +28,8 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4")
 SSH_USER = os.getenv("SSH_USER", "root")
 TERMINAL1_IP = os.getenv("TERMINAL1_IP", "192.168.10.31")
 TERMINAL2_IP = os.getenv("TERMINAL2_IP", "192.168.10.33")
+AUTH_USERNAME = os.getenv("AUTH_USERNAME")
+AUTH_PASSWORD = os.getenv("AUTH_PASSWORD")
 
 # Initialize OpenAI client
 client = OpenAI(api_key=OPENAI_API_KEY)

@@ -37,7 +37,7 @@ mkdir -p /var/www/stresstest_monitor/static/audios
 wget https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js -O /var/www/stresstest_monitor/static/js/xterm.min.js
 wget https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.7.0/lib/xterm-addon-fit.min.js -O /var/www/stresstest_monitor/static/js/xterm-addon-fit.min.js
 wget https://cdn.jsdelivr.net/npm/chart.js -O /var/www/stresstest_monitor/static/js/chart.umd.min.js
-wget https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js -O /var/www/stresstest_monitor/static/js/confetti.min.js
+wget https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js -O /var/www/stresstest_monitor/static/js/confetti.browser.min.js
 wget https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/monitor/static/js/app.js -O /var/www/stresstest_monitor/static/js/app.js
 
 # -----------------------------

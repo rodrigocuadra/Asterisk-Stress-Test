@@ -103,7 +103,7 @@ if [ -f "$filename" ]; then
     echo -e "Network Interface name (e.g., eth0)................... >  $interface_name"
     echo -e "Codec (1.-PCMU, 2.-OPUS).............................. >  $codec"
     echo -e "Recording Calls (yes,no).............................. >  $recording"
-    echo -e "Max CPU Load (Recommended 60%)........................ >  $maxcpuload"
+    echo -e "Max CPU Load (Recommended 50%)........................ >  $maxcpuload"
     echo -e "Calls Step (Recommended 5-100)........................ >  $call_step"
     echo -e "Seconds between each step (Recommended 5-30).......... >  $call_step_seconds"
     echo -e "Estimated Call Duration Seconds (e.g., 180)........... >  $call_duration"

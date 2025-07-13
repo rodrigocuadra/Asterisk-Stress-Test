@@ -35,7 +35,7 @@ DEMO_PASS = os.getenv("DEMO_PASS", "1234")
 app = FastAPI()
 
 # Montar archivos estáticos (solo CSS, JS, etc.)
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="/var/www/stresstest_monitor/static"), name="static")
 
 # 👉 Página de login
 @app.get("/login.html")

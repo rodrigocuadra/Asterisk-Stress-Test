@@ -8,7 +8,7 @@ apt update && apt install -y python3 python3-pip nginx
 
 # Install required Python packages for the FastAPI application
 # --break-system-packages ensures compatibility on newer systems like Ubuntu 23+
-pip3 install --break-system-packages fastapi uvicorn paramiko pydantic aiofiles python-multipart websockets requests python-dotenv
+pip3 install --break-system-packages fastapi uvicorn paramiko pydantic aiofiles python-multipart websockets requests python-dotenv python-jose
 pip3 install openai --break-system-packages
 
 # -----------------------------

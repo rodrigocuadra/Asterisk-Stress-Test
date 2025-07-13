@@ -107,9 +107,7 @@ if [ -f "$filename" ]; then
     echo -e "Calls Step (Recommended 5-100)........................ >  $call_step"
     echo -e "Seconds between each step (Recommended 5-30).......... >  $call_step_seconds"
     echo -e "Estimated Call Duration Seconds (e.g., 180)........... >  $call_duration"
-    if [ "$WEB_NOTIFY" = true ]; then
-        echo -e "Web server URL base (e.g., http://192.168.5.5:8000)... >  $web_notify_url_base"
-    fi
+    echo -e "Monitor server URL (None or http://192.168.5.5:8000).. >  $web_notify_url_base"
 fi
 
 if [ "$AUTO_MODE" = false ]; then
@@ -154,11 +152,9 @@ if [ "$AUTO_MODE" = false ]; then
     while [[ -z $call_duration ]]; do
         read -p "Estimated Call Duration Seconds (e.g., 180)........... > " call_duration
     done 
-    if [ "$WEB_NOTIFY" = true ]; then
-        while [[ -z $web_notify_url_base ]]; do
-            read -p "Web server URL base (e.g., http://192.168.5.5:8000)... > " web_notify_url_base
-        done
-    fi
+    while [[ -z $web_notify_url_base ]]; do
+        read -p "Monitor server URL (None or http://192.168.5.5:8000).. > " web_notify_url_base
+    done
     # Verify configuration
     echo -e "************************************************************"
     echo -e "*                   Check Information                      *"
@@ -209,11 +205,9 @@ if [ "$AUTO_MODE" = false ]; then
         while [[ -z $call_duration ]]; do
             read -p "Estimated Call Duration Seconds (e.g., 180)........... > " call_duration
         done 
-        if [ "$WEB_NOTIFY" = true ]; then
-            while [[ -z $web_notify_url_base ]]; do
-                read -p "Web server URL base (e.g., http://192.168.5.5:8000)... > " web_notify_url_base
-            done
-        fi
+        while [[ -z $web_notify_url_base ]]; do
+            read -p "Monitor server URL (None or http://192.168.5.5:8000).. > " web_notify_url_base
+        done
     fi
 
 else
@@ -231,11 +225,7 @@ echo -e "$maxcpuload"        >> config.txt
 echo -e "$call_step"         >> config.txt
 echo -e "$call_step_seconds" >> config.txt
 echo -e "$call_duration"     >> config.txt
-if [ "$WEB_NOTIFY" = true ]; then
-    echo -e "$web_notify_url_base"    >> config.txt
-else
-    echo -e "None"                    >> config.txt
-fi
+echo -e "$web_notify_url_base"    >> config.txt
 
 test_type="asterisk"
 info_url="${web_notify_url_base}/api/system_info"

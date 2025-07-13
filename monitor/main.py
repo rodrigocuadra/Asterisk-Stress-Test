@@ -1,5 +1,4 @@
-from jose import jwt, JWTError
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, Depends, Request, Response, Cookie, status
 from fastapi.responses import JSONResponse, HTMLResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel

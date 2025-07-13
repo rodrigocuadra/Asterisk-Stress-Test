@@ -52,14 +52,7 @@ sudo ./install_asterisk.sh
 
 ## 📞 Step 2: Run the Stress Test
 
-From **one of the two servers** (your controller), run:
-
-**API (Optional)**
-```
-wget https://raw.githubusercontent.com/rodrigocuadra/Asterisk-Stress-Test/refs/heads/main/install_stresstest_api.sh
-chmod +x install_stresstest_api.sh
-./install_stresstest_api.sh
-```
+On the first of the two servers run::
 
 **Stress Test**
 ```
@@ -93,7 +86,7 @@ Max CPU Load (Recommended 75%)........................ >  75
 Calls Step (Recommended 5-100)........................ >  100
 Seconds between each step (Recommended 5-30).......... >  4
 Estimated Call Duration Seconds (e.g., 180)........... >  180
-Web server URL base (e.g., http://192.168.5.5:8000)... > http://192.168.10.30:8000
+Monitor server URL (None or http://192.168.5.5:8000).. > http://192.168.10.30:8000
 ************************************************************
 *                   Check Information                      *
 *        Make sure that both servers have communication    *

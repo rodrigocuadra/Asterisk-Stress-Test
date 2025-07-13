@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, Depends, Request, Response, Cookie, status
+from fastapi import FastAPI, WebSocket
 from fastapi.responses import JSONResponse, HTMLResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -28,8 +28,6 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4")
 SSH_USER = os.getenv("SSH_USER", "root")
 TERMINAL1_IP = os.getenv("TERMINAL1_IP", "192.168.10.31")
 TERMINAL2_IP = os.getenv("TERMINAL2_IP", "192.168.10.33")
-DEMO_USER = os.getenv("DEMO_USER", "admin")
-DEMO_PASS = os.getenv("DEMO_PASS", "1234")
 
 # Initialize OpenAI client
 client = OpenAI(api_key=OPENAI_API_KEY)
@@ -375,21 +373,6 @@ async def ssh_handler(websocket: WebSocket, ip: str):
     except:
         channel.close()
         ssh.close()
-
-from fastapi import Form
-
-@app.post("/login")
-async def login(response: Response, username: str = Form(...), password: str = Form(...)):
-    if username == DEMO_USER and password == DEMO_PASS:
-        response.set_cookie("auth", "ok", max_age=60*60*24*2)  # 2 días
-        return {"status": "ok"}
-    return JSONResponse({"error": "Invalid credentials"}, status_code=401)
-
-@app.get("/")
-async def get_index(request: Request):
-    if request.cookies.get("auth") != "ok":
-        return JSONResponse({"error": "Unauthorized"}, status_code=401)
-    return HTMLResponse(index_html_path.read_text(), status_code=200)
 
 @app.websocket("/ws/terminal1")
 async def ws_terminal1(websocket: WebSocket):

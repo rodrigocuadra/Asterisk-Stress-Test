@@ -12,10 +12,14 @@ This toolkit is ideal for:
 ---
 
 ## Freeswitch Stress Test
-If you want to perform the same test but with Freeswitch, you can go to the following link:<br>
-[FreeSWITCH Stress Test Toolkit](https://github.com/rodrigocuadra/Freeswitch-Stress-Test)
+
 ---
 
+## 📎 Related Projects
+
+* [FreeSWITCH Stress Test Toolkit](https://github.com/rodrigocuadra/Freeswitch-Stress-Test)
+
+---
 
 ## 📦 Repository Contents
 
@@ -169,12 +173,6 @@ Adapted for benchmarking and analysis by Grok 3 (xAI)
 This toolkit is meant for **controlled testing environments**.
 Running this in production without safeguards could disrupt your VoIP services.
 Use responsibly.
-
----
-
-## 📎 Related Projects
-
-* [FreeSWITCH Stress Test Toolkit](https://github.com/rodrigocuadra/Freeswitch-Stress-Test)
 
 ---
 

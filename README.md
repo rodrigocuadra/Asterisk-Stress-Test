@@ -160,7 +160,6 @@ Perfect for plotting time-series graphs or analyzing call behavior step-by-step.
 
 **Rodrigo Cuadra**
 🔗 GitHub: [@rodrigocuadra](https://github.com/rodrigocuadra)
-Adapted for benchmarking and analysis by Grok 3 (xAI)
 
 ---
 

@@ -11,10 +11,6 @@ This toolkit is ideal for:
 
 ---
 
-## Freeswitch Stress Test
-
----
-
 ## 📎 Related Projects
 
 * [FreeSWITCH Stress Test Toolkit](https://github.com/rodrigocuadra/Freeswitch-Stress-Test)

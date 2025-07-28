@@ -13,7 +13,7 @@ This toolkit is ideal for:
 
 ## Freeswitch Stress Test
 If you want to perform the same test but with Freeswitch, you can go to the following link:<br>
-![FreeSWITCH Stress Test](https://github.com/rodrigocuadra/Freeswitch-Stress-Test)
+[FreeSWITCH Stress Test Toolkit](https://github.com/rodrigocuadra/Freeswitch-Stress-Test)
 ---
 
 

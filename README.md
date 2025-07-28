@@ -170,5 +170,3 @@ Running this in production without safeguards could disrupt your VoIP services.
 Use responsibly.
 
 ---
-
-Happy benchmarking! 🎧📶

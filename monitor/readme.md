@@ -101,3 +101,12 @@ Configure credentials to log in to Stress Test
 DEMO_USER=admin
 DEMO_PASS=1234 (change to strong password)
 </pre>
+
+After making these changes it is necessary to restart the stresstest-api service
+```
+systemctl restart stresstest-api
+```
+
+### Entering the Stress Test web interface
+Open a browser like Chrome and just put the URL of the Monitoring server IP, you will be asked for login credentials and then just press Start Stress Test
+

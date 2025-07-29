@@ -67,5 +67,15 @@ When installing iptables-persistent, preserve the current table by selecting **y
 ```
 sudo apt install iptables-persistent
 sudo iptables -I INPUT -p tcp --dport 8000 -j ACCEPT
+sudo iptables -I INPUT -p tcp --dport 5080 -j ACCEPT
+sudo iptables -I INPUT -p udp --dport 5080 -j ACCEPT
+sudo netfilter-persistent save
+```
+### Freeswitch 02 Server
+When installing iptables-persistent, preserve the current table by selecting **yes**. Then add the rules and save them so they're present on any system reboot.
+```
+sudo apt install iptables-persistent
+sudo iptables -I INPUT -p tcp --dport 5080 -j ACCEPT
+sudo iptables -I INPUT -p udp --dport 5080 -j ACCEPT
 sudo netfilter-persistent save
 ```

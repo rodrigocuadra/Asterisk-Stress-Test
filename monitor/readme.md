@@ -79,3 +79,13 @@ sudo iptables -I INPUT -p tcp --dport 5080 -j ACCEPT
 sudo iptables -I INPUT -p udp --dport 5080 -j ACCEPT
 sudo netfilter-persistent save
 ```
+### Edit .env
+Go to /opt/stresstest_monitor and edit the .env file to configure Terminal 1 of Asterisk_01 and Terminal 2 of Freeswict_01
+```
+cd /opt/stresstest_monitor
+nano .env
+```
+<pre>
+TERMINAL1_IP=Asterisk_01 IP
+TERMINAL2_IP=Freeswitch_01 IP
+</pre>pre>

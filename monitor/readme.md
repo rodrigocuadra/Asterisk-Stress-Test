@@ -92,5 +92,12 @@ TERMINAL2_IP=Freeswitch_01 IP
 
 Configure the OpenAI API Key
 <pre>
-OPENAI_API_KEY=
+OPENAI_API_KEY= sk-proj-
+</pre>
+
+Configure credentials to log in to Stress Test
+<pre>
+# Access credentials
+DEMO_USER=admin
+DEMO_PASS=1234 (change to strong password)
 </pre>

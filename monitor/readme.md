@@ -89,3 +89,8 @@ nano .env
 TERMINAL1_IP=Asterisk_01 IP
 TERMINAL2_IP=Freeswitch_01 IP
 </pre>
+
+Configure the OpenAI API Key
+<pre>
+OPENAI_API_KEY=
+</pre>

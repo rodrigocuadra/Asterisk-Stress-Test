@@ -88,4 +88,4 @@ nano .env
 <pre>
 TERMINAL1_IP=Asterisk_01 IP
 TERMINAL2_IP=Freeswitch_01 IP
-</pre>pre>
+</pre>

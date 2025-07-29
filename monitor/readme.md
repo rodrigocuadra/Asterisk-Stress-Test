@@ -80,7 +80,7 @@ sudo iptables -I INPUT -p udp --dport 5080 -j ACCEPT
 sudo netfilter-persistent save
 ```
 ### Edit .env
-Go to /opt/stresstest_monitor and edit the .env file to configure Terminal 1 of Asterisk_01 and Terminal 2 of Freeswict_01
+Go to /opt/stresstest_monitor and edit the .env file to configure Terminal 1 of Asterisk_01 and Terminal 2 of Freeswict_01 and OpeanAI API Key
 ```
 cd /opt/stresstest_monitor
 nano .env

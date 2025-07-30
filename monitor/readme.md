@@ -9,7 +9,10 @@ sudo ./monitor_install.sh
 
 # Create authorization key for the Access between Asterisk/Freeswitch Server to Monitor Server.
 
-Go to **Monitor Server** and create the ssh for Asyterisk/Freeswitch server.
+Go to **Monitor Server** and create the ssh key for Asyterisk/Freeswitch server.
+
+### Asterisk Server ssh key creation
+
 ```
 ssh-keygen -f /root/.ssh/id_rsa -t rsa -N '' >/dev/null
 ssh-copy-id root@192.168.10.31
@@ -26,6 +29,7 @@ and check to make sure that only the key(s) you wanted were added.
 root@vitalpbx-master:~#
 </pre>
 
+### Freeswitch Server ssh key creation
 ```
 ssh-keygen -f /root/.ssh/id_rsa -t rsa -N '' >/dev/null
 ssh-copy-id root@192.168.10.33

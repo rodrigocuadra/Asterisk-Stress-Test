@@ -58,7 +58,7 @@ sudo ./install_asterisk.sh
 
 ## 📞 Step 2: Run the Stress Test
 
-On the first of the two servers run::
+On the first of the two Asterisk servers run:
 
 **Stress Test**
 ```

@@ -32,7 +32,7 @@ This toolkit is ideal for:
 * Root access to both servers
 * Outbound internet access (to fetch audio/codecs)
 * Open ports: **5060/UDP** (SIP), **10000–20000/UDP** (RTP)
-* Recommended: ≥2 vCPU, ≥2 GB RAM
+* Recommended: ≥2 vCPU, ≥4 GB RAM
 
 ---
 

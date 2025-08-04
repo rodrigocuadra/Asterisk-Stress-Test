@@ -623,10 +623,10 @@ systemctl restart asterisk
 # Wait for Asterisk to raise
 for i in {1..10}; do
     if asterisk -rx "core show uptime" &>/dev/null; then
-        echo "✅ Asterisk está arriba"
+        echo "✅ Asterisk is up"
         break
     else
-        echo "⏳ Esperando que Asterisk inicie..."
+        echo "⏳ Waiting for Asterisk to start..."
         sleep 1
     fi
 done

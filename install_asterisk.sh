@@ -65,7 +65,7 @@ echo "Configuring the build..."
 # Select basic modules (using defaults for chan_pjsip and format_mp3)
 echo "Selecting basic modules..."
 make menuselect.makeopts
-menuselect/menuselect --enable chan_pjsip --enable format_mp3 --enable app_cdr menuselect.makeopts || error_exit "Error selecting modules"
+menuselect/menuselect --enable chan_pjsip --enable format_mp3 --enable app_cdr --enable channelstorage_cpp_map_name_id menuselect.makeopts || error_exit "Error selecting modules"
 
 # Compile Asterisk
 echo "Compiling Asterisk (this may take several minutes)..."
